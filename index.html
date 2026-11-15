@@ -35,14 +35,14 @@
             </div>
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
                 <div>
-                    <span class="text-xs font-bold text-indigo-500 uppercase">합병형 + 정상 + 매수적정(O) + 0%이상</span>
+                    <span class="text-xs font-bold text-indigo-500 uppercase">합병형 + 일반 + 매수적정(O) + 0%이상</span>
                     <div id="stat-merger-count" class="text-xl font-extrabold text-indigo-600 mt-0.5">- 개</div>
                 </div>
                 <div class="p-3 bg-indigo-50 rounded-xl text-indigo-600 font-bold">🤝</div>
             </div>
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
                 <div>
-                    <span class="text-xs font-bold text-blue-500 uppercase">청산형 + 정상 + 매수적정(O) + 예금이상</span>
+                    <span class="text-xs font-bold text-blue-500 uppercase">청산형 + 일반 + 매수적정(O) + 예금이상</span>
                     <div id="stat-liq-count" class="text-xl font-extrabold text-blue-600 mt-0.5">- 개</div>
                 </div>
                 <div class="p-3 bg-blue-50 rounded-xl text-blue-600 font-bold">🛡️</div>
@@ -158,10 +158,10 @@
             </div>
         </div>
 
-        <!-- Filters & Search Bar (청산예정일 연도별 필터 추가) -->
+        <!-- Filters & Search Bar (요청된 필터명 변경 반영) -->
         <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4 items-center">
             <div>
-                <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">유형</label>
+                <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">투자유형</label>
                 <select id="filter-type" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                     <option value="all">전체</option>
                     <option value="합병">합병</option>
@@ -169,7 +169,7 @@
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">매수</label>
+                <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">매수적정</label>
                 <select id="filter-fair" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                     <option value="all">전체</option>
                     <option value="O">O</option>
@@ -177,23 +177,23 @@
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">상태</label>
+                <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">거래상태</label>
                 <select id="filter-status" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                     <option value="all">전체</option>
-                    <option value="정상" selected>정상</option>
+                    <option value="일반" selected>일반</option>
                     <option value="정지">정지</option>
                     <option value="합병">합병</option>
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">일반</label>
+                <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">투자계좌</label>
                 <select id="filter-account" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                     <option value="isa" selected>ISA</option>
                     <option value="general">일반</option>
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">청산예정년도</label>
+                <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">청산 예상년도</label>
                 <select id="filter-delisting-year" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                     <option value="all" selected>전체</option>
                     <option value="2026">2026</option>
@@ -203,7 +203,7 @@
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">예상수익률</label>
+                <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">예상 수익률</label>
                 <select id="filter-yield-range" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                     <option value="all" selected>전체</option>
                     <option value="above_deposit">예금 이상</option>
@@ -217,7 +217,7 @@
             </div>
         </div>
 
-        <!-- Data Table (클릭 시 오름차순/내림차순 정렬 가능한 헤더 적용) -->
+        <!-- Data Table (테이블 표 내 범례명 '청산일'로 변경 반영) -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
@@ -229,7 +229,7 @@
                             <th onclick="sortData('is_fair_buy')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors">매수 <span id="sort-icon-is_fair_buy" class="text-slate-400">↕</span></th>
                             <th onclick="sortData('invest_type')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors">유형 <span id="sort-icon-invest_type" class="text-slate-400">↕</span></th>
                             <th onclick="sortData('yield')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors"><span id="yield-header-col">예상수익률 (ISA)</span> <span id="sort-icon-yield" class="text-slate-400">↕</span></th>
-                            <th onclick="sortData('delisting_date')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors">청산예정일 <span id="sort-icon-delisting_date" class="text-slate-400">↕</span></th>
+                            <th onclick="sortData('delisting_date')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors">청산일 <span id="sort-icon-delisting_date" class="text-slate-400">↕</span></th>
                             <th onclick="sortData('status')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors">상태 <span id="sort-icon-status" class="text-slate-400">↕</span></th>
                         </tr>
                     </thead>
@@ -243,9 +243,8 @@
 
     <script>
         let allItems = [];
-        let currentFilteredItems = [];
         let currentSortColumn = 'yield';
-        let currentSortDirection = 'desc'; // 기본값: 수익률 기준 내림차순
+        let currentSortDirection = 'desc';
 
         async function loadSpacData() {
             try {
@@ -253,7 +252,11 @@
                 const data = await response.json();
                 
                 document.getElementById('update-time').innerText = `최종 갱신: ${data.updated_at}`;
-                allItems = data.items;
+                allItems = data.items.map(item => ({
+                    ...item,
+                    // 기존 '정상' 상태 명칭을 화면용 '일반'으로 매핑 호환 처리
+                    status: item.status === '정상' ? '일반' : item.status
+                }));
 
                 if (allItems.length > 0 && allItems[0].deposit_rate) {
                     document.getElementById('deposit-rate-badge').innerText = `기준 예금금리: 연 ${allItems[0].deposit_rate}%`;
@@ -277,19 +280,19 @@
 
             const mergerMatch = validItems.filter(i => {
                 const y = accountType === 'isa' ? i.yield_isa : i.yield_general;
-                return i.invest_type === '합병' && i.status === '정상' && i.is_fair_buy === 'O' && y >= 0;
+                return i.invest_type === '합병' && i.status === '일반' && i.is_fair_buy === 'O' && y >= 0;
             });
             document.getElementById('stat-merger-count').innerText = `${mergerMatch.length} 개`;
 
             const liqMatch = validItems.filter(i => {
                 const y = accountType === 'isa' ? i.yield_isa : i.yield_general;
-                return i.invest_type === '청산' && i.status === '정상' && i.is_fair_buy === 'O' && y >= depositRate;
+                return i.invest_type === '청산' && i.status === '일반' && i.is_fair_buy === 'O' && y >= depositRate;
             });
             document.getElementById('stat-liq-count').innerText = `${liqMatch.length} 개`;
         }
 
         function updateRecommendations(items) {
-            const validItems = items.filter(i => i.is_fair_buy === 'O' && i.status === '정상');
+            const validItems = items.filter(i => i.is_fair_buy === 'O' && i.status === '일반');
             const depositRate = items.length > 0 && items[0].deposit_rate ? items[0].deposit_rate : 3.2;
 
             const mergerItems = validItems.filter(i => i.invest_type === '합병');
@@ -325,7 +328,6 @@
                 currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
             } else {
                 currentSortColumn = column;
-                // 문자열인 종목명은 기본 오름차순, 숫자인 수익률/가격 등은 기본 내림차순
                 currentSortDirection = (column === 'name' || column === 'invest_type' || column === 'status' || column === 'delisting_date') ? 'asc' : 'desc';
             }
             applyFilters();
@@ -416,7 +418,6 @@
                 return true;
             });
 
-            // 정렬 적용
             filtered.sort((a, b) => {
                 let valA, valB;
                 if (currentSortColumn === 'yield') {
