@@ -24,7 +24,32 @@
             </div>
         </div>
 
-        <!-- Recommendations Section (합병형 4개, 청산형 4개 - 2x2 그리드 깔끔한 배치) -->
+        <!-- Summary Stats Bar (전체 스팩 수 및 조건별 종목 수 요약 카드) -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold text-slate-400 uppercase">전체 유효 스팩주 수</span>
+                    <div id="stat-total-count" class="text-xl font-extrabold text-slate-800 mt-0.5">- 개</div>
+                </div>
+                <div class="p-3 bg-slate-100 rounded-xl text-slate-600 font-bold">🏢</div>
+            </div>
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold text-indigo-500 uppercase">합병형 + 정상 + 매수적정(O) + 0%이상</span>
+                    <div id="stat-merger-count" class="text-xl font-extrabold text-indigo-600 mt-0.5">- 개</div>
+                </div>
+                <div class="p-3 bg-indigo-50 rounded-xl text-indigo-600 font-bold">🤝</div>
+            </div>
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold text-blue-500 uppercase">청산형 + 정상 + 매수적정(O) + 예금이상</span>
+                    <div id="stat-liq-count" class="text-xl font-extrabold text-blue-600 mt-0.5">- 개</div>
+                </div>
+                <div class="p-3 bg-blue-50 rounded-xl text-blue-600 font-bold">🛡️</div>
+            </div>
+        </div>
+
+        <!-- Recommendations Section (합병형 4개, 청산형 4개 - 2x2 그리드) -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
             <!-- 1. 합병형 추천 (2x2 그리드) -->
             <div class="bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-900 text-white p-6 rounded-2xl shadow-lg border border-indigo-500/25">
@@ -145,7 +170,7 @@
         <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-center">
             <div>
                 <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">유형</label>
-                <select id="filter-type" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white font-medium text-slate-700">
+                <select id="filter-type" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                     <option value="all">전체</option>
                     <option value="합병">합병</option>
                     <option value="청산">청산</option>
@@ -153,7 +178,7 @@
             </div>
             <div>
                 <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">매수</label>
-                <select id="filter-fair" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white font-medium text-slate-700">
+                <select id="filter-fair" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                     <option value="all">전체</option>
                     <option value="O">O</option>
                     <option value="X">X</option>
@@ -161,7 +186,7 @@
             </div>
             <div>
                 <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">상태</label>
-                <select id="filter-status" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white font-medium text-slate-700">
+                <select id="filter-status" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                     <option value="all">전체</option>
                     <option value="정상" selected>정상</option>
                     <option value="정지">정지</option>
@@ -170,14 +195,14 @@
             </div>
             <div>
                 <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">일반</label>
-                <select id="filter-account" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white font-medium text-slate-700">
+                <select id="filter-account" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                     <option value="isa" selected>ISA</option>
                     <option value="general">일반</option>
                 </select>
             </div>
             <div>
                 <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">예상수익률</label>
-                <select id="filter-yield-range" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white font-medium text-slate-700">
+                <select id="filter-yield-range" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                     <option value="all" selected>전체</option>
                     <option value="above_deposit">예금 이상</option>
                     <option value="low_positive">0% 이상 ~ 예금 미만</option>
@@ -186,7 +211,7 @@
             </div>
             <div>
                 <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">검색</label>
-                <input type="text" id="search-input" onkeyup="applyFilters()" placeholder="종목명 입력..." class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium text-slate-700">
+                <input type="text" id="search-input" onkeyup="applyFilters()" placeholder="종목명 입력..." class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700">
             </div>
         </div>
 
@@ -228,12 +253,36 @@
                     document.getElementById('deposit-rate-badge').innerText = `기준 예금금리: 연 ${allItems[0].deposit_rate}%`;
                 }
 
+                updateSummaryStats(allItems);
                 applyFilters();
 
             } catch (error) {
                 console.error('데이터 로드 에러:', error);
                 document.getElementById('update-time').innerText = '데이터 로드 실패';
             }
+        }
+
+        function updateSummaryStats(items) {
+            const depositRate = items.length > 0 && items[0].deposit_rate ? items[0].deposit_rate : 3.2;
+            const accountType = document.getElementById('filter-account').value;
+
+            // 1. 전체 유효 스팩 수 (현재가 > 0)
+            const validItems = items.filter(i => i.current_price > 0);
+            document.getElementById('stat-total-count').innerText = `${validItems.length} 개`;
+
+            // 2. 합병형 + 정상 + 매수적정(O) + 0% 이상
+            const mergerMatch = validItems.filter(i => {
+                const y = accountType === 'isa' ? i.yield_isa : i.yield_general;
+                return i.invest_type === '합병' && i.status === '정상' && i.is_fair_buy === 'O' && y >= 0;
+            });
+            document.getElementById('stat-merger-count').innerText = `${mergerMatch.length} 개`;
+
+            // 3. 청산형 + 정상 + 매수적정(O) + 예금 이상
+            const liqMatch = validItems.filter(i => {
+                const y = accountType === 'isa' ? i.yield_isa : i.yield_general;
+                return i.invest_type === '청산' && i.status === '정상' && i.is_fair_buy === 'O' && y >= depositRate;
+            });
+            document.getElementById('stat-liq-count').innerText = `${liqMatch.length} 개`;
         }
 
         function updateRecommendations(items) {
@@ -322,6 +371,7 @@
             const yieldRange = document.getElementById('filter-yield-range').value;
             const searchQuery = document.getElementById('search-input').value.toLowerCase();
 
+            updateSummaryStats(allItems);
             updateRecommendations(allItems);
 
             let filtered = allItems.filter(item => {
