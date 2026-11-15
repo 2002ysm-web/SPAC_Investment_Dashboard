@@ -24,7 +24,7 @@
             </div>
         </div>
 
-        <!-- Summary Stats Bar (전체 스팩 수 및 조건별 종목 수 요약 카드) -->
+        <!-- Summary Stats Bar -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
                 <div>
@@ -49,15 +49,14 @@
             </div>
         </div>
 
-        <!-- Recommendations Section (합병형 4개, 청산형 4개 - 2x2 그리드) -->
+        <!-- Recommendations Section (2x2 그리드) -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-            <!-- 1. 합병형 추천 (2x2 그리드) -->
+            <!-- 1. 합병형 추천 -->
             <div class="bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-900 text-white p-6 rounded-2xl shadow-lg border border-indigo-500/25">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-base font-bold tracking-tight text-indigo-200">🤝 합병형 추천</h2>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
-                    <!-- 1. 예금 이상 (ISA) -->
                     <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
                         <div>
                             <span class="text-[10px] font-bold text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded">예금 이상 (ISA)</span>
@@ -69,7 +68,6 @@
                             <div class="flex justify-between"><span>청산가</span><span id="rec-merger-high-isa-liq" class="font-bold text-white">-</span></div>
                         </div>
                     </div>
-                    <!-- 2. 예금 이상 (일반) -->
                     <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
                         <div>
                             <span class="text-[10px] font-bold text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded">예금 이상 (일반)</span>
@@ -81,7 +79,6 @@
                             <div class="flex justify-between"><span>청산가</span><span id="rec-merger-high-gen-liq" class="font-bold text-white">-</span></div>
                         </div>
                     </div>
-                    <!-- 3. 0%~예금미만 (ISA) -->
                     <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
                         <div>
                             <span class="text-[10px] font-bold text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded">0%~예금미만 (ISA)</span>
@@ -93,7 +90,6 @@
                             <div class="flex justify-between"><span>청산가</span><span id="rec-merger-mid-isa-liq" class="font-bold text-white">-</span></div>
                         </div>
                     </div>
-                    <!-- 4. 0%~예금미만 (일반) -->
                     <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
                         <div>
                             <span class="text-[10px] font-bold text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded">0%~예금미만 (일반)</span>
@@ -108,13 +104,12 @@
                 </div>
             </div>
 
-            <!-- 2. 청산형 추천 (2x2 그리드) -->
+            <!-- 2. 청산형 추천 -->
             <div class="bg-gradient-to-br from-blue-950 via-slate-900 to-slate-900 text-white p-6 rounded-2xl shadow-lg border border-blue-500/25">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-base font-bold tracking-tight text-blue-200">🛡️ 청산형 추천</h2>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
-                    <!-- 1. 예금 이상 (ISA) -->
                     <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
                         <div>
                             <span class="text-[10px] font-bold text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded">예금 이상 (ISA)</span>
@@ -126,7 +121,6 @@
                             <div class="flex justify-between"><span>청산가</span><span id="rec-liq-high-isa-liq" class="font-bold text-white">-</span></div>
                         </div>
                     </div>
-                    <!-- 2. 예금 이상 (일반) -->
                     <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
                         <div>
                             <span class="text-[10px] font-bold text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded">예금 이상 (일반)</span>
@@ -138,7 +132,6 @@
                             <div class="flex justify-between"><span>청산가</span><span id="rec-liq-high-gen-liq" class="font-bold text-white">-</span></div>
                         </div>
                     </div>
-                    <!-- 3. 0%~예금미만 (ISA) -->
                     <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
                         <div>
                             <span class="text-[10px] font-bold text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded">0%~예금미만 (ISA)</span>
@@ -150,7 +143,6 @@
                             <div class="flex justify-between"><span>청산가</span><span id="rec-liq-mid-isa-liq" class="font-bold text-white">-</span></div>
                         </div>
                     </div>
-                    <!-- 4. 0%~예금미만 (일반) -->
                     <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
                         <div>
                             <span class="text-[10px] font-bold text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded">0%~예금미만 (일반)</span>
@@ -166,8 +158,8 @@
             </div>
         </div>
 
-        <!-- Filters & Search Bar -->
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-center">
+        <!-- Filters & Search Bar (청산예정일 연도별 필터 추가) -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4 items-center">
             <div>
                 <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">유형</label>
                 <select id="filter-type" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
@@ -201,6 +193,16 @@
                 </select>
             </div>
             <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">청산예정년도</label>
+                <select id="filter-delisting-year" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                    <option value="all" selected>전체</option>
+                    <option value="2026">2026</option>
+                    <option value="2027">2027</option>
+                    <option value="2028">2028</option>
+                    <option value="2029">2029</option>
+                </select>
+            </div>
+            <div>
                 <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">예상수익률</label>
                 <select id="filter-yield-range" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                     <option value="all" selected>전체</option>
@@ -215,19 +217,20 @@
             </div>
         </div>
 
-        <!-- Data Table -->
+        <!-- Data Table (클릭 시 오름차순/내림차순 정렬 가능한 헤더 적용) -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr id="table-header-row" class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200">
-                            <th class="py-4 px-6 font-bold">종목명</th>
-                            <th class="py-4 px-6 font-bold">현재가</th>
-                            <th class="py-4 px-6 font-bold">청산가</th>
-                            <th class="py-4 px-6 font-bold">매수</th>
-                            <th class="py-4 px-6 font-bold">유형</th>
-                            <th id="yield-header-col" class="py-4 px-6 font-bold">예상수익률 (ISA)</th>
-                            <th class="py-4 px-6 font-bold">상태</th>
+                        <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200 select-none">
+                            <th onclick="sortData('name')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors">종목명 <span id="sort-icon-name" class="text-slate-400">↕</span></th>
+                            <th onclick="sortData('current_price')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors">현재가 <span id="sort-icon-current_price" class="text-slate-400">↕</span></th>
+                            <th onclick="sortData('liquidation_price')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors">청산가 <span id="sort-icon-liquidation_price" class="text-slate-400">↕</span></th>
+                            <th onclick="sortData('is_fair_buy')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors">매수 <span id="sort-icon-is_fair_buy" class="text-slate-400">↕</span></th>
+                            <th onclick="sortData('invest_type')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors">유형 <span id="sort-icon-invest_type" class="text-slate-400">↕</span></th>
+                            <th onclick="sortData('yield')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors"><span id="yield-header-col">예상수익률 (ISA)</span> <span id="sort-icon-yield" class="text-slate-400">↕</span></th>
+                            <th onclick="sortData('delisting_date')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors">청산예정일 <span id="sort-icon-delisting_date" class="text-slate-400">↕</span></th>
+                            <th onclick="sortData('status')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors">상태 <span id="sort-icon-status" class="text-slate-400">↕</span></th>
                         </tr>
                     </thead>
                     <tbody id="spac-table-body" class="divide-y divide-slate-100 text-sm font-medium text-slate-700">
@@ -240,6 +243,9 @@
 
     <script>
         let allItems = [];
+        let currentFilteredItems = [];
+        let currentSortColumn = 'yield';
+        let currentSortDirection = 'desc'; // 기본값: 수익률 기준 내림차순
 
         async function loadSpacData() {
             try {
@@ -266,18 +272,15 @@
             const depositRate = items.length > 0 && items[0].deposit_rate ? items[0].deposit_rate : 3.2;
             const accountType = document.getElementById('filter-account').value;
 
-            // 1. 전체 유효 스팩 수 (현재가 > 0)
             const validItems = items.filter(i => i.current_price > 0);
             document.getElementById('stat-total-count').innerText = `${validItems.length} 개`;
 
-            // 2. 합병형 + 정상 + 매수적정(O) + 0% 이상
             const mergerMatch = validItems.filter(i => {
                 const y = accountType === 'isa' ? i.yield_isa : i.yield_general;
                 return i.invest_type === '합병' && i.status === '정상' && i.is_fair_buy === 'O' && y >= 0;
             });
             document.getElementById('stat-merger-count').innerText = `${mergerMatch.length} 개`;
 
-            // 3. 청산형 + 정상 + 매수적정(O) + 예금 이상
             const liqMatch = validItems.filter(i => {
                 const y = accountType === 'isa' ? i.yield_isa : i.yield_general;
                 return i.invest_type === '청산' && i.status === '정상' && i.is_fair_buy === 'O' && y >= depositRate;
@@ -290,26 +293,16 @@
             const depositRate = items.length > 0 && items[0].deposit_rate ? items[0].deposit_rate : 3.2;
 
             const mergerItems = validItems.filter(i => i.invest_type === '합병');
-            const mHighIsa = mergerItems.filter(i => i.yield_isa >= depositRate).sort((a, b) => b.yield_isa - a.yield_isa);
-            const mHighGen = mergerItems.filter(i => i.yield_general >= depositRate).sort((a, b) => b.yield_general - a.yield_general);
-            const mMidIsa = mergerItems.filter(i => i.yield_isa >= 0 && i.yield_isa < depositRate).sort((a, b) => b.yield_isa - a.yield_isa);
-            const mMidGen = mergerItems.filter(i => i.yield_general >= 0 && i.yield_general < depositRate).sort((a, b) => b.yield_general - a.yield_general);
-
-            setCardData('rec-merger-high-isa', mHighIsa[0], 'isa');
-            setCardData('rec-merger-high-gen', mHighGen[0], 'general');
-            setCardData('rec-merger-mid-isa', mMidIsa[0], 'isa');
-            setCardData('rec-merger-mid-gen', mMidGen[0], 'general');
+            setCardData('rec-merger-high-isa', mergerItems.filter(i => i.yield_isa >= depositRate).sort((a, b) => b.yield_isa - a.yield_isa)[0], 'isa');
+            setCardData('rec-merger-high-gen', mergerItems.filter(i => i.yield_general >= depositRate).sort((a, b) => b.yield_general - a.yield_general)[0], 'general');
+            setCardData('rec-merger-mid-isa', mergerItems.filter(i => i.yield_isa >= 0 && i.yield_isa < depositRate).sort((a, b) => b.yield_isa - a.yield_isa)[0], 'isa');
+            setCardData('rec-merger-mid-gen', mergerItems.filter(i => i.yield_general >= 0 && i.yield_general < depositRate).sort((a, b) => b.yield_general - a.yield_general)[0], 'general');
 
             const liqItems = validItems.filter(i => i.invest_type === '청산');
-            const lHighIsa = liqItems.filter(i => i.yield_isa >= depositRate).sort((a, b) => b.yield_isa - a.yield_isa);
-            const lHighGen = liqItems.filter(i => i.yield_general >= depositRate).sort((a, b) => b.yield_general - a.yield_general);
-            const lMidIsa = liqItems.filter(i => i.yield_isa >= 0 && i.yield_isa < depositRate).sort((a, b) => b.yield_isa - a.yield_isa);
-            const lMidGen = liqItems.filter(i => i.yield_general >= 0 && i.yield_general < depositRate).sort((a, b) => b.yield_general - a.yield_general);
-
-            setCardData('rec-liq-high-isa', lHighIsa[0], 'isa');
-            setCardData('rec-liq-high-gen', lHighGen[0], 'general');
-            setCardData('rec-liq-mid-isa', lMidIsa[0], 'isa');
-            setCardData('rec-liq-mid-gen', lMidGen[0], 'general');
+            setCardData('rec-liq-high-isa', liqItems.filter(i => i.yield_isa >= depositRate).sort((a, b) => b.yield_isa - a.yield_isa)[0], 'isa');
+            setCardData('rec-liq-high-gen', liqItems.filter(i => i.yield_general >= depositRate).sort((a, b) => b.yield_general - a.yield_general)[0], 'general');
+            setCardData('rec-liq-mid-isa', liqItems.filter(i => i.yield_isa >= 0 && i.yield_isa < depositRate).sort((a, b) => b.yield_isa - a.yield_isa)[0], 'isa');
+            setCardData('rec-liq-mid-gen', liqItems.filter(i => i.yield_general >= 0 && i.yield_general < depositRate).sort((a, b) => b.yield_general - a.yield_general)[0], 'general');
         }
 
         function setCardData(prefix, item, accType) {
@@ -327,6 +320,33 @@
             }
         }
 
+        function sortData(column) {
+            if (currentSortColumn === column) {
+                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortColumn = column;
+                // 문자열인 종목명은 기본 오름차순, 숫자인 수익률/가격 등은 기본 내림차순
+                currentSortDirection = (column === 'name' || column === 'invest_type' || column === 'status' || column === 'delisting_date') ? 'asc' : 'desc';
+            }
+            applyFilters();
+        }
+
+        function updateSortIcons() {
+            const columns = ['name', 'current_price', 'liquidation_price', 'is_fair_buy', 'invest_type', 'yield', 'delisting_date', 'status'];
+            columns.forEach(col => {
+                const iconEl = document.getElementById(`sort-icon-${col}`);
+                if (iconEl) {
+                    if (currentSortColumn === col) {
+                        iconEl.innerText = currentSortDirection === 'asc' ? ' ▲' : ' ▼';
+                        iconEl.className = 'text-indigo-600 font-bold';
+                    } else {
+                        iconEl.innerText = ' ↕';
+                        iconEl.className = 'text-slate-400';
+                    }
+                }
+            });
+        }
+
         function renderTable(items, accountType) {
             const tbody = document.getElementById('spac-table-body');
             tbody.innerHTML = '';
@@ -335,7 +355,7 @@
             yieldHeader.innerText = accountType === 'isa' ? '예상수익률 (ISA)' : '예상수익률 (일반)';
 
             if (items.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="py-12 text-center text-slate-400 font-normal">조건에 일치하는 종목이 없습니다.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="py-12 text-center text-slate-400 font-normal">조건에 일치하는 종목이 없습니다.</td></tr>`;
                 return;
             }
 
@@ -357,6 +377,7 @@
                     <td class="py-4 px-6"><span class="font-bold ${item.is_fair_buy === 'O' ? 'text-indigo-600' : 'text-slate-400'}">${item.is_fair_buy}</span></td>
                     <td class="py-4 px-6"><span class="px-2.5 py-1 text-xs rounded-full font-semibold ${item.invest_type === '합병' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/50' : 'bg-amber-50 text-amber-700 border border-amber-200/50'}">${item.invest_type}</span></td>
                     <td class="py-4 px-6 ${yieldColorClass}">${targetYield}%</td>
+                    <td class="py-4 px-6 text-slate-600 text-xs font-semibold">${item.delisting_date || '-'}</td>
                     <td class="py-4 px-6"><span class="${statusBadgeClass}">${item.status}</span></td>
                 `;
                 tbody.appendChild(tr);
@@ -368,6 +389,7 @@
             const fairFilter = document.getElementById('filter-fair').value;
             const statusFilter = document.getElementById('filter-status').value;
             const accountType = document.getElementById('filter-account').value;
+            const yearFilter = document.getElementById('filter-delisting-year').value;
             const yieldRange = document.getElementById('filter-yield-range').value;
             const searchQuery = document.getElementById('search-input').value.toLowerCase();
 
@@ -379,6 +401,10 @@
                 if (typeFilter !== 'all' && item.invest_type !== typeFilter) return false;
                 if (fairFilter !== 'all' && item.is_fair_buy !== fairFilter) return false;
                 if (statusFilter !== 'all' && item.status !== statusFilter) return false;
+                
+                if (yearFilter !== 'all') {
+                    if (!item.delisting_date || !item.delisting_date.startsWith(yearFilter)) return false;
+                }
 
                 const currentYield = accountType === 'isa' ? item.yield_isa : item.yield_general;
                 const depositRate = item.deposit_rate || 3.2;
@@ -390,12 +416,25 @@
                 return true;
             });
 
+            // 정렬 적용
             filtered.sort((a, b) => {
-                const yA = accountType === 'isa' ? a.yield_isa : a.yield_general;
-                const yB = accountType === 'isa' ? b.yield_isa : b.yield_general;
-                return yB - yA;
+                let valA, valB;
+                if (currentSortColumn === 'yield') {
+                    valA = accountType === 'isa' ? a.yield_isa : a.yield_general;
+                    valB = accountType === 'isa' ? b.yield_isa : b.yield_general;
+                } else {
+                    valA = a[currentSortColumn];
+                    valB = b[currentSortColumn];
+                }
+
+                if (typeof valA === 'string') {
+                    return currentSortDirection === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                } else {
+                    return currentSortDirection === 'asc' ? valA - valB : valB - valA;
+                }
             });
 
+            updateSortIcons();
             renderTable(filtered, accountType);
         }
 
