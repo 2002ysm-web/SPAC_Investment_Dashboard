@@ -24,28 +24,19 @@
             </div>
         </div>
 
-        <!-- Summary Stats Bar (화면 크기 상관없이 무조건 한 줄에 좌우 3칸으로 3분할 배치) -->
-        <div class="grid grid-cols-3 gap-4 mb-8">
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                <div>
-                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">전체 유효 스팩주 수</span>
-                    <div id="stat-total-count" class="text-xl lg:text-2xl font-extrabold text-slate-800 mt-1">- 개</div>
-                </div>
-                <div class="p-3 bg-slate-100 rounded-2xl text-slate-600 font-bold text-base lg:text-lg">🏢</div>
+        <!-- Summary Stats Bar (간소화된 3분할 카드) -->
+        <div class="grid grid-cols-3 gap-3 mb-8">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">전체 스팩 수</span>
+                <div id="stat-total-count" class="text-xl font-extrabold text-slate-800">- 개</div>
             </div>
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                <div>
-                    <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">합병형 + 일반 + 매수적정 + 0% 이상</span>
-                    <div id="stat-merger-count" class="text-xl lg:text-2xl font-extrabold text-slate-800 mt-1">- 개</div>
-                </div>
-                <div class="p-3 bg-indigo-50 rounded-2xl text-indigo-600 font-bold text-base lg:text-lg">🤝</div>
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                <span class="text-[11px] font-bold text-indigo-600 uppercase tracking-wider block mb-1">합병형 (매수적정, 0%↑)</span>
+                <div id="stat-merger-count" class="text-xl font-extrabold text-indigo-600">- 개</div>
             </div>
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                <div>
-                    <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">청산형 + 일반 + 매수적정 + 예금 이상</span>
-                    <div id="stat-liq-count" class="text-xl lg:text-2xl font-extrabold text-slate-800 mt-1">- 개</div>
-                </div>
-                <div class="p-3 bg-blue-50 rounded-2xl text-blue-600 font-bold text-base lg:text-lg">🛡️</div>
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                <span class="text-[11px] font-bold text-blue-600 uppercase tracking-wider block mb-1">청산형 (매수적정, 예금↑)</span>
+                <div id="stat-liq-count" class="text-xl font-extrabold text-blue-600">- 개</div>
             </div>
         </div>
 
