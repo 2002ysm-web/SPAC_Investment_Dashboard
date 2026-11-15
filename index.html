@@ -24,8 +24,15 @@
             </div>
         </div>
 
-        <!-- Summary Stats Bar (1x2 형식으로 조건별 요약 통계 병합 배치) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+        <!-- Summary Stats Bar (전체 스팩 수 + 두 조건 카드를 1행에 좌우로 나란히 배치) -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">전체 유효 스팩주 수</span>
+                    <div id="stat-total-count" class="text-2xl font-extrabold text-slate-800 mt-1">- 개</div>
+                </div>
+                <div class="p-3.5 bg-slate-100 rounded-2xl text-slate-600 font-bold text-lg">🏢</div>
+            </div>
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
                 <div>
                     <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">합병형 + 일반 + 매수적정 + 0% 이상</span>
@@ -267,16 +274,18 @@
             const depositRate = items.length > 0 && items[0].deposit_rate ? items[0].deposit_rate : 3.2;
             const accountType = document.getElementById('filter-account').value;
 
+            // 1. 전체 유효 스팩 수 (현재가 > 0)
             const validItems = items.filter(i => i.current_price > 0);
+            document.getElementById('stat-total-count').innerText = `${validItems.length} 개`;
 
-            // 1. 합병형 + 일반 + 매수적정(O 조건) + 0% 이상
+            // 2. 합병형 + 일반 + 매수적정 + 0% 이상
             const mergerMatch = validItems.filter(i => {
                 const y = accountType === 'isa' ? i.yield_isa : i.yield_general;
                 return i.invest_type === '합병' && i.status === '일반' && i.is_fair_buy === 'O' && y >= 0;
             });
             document.getElementById('stat-merger-count').innerText = `${mergerMatch.length} 개`;
 
-            // 2. 청산형 + 일반 + 매수적정(O 조건) + 예금 이상
+            // 3. 청산형 + 일반 + 매수적정 + 예금 이상
             const liqMatch = validItems.filter(i => {
                 const y = accountType === 'isa' ? i.yield_isa : i.yield_general;
                 return i.invest_type === '청산' && i.status === '일반' && i.is_fair_buy === 'O' && y >= depositRate;
