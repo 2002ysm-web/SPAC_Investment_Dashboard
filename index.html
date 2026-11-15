@@ -24,9 +24,8 @@
             </div>
         </div>
 
-        <!-- Summary Stats Bar (1행: 전체 스팩 수 / 2행: 1x2 그리드 좌우 배치) -->
-        <div class="space-y-4 mb-8">
-            <!-- 1행: 전체 유효 스팩주 수 -->
+        <!-- Summary Stats Bar (3개의 카드를 한 줄에 좌우로 나란히 배치) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
                 <div>
                     <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">전체 유효 스팩주 수</span>
@@ -34,23 +33,19 @@
                 </div>
                 <div class="p-3.5 bg-slate-100 rounded-2xl text-slate-600 font-bold text-lg">🏢</div>
             </div>
-
-            <!-- 2행: 두 조건 종목 수 (1x2 좌우 배치) -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">합병형 + 일반 + 매수적정 + 0% 이상</span>
-                        <div id="stat-merger-count" class="text-2xl font-extrabold text-slate-800 mt-1">- 개</div>
-                    </div>
-                    <div class="p-3.5 bg-indigo-50 rounded-2xl text-indigo-600 font-bold text-lg">🤝</div>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">합병형 + 일반 + 매수적정 + 0% 이상</span>
+                    <div id="stat-merger-count" class="text-2xl font-extrabold text-slate-800 mt-1">- 개</div>
                 </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">청산형 + 일반 + 매수적정 + 예금 이상</span>
-                        <div id="stat-liq-count" class="text-2xl font-extrabold text-slate-800 mt-1">- 개</div>
-                    </div>
-                    <div class="p-3.5 bg-blue-50 rounded-2xl text-blue-600 font-bold text-lg">🛡️</div>
+                <div class="p-3.5 bg-indigo-50 rounded-2xl text-indigo-600 font-bold text-lg">🤝</div>
+            </div>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">청산형 + 일반 + 매수적정 + 예금 이상</span>
+                    <div id="stat-liq-count" class="text-2xl font-extrabold text-slate-800 mt-1">- 개</div>
                 </div>
+                <div class="p-3.5 bg-blue-50 rounded-2xl text-blue-600 font-bold text-lg">🛡️</div>
             </div>
         </div>
 
