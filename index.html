@@ -273,7 +273,7 @@
                         <div id="perf-avg-simple" class="text-lg sm:text-2xl font-extrabold text-emerald-600 truncate">- %</div>
                     </div>
                     <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200">
-                        <span class="text-[11px] sm:text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">연환산 수익률</span>
+                        <span class="text-[11px] sm:text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">연환산 수익률 (XIRR)</span>
                         <div id="perf-avg-annual" class="text-lg sm:text-2xl font-extrabold text-blue-600 truncate">- %</div>
                     </div>
                 </div>
@@ -283,7 +283,7 @@
                     <div class="flex items-center justify-between mb-4">
                         <div>
                             <h2 class="text-base font-bold text-slate-800">📝 성과 내역 직접 추가하기</h2>
-                            <p class="text-xs text-slate-400 mt-0.5">매수일을 입력하면 해당 시점의 한국은행 정기예금 금리가 자동으로 조회되어 연환산 수익률과 비교됩니다.</p>
+                            <p class="text-xs text-slate-400 mt-0.5">매수일을 입력하면 해당 시점의 한국은행 정기예금 금리가 자동으로 조회되어 비교됩니다.</p>
                         </div>
                         <button onclick="lockPerformance()" class="text-xs text-rose-500 hover:underline font-semibold">🔒 다시 잠그기</button>
                     </div>
@@ -401,6 +401,51 @@
             "2026-05": 2.38, "2026-06": 2.35, "2026-07": 2.35, "2026-08": 2.35,
             "2026-09": 2.35, "2026-10": 2.35, "2026-11": 2.35
         };
+
+        // 엑셀 XIRR 함수 구현 (JavaScript Newton-Raphson 방식)
+        function calculateXIRR(cashFlows) {
+            if (!cashFlows || cashFlows.length < 2) return 0;
+            
+            // 날짜 정렬
+            cashFlows.sort((a, b) => a.date - b.date);
+            const t0 = cashFlows[0].date;
+
+            // 현금흐름 검증 (부호가 최소한 한 번은 바뀌어야 함)
+            const hasPos = cashFlows.some(cf => cf.amount > 0);
+            const hasNeg = cashFlows.some(cf => cf.amount < 0);
+            if (!hasPos || !hasNeg) return 0;
+
+            let rate = 0.1; // 초기 추정치 10%
+            const maxIter = 100;
+            const tol = 1e-7;
+
+            for (let i = 0; i < maxIter; i++) {
+                let npv = 0;
+                let dnpv = 0;
+
+                for (let cf of cashFlows) {
+                    const years = (cf.date - t0) / (1000 * 60 * 60 * 24 * 365.0);
+                    const denom = Math.pow(1 + rate, years);
+                    npv += cf.amount / denom;
+                    dnpv -= years * cf.amount / (denom * (1 + rate));
+                }
+
+                if (Math.abs(npv) < tol) {
+                    return rate * 100; // 백분율 반환
+                }
+
+                if (Math.abs(dnpv) < 1e-12) {
+                    break;
+                }
+
+                const newRate = rate - npv / dnpv;
+                if (Math.abs(newRate - rate) < tol) {
+                    return newRate * 100;
+                }
+                rate = newRate;
+            }
+            return rate * 100;
+        }
 
         function getBokRateForDate(dateStr) {
             if (!dateStr || dateStr.length < 7) return 3.2;
@@ -533,7 +578,6 @@
                     performanceItems = [];
                 }
             } else {
-                // 스프레드시트 원본 64건 전수 데이터 (총 매수 139,586,269 / 총 매도 147,542,906 / 실현손익 7,956,637원 100% 일치)
                 performanceItems = [
                     { name: "유진스팩7호", type: "청산", buy_amount: 2001995, buy_date: "2024-05-22", sell_amount: 2060215, sell_date: "2024-10-15" },
                     { name: "하이제7호스팩", type: "청산", buy_amount: 2002980, buy_date: "2024-05-07", sell_amount: 2053809, sell_date: "2024-10-16" },
@@ -623,11 +667,17 @@
                 const d1 = new Date(item.buy_date);
                 const d2 = new Date(item.sell_date);
                 const diffDays = Math.max(1, Math.round((d2 - d1) / (1000 * 60 * 60 * 24)));
-                const annualYield = simpleYield * (365 / diffDays);
-                const bokRate = getBokRateForDate(item.buy_date);
-                const isBeat = annualYield >= bokRate;
+                
+                // 개별 건 XIRR 계산을 위한 현금흐름 배열
+                const singleXirr = calculateXIRR([
+                    { date: d1, amount: -item.buy_amount },
+                    { date: d2, amount: item.sell_amount }
+                ]);
 
-                return { ...item, origIndex: idx, pnl, simpleYield, annualYield, bokRate, isBeat, diffDays };
+                const bokRate = getBokRateForDate(item.buy_date);
+                const isBeat = singleXirr >= bokRate;
+
+                return { ...item, origIndex: idx, pnl, simpleYield, annualYield: singleXirr, bokRate, isBeat, diffDays };
             });
 
             let filtered = enriched.filter(item => {
@@ -643,7 +693,7 @@
 
             let totalPnl = 0;
             let totalBuy = 0;
-            let weightedAnnualSum = 0;
+            let totalCashFlows = [];
 
             if (filtered.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="11" class="py-12 text-center text-slate-400 font-normal">조건에 일치하는 성과 내역이 없습니다.</td></tr>`;
@@ -656,7 +706,10 @@
             filtered.forEach(item => {
                 totalPnl += item.pnl;
                 totalBuy += item.buy_amount;
-                weightedAnnualSum += item.annualYield * item.buy_amount;
+
+                // 전체 XIRR 계산용 현금흐름 수집 (-매수금액, +매도금액)
+                totalCashFlows.push({ date: new Date(item.buy_date), amount: -item.buy_amount });
+                totalCashFlows.push({ date: new Date(item.sell_date), amount: item.sell_amount });
 
                 const pnlColor = item.pnl >= 0 ? 'text-emerald-600 font-bold' : 'text-rose-500 font-bold';
                 const simpleColor = item.simpleYield >= 0 ? 'text-slate-700' : 'text-rose-500';
@@ -685,14 +738,14 @@
             });
 
             const totalSimpleYield = totalBuy > 0 ? (totalPnl / totalBuy) * 100 : 0;
-            const weightedAnnualYield = totalBuy > 0 ? (weightedAnnualSum / totalBuy) : 0;
+            const overallXirr = calculateXIRR(totalCashFlows); // 전체 거래 건 통합 XIRR 계산
 
             const totalPnlEl = document.getElementById('perf-total-pnl');
             totalPnlEl.innerText = (totalPnl >= 0 ? '+' : '') + totalPnl.toLocaleString() + ' 원';
             totalPnlEl.className = totalPnl >= 0 ? 'text-lg sm:text-2xl font-extrabold text-emerald-600 truncate' : 'text-lg sm:text-2xl font-extrabold text-rose-500 truncate';
 
             document.getElementById('perf-avg-simple').innerText = totalSimpleYield.toFixed(2) + ' %';
-            document.getElementById('perf-avg-annual').innerText = weightedAnnualYield.toFixed(2) + ' %';
+            document.getElementById('perf-avg-annual').innerText = overallXirr.toFixed(2) + ' %';
         }
 
         function updateSummaryStats(items) {
