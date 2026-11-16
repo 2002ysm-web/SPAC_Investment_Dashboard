@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-16 04:16:40",
+  "updated_at": "2026-11-16 04:32:30",
   "count": 69,
   "items": [
     {
@@ -59,6 +59,20 @@
       "fair_price_calc": 2142
     },
     {
+      "code": "474930",
+      "name": "신한제13호스팩",
+      "is_fair_buy": "O",
+      "invest_type": "청산",
+      "delisting_date": "2027-04-22",
+      "current_price": 2092,
+      "liquidation_price": 2167,
+      "yield_general": 5.92,
+      "yield_isa": 7.0,
+      "deposit_rate": 3.2,
+      "status": "정상",
+      "fair_price_calc": 2143
+    },
+    {
       "code": "473950",
       "name": "SK증권제13호스팩",
       "is_fair_buy": "O",
@@ -71,6 +85,20 @@
       "deposit_rate": 3.2,
       "status": "정상",
       "fair_price_calc": 2129
+    },
+    {
+      "code": "475250",
+      "name": "하나33호스팩",
+      "is_fair_buy": "O",
+      "invest_type": "청산",
+      "delisting_date": "2027-04-24",
+      "current_price": 2092,
+      "liquidation_price": 2167,
+      "yield_general": 5.86,
+      "yield_isa": 6.92,
+      "deposit_rate": 3.2,
+      "status": "정상",
+      "fair_price_calc": 2143
     },
     {
       "code": "478440",
@@ -113,20 +141,6 @@
       "deposit_rate": 3.2,
       "status": "정상",
       "fair_price_calc": 2131
-    },
-    {
-      "code": "475250",
-      "name": "하나33호스팩",
-      "is_fair_buy": "O",
-      "invest_type": "청산",
-      "delisting_date": "2027-04-24",
-      "current_price": 2095,
-      "liquidation_price": 2167,
-      "yield_general": 5.62,
-      "yield_isa": 6.64,
-      "deposit_rate": 3.2,
-      "status": "정상",
-      "fair_price_calc": 2143
     },
     {
       "code": "477470",
@@ -185,20 +199,6 @@
       "fair_price_calc": 2119
     },
     {
-      "code": "474930",
-      "name": "신한제13호스팩",
-      "is_fair_buy": "O",
-      "invest_type": "청산",
-      "delisting_date": "2027-04-22",
-      "current_price": 2100,
-      "liquidation_price": 2167,
-      "yield_general": 5.27,
-      "yield_isa": 6.23,
-      "deposit_rate": 3.2,
-      "status": "정상",
-      "fair_price_calc": 2143
-    },
-    {
       "code": "484130",
       "name": "하나34호스팩",
       "is_fair_buy": "O",
@@ -211,6 +211,20 @@
       "deposit_rate": 3.2,
       "status": "정상",
       "fair_price_calc": 2111
+    },
+    {
+      "code": "492220",
+      "name": "KB제31호스팩",
+      "is_fair_buy": "O",
+      "invest_type": "합병",
+      "delisting_date": "2027-12-12",
+      "current_price": 2030,
+      "liquidation_price": 2167,
+      "yield_general": 4.95,
+      "yield_isa": 5.85,
+      "deposit_rate": 3.2,
+      "status": "정상",
+      "fair_price_calc": 2107
     },
     {
       "code": "487830",
@@ -239,20 +253,6 @@
       "deposit_rate": 3.2,
       "status": "정상",
       "fair_price_calc": 2101
-    },
-    {
-      "code": "492220",
-      "name": "KB제31호스팩",
-      "is_fair_buy": "O",
-      "invest_type": "합병",
-      "delisting_date": "2027-12-12",
-      "current_price": 2035,
-      "liquidation_price": 2167,
-      "yield_general": 4.76,
-      "yield_isa": 5.62,
-      "deposit_rate": 3.2,
-      "status": "정상",
-      "fair_price_calc": 2107
     },
     {
       "code": "489730",
@@ -339,20 +339,6 @@
       "fair_price_calc": 2002
     },
     {
-      "code": "0072Z0",
-      "name": "KB제33호스팩",
-      "is_fair_buy": "O",
-      "invest_type": "합병",
-      "delisting_date": "2028-09-29",
-      "current_price": 1974,
-      "liquidation_price": 2167,
-      "yield_general": 4.23,
-      "yield_isa": 5.01,
-      "deposit_rate": 3.2,
-      "status": "정상",
-      "fair_price_calc": 2063
-    },
-    {
       "code": "0037T0",
       "name": "KB제32호스팩",
       "is_fair_buy": "O",
@@ -367,6 +353,20 @@
       "fair_price_calc": 2076
     },
     {
+      "code": "0072Z0",
+      "name": "KB제33호스팩",
+      "is_fair_buy": "O",
+      "invest_type": "합병",
+      "delisting_date": "2028-09-29",
+      "current_price": 1977,
+      "liquidation_price": 2167,
+      "yield_general": 4.16,
+      "yield_isa": 4.92,
+      "deposit_rate": 3.2,
+      "status": "정상",
+      "fair_price_calc": 2063
+    },
+    {
       "code": "0044K0",
       "name": "삼성스팩10호",
       "is_fair_buy": "O",
@@ -379,6 +379,20 @@
       "deposit_rate": 3.2,
       "status": "정상",
       "fair_price_calc": 2069
+    },
+    {
+      "code": "0004Y0",
+      "name": "디비금융제14호스팩",
+      "is_fair_buy": "O",
+      "invest_type": "합병",
+      "delisting_date": "2028-07-21",
+      "current_price": 1998,
+      "liquidation_price": 2167,
+      "yield_general": 4.06,
+      "yield_isa": 4.8,
+      "deposit_rate": 3.2,
+      "status": "정상",
+      "fair_price_calc": 2074
     },
     {
       "code": "0209J0",
@@ -409,18 +423,18 @@
       "fair_price_calc": 2050
     },
     {
-      "code": "0004Y0",
-      "name": "디비금융제14호스팩",
+      "code": "0127E0",
+      "name": "한화플러스제6호스팩",
       "is_fair_buy": "O",
       "invest_type": "합병",
-      "delisting_date": "2028-07-21",
-      "current_price": 1999,
+      "delisting_date": "2029-10-29",
+      "current_price": 1894,
       "liquidation_price": 2167,
-      "yield_general": 4.04,
-      "yield_isa": 4.77,
+      "yield_general": 4.02,
+      "yield_isa": 4.75,
       "deposit_rate": 3.2,
       "status": "정상",
-      "fair_price_calc": 2074
+      "fair_price_calc": 2003
     },
     {
       "code": "489210",
@@ -437,29 +451,15 @@
       "fair_price_calc": 2111
     },
     {
-      "code": "0127E0",
-      "name": "한화플러스제6호스팩",
-      "is_fair_buy": "O",
-      "invest_type": "합병",
-      "delisting_date": "2029-10-29",
-      "current_price": 1895,
-      "liquidation_price": 2167,
-      "yield_general": 4.0,
-      "yield_isa": 4.73,
-      "deposit_rate": 3.2,
-      "status": "정상",
-      "fair_price_calc": 2003
-    },
-    {
       "code": "0197V0",
       "name": "엔에이치스팩34호",
       "is_fair_buy": "O",
       "invest_type": "합병",
       "delisting_date": "2029-09-09",
-      "current_price": 1906,
+      "current_price": 1907,
       "liquidation_price": 2167,
-      "yield_general": 4.0,
-      "yield_isa": 4.72,
+      "yield_general": 3.98,
+      "yield_isa": 4.7,
       "deposit_rate": 3.2,
       "status": "정상",
       "fair_price_calc": 2010
@@ -605,20 +605,6 @@
       "fair_price_calc": 2063
     },
     {
-      "code": "0164H0",
-      "name": "한국제16호스팩",
-      "is_fair_buy": "O",
-      "invest_type": "합병",
-      "delisting_date": "2029-06-29",
-      "current_price": 1942,
-      "liquidation_price": 2167,
-      "yield_general": 3.63,
-      "yield_isa": 4.29,
-      "deposit_rate": 3.2,
-      "status": "정상",
-      "fair_price_calc": 2021
-    },
-    {
       "code": "0041B0",
       "name": "교보18호스팩",
       "is_fair_buy": "O",
@@ -645,6 +631,20 @@
       "deposit_rate": 3.2,
       "status": "정상",
       "fair_price_calc": 2050
+    },
+    {
+      "code": "0164H0",
+      "name": "한국제16호스팩",
+      "is_fair_buy": "O",
+      "invest_type": "합병",
+      "delisting_date": "2029-06-29",
+      "current_price": 1949,
+      "liquidation_price": 2167,
+      "yield_general": 3.5,
+      "yield_isa": 4.14,
+      "deposit_rate": 3.2,
+      "status": "정상",
+      "fair_price_calc": 2021
     },
     {
       "code": "0093G0",
@@ -680,10 +680,10 @@
       "is_fair_buy": "O",
       "invest_type": "합병",
       "delisting_date": "2029-01-20",
-      "current_price": 1985,
+      "current_price": 1989,
       "liquidation_price": 2167,
-      "yield_general": 3.43,
-      "yield_isa": 4.05,
+      "yield_general": 3.35,
+      "yield_isa": 3.95,
       "deposit_rate": 3.2,
       "status": "정상",
       "fair_price_calc": 2046
@@ -745,6 +745,20 @@
       "fair_price_calc": 2035
     },
     {
+      "code": "0131D0",
+      "name": "키움히어로제2호스팩",
+      "is_fair_buy": "O",
+      "invest_type": "합병",
+      "delisting_date": "2029-04-22",
+      "current_price": 1975,
+      "liquidation_price": 2167,
+      "yield_general": 3.27,
+      "yield_isa": 3.87,
+      "deposit_rate": 3.2,
+      "status": "정상",
+      "fair_price_calc": 2032
+    },
+    {
       "code": "0130H0",
       "name": "엔에이치스팩33호",
       "is_fair_buy": "O",
@@ -759,29 +773,15 @@
       "fair_price_calc": 2036
     },
     {
-      "code": "0131D0",
-      "name": "키움히어로제2호스팩",
-      "is_fair_buy": "O",
-      "invest_type": "합병",
-      "delisting_date": "2029-04-22",
-      "current_price": 1980,
-      "liquidation_price": 2167,
-      "yield_general": 3.18,
-      "yield_isa": 3.76,
-      "deposit_rate": 3.2,
-      "status": "정상",
-      "fair_price_calc": 2032
-    },
-    {
       "code": "0134X0",
       "name": "대신밸런스제20호스팩",
       "is_fair_buy": "O",
       "invest_type": "합병",
       "delisting_date": "2029-06-04",
-      "current_price": 1990,
+      "current_price": 1988,
       "liquidation_price": 2167,
-      "yield_general": 2.86,
-      "yield_isa": 3.38,
+      "yield_general": 2.89,
+      "yield_isa": 3.42,
       "deposit_rate": 3.2,
       "status": "정상",
       "fair_price_calc": 2025
@@ -806,10 +806,10 @@
       "is_fair_buy": "O",
       "invest_type": "합병",
       "delisting_date": "2028-12-14",
-      "current_price": 2040,
+      "current_price": 2045,
       "liquidation_price": 2167,
-      "yield_general": 2.44,
-      "yield_isa": 2.88,
+      "yield_general": 2.33,
+      "yield_isa": 2.76,
       "deposit_rate": 3.2,
       "status": "정상",
       "fair_price_calc": 2051
@@ -834,7 +834,7 @@
       "is_fair_buy": "X",
       "invest_type": "합병",
       "delisting_date": "2028-12-18",
-      "current_price": 1974,
+      "current_price": 1973,
       "liquidation_price": 2167,
       "yield_general": 0.0,
       "yield_isa": 0.0,
@@ -848,7 +848,7 @@
       "is_fair_buy": "X",
       "invest_type": "합병",
       "delisting_date": "2028-03-19",
-      "current_price": 2060,
+      "current_price": 2085,
       "liquidation_price": 2167,
       "yield_general": 0.0,
       "yield_isa": 0.0,
@@ -960,7 +960,7 @@
       "is_fair_buy": "X",
       "invest_type": "청산",
       "delisting_date": "2027-01-31",
-      "current_price": 2820,
+      "current_price": 2825,
       "liquidation_price": 2167,
       "yield_general": 0.0,
       "yield_isa": 0.0,
