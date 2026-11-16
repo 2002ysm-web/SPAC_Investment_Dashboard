@@ -262,15 +262,21 @@
 
             <!-- 실제 성과 콘텐츠 (비밀번호 해제 시 노출) -->
             <div id="perf-content" class="hidden">
-                <!-- 1. 최상단 요약 카드 바 (실현손익 강조 2분할 레이아웃) -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-center">
+                <!-- 1. 최상단 요약 카드 바 (실현손익 단독 1줄 + 단순/연환산 1x2 그리드) -->
+                <div class="space-y-4 mb-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">전체 실현손익금액</span>
                         <div id="perf-total-pnl" class="text-3xl sm:text-4xl font-black text-slate-800 truncate">- 원</div>
                     </div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-center">
-                        <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider block mb-1">전체 단순 수익률</span>
-                        <div id="perf-avg-simple" class="text-3xl sm:text-4xl font-black text-emerald-600 truncate">- %</div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                            <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider block mb-1">전체 단순 수익률</span>
+                            <div id="perf-avg-simple" class="text-3xl sm:text-4xl font-black text-emerald-600 truncate">- %</div>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                            <span class="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">전체 연환산 수익률</span>
+                            <div id="perf-avg-annual" class="text-3xl sm:text-4xl font-black text-blue-600 truncate">- %</div>
+                        </div>
                     </div>
                 </div>
 
@@ -586,11 +592,11 @@
                     { name: "하나29호스팩", type: "청산", buy_amount: 3001505, buy_date: "2026-01-07", sell_amount: 3081002, sell_date: "2026-05-15" },
                     { name: "하나29호스팩", type: "청산", buy_amount: 1889360, buy_date: "2026-01-06", sell_amount: 1933431, sell_date: "2026-05-15" },
                     { name: "하나29호스팩", type: "청산", buy_amount: 5007430, buy_date: "2026-01-05", sell_amount: 5124239, sell_date: "2026-05-15" },
-                    { name: "교보14호스팩", type: "청산", buy_amount: 3002360, buy_date: "2026-01-07", sell_amount: 3084152, sell_date: "2026-05-18" },
+                    { name: "교보14호ส팩", type: "청산", buy_amount: 3002360, buy_date: "2026-01-07", sell_amount: 3084152, sell_date: "2026-05-18" },
                     { name: "교보14호스팩", type: "청산", buy_amount: 4007050, buy_date: "2026-01-06", sell_amount: 4103564, sell_date: "2026-05-18" },
                     { name: "교보14호스팩", type: "청산", buy_amount: 1796780, buy_date: "2026-01-05", sell_amount: 1844444, sell_date: "2026-05-18" },
                     { name: "케이비제25호스팩", type: "청산", buy_amount: 4170605, buy_date: "2026-01-05", sell_amount: 4282230, sell_date: "2026-05-29" },
-                    { name: "케이비제25호스팩", type: "청산", buy_amount: 3001505, buy_date: "2026-01-07", sell_amount: 3083981, sell_date: "2026-05-29" },
+                    { name: "케이비제25호ส팩", type: "청산", buy_amount: 3001505, buy_date: "2026-01-07", sell_amount: 3083981, sell_date: "2026-05-29" },
                     { name: "에스케이증권제9호스팩", type: "청산", buy_amount: 1433745, buy_date: "2025-09-05", sell_amount: 1492326, sell_date: "2026-06-24" },
                     { name: "에스케이증권제9호스팩", type: "청산", buy_amount: 2000430, buy_date: "2025-10-27", sell_amount: 2058677, sell_date: "2026-06-24" },
                     { name: "유안타제14호스팩", type: "청산", buy_amount: 2065960, buy_date: "2025-09-05", sell_amount: 2160321, sell_date: "2026-06-24" },
@@ -606,16 +612,16 @@
                     { name: "대신밸런스제16호스팩", type: "청산", buy_amount: 5970180, buy_date: "2026-01-05", sell_amount: 6152494, sell_date: "2026-08-07" },
                     { name: "대신밸런스제16호스팩", type: "청산", buy_amount: 1000595, buy_date: "2026-01-07", sell_amount: 1031156, sell_date: "2026-08-07" },
                     { name: "대신밸런스제16호스팩", type: "청산", buy_amount: 1200295, buy_date: "2026-01-09", sell_amount: 1237818, sell_date: "2026-08-07" },
-                    { name: "대신밸런스제16호스팩", type: "청산", buy_amount: 3002710, buy_date: "2026-01-08", sell_amount: 3089163, sell_date: "2026-08-07" },
+                    { name: "대신밸런스제16호ส팩", type: "청산", buy_amount: 3002710, buy_date: "2026-01-08", sell_amount: 3089163, sell_date: "2026-08-07" },
                     { name: "유안타제11호스팩", type: "청산", buy_amount: 2001270, buy_date: "2025-10-22", sell_amount: 2068674, sell_date: "2026-08-05" },
                     { name: "한화플러스제4호스팩", type: "청산", buy_amount: 2000615, buy_date: "2025-10-22", sell_amount: 2080145, sell_date: "2026-08-07" },
-                    { name: "신한제11호스팩", type: "청산", buy_amount: 2000615, buy_date: "2025-10-22", sell_amount: 2077506, sell_date: "2026-08-20" },
+                    { name: "신한제11호ส팩", type: "청산", buy_amount: 2000615, buy_date: "2025-10-22", sell_amount: 2077506, sell_date: "2026-08-20" },
                     { name: "신한제11호스팩", type: "청산", buy_amount: 2077520, buy_date: "2025-07-04", sell_amount: 2209103, sell_date: "2026-08-20" },
-                    { name: "신한제11호스팩", type: "청산", buy_amount: 96909, buy_date: "2024-04-23", sell_amount: 105709, sell_date: "2026-08-20" },
-                    { name: "케이비제27호스팩", type: "청산", buy_amount: 6274985, buy_date: "2025-11-14", sell_amount: 6532654, sell_date: "2026-09-28" },
+                    { name: "신한제11호ส팩", type: "청산", buy_amount: 96909, buy_date: "2024-04-23", sell_amount: 105709, sell_date: "2026-08-20" },
+                    { name: "케이비제27호ส팩", type: "청산", buy_amount: 6274985, buy_date: "2025-11-14", sell_amount: 6532654, sell_date: "2026-09-28" },
                     { name: "케이비제27호스팩", type: "청산", buy_amount: 2161997, buy_date: "2025-10-31", sell_amount: 2250782, sell_date: "2026-09-28" },
                     { name: "케이비제27호스팩", type: "청산", buy_amount: 1480850, buy_date: "2025-10-23", sell_amount: 1546470, sell_date: "2026-09-28" },
-                    { name: "케이비제27호스팩", type: "청산", buy_amount: 541670, buy_date: "2025-10-29", sell_amount: 564310, sell_date: "2026-09-28" },
+                    { name: "케이비제27호ส팩", type: "청산", buy_amount: 541670, buy_date: "2025-10-29", sell_amount: 564310, sell_date: "2026-09-28" },
                     { name: "한화플러스제5호스팩", type: "매매", buy_amount: 4959129, buy_date: "2026-02-23", sell_amount: 5986913, sell_date: "2026-09-29" },
                     { name: "하이제8호스팩", type: "청산", buy_amount: 2003400, buy_date: "2025-09-05", sell_amount: 2084599, sell_date: "2026-04-28" }
                 ];
@@ -705,17 +711,22 @@
 
             let totalPnl = 0;
             let totalBuy = 0;
+            let totalCashFlows = [];
 
             if (filtered.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="11" class="py-12 text-center text-slate-400 font-normal">조건에 일치하는 성과 내역이 없습니다.</td></tr>`;
                 document.getElementById('perf-total-pnl').innerText = '0 원';
                 document.getElementById('perf-avg-simple').innerText = '0.00%';
+                document.getElementById('perf-avg-annual').innerText = '0.00%';
                 return;
             }
 
             filtered.forEach(item => {
                 totalPnl += item.pnl;
                 totalBuy += item.buy_amount;
+
+                totalCashFlows.push({ date: new Date(item.buy_date), amount: -item.buy_amount });
+                totalCashFlows.push({ date: new Date(item.sell_date), amount: item.sell_amount });
 
                 const pnlColor = item.pnl >= 0 ? 'text-emerald-600 font-bold' : 'text-rose-500 font-bold';
                 const simpleColor = item.simpleYield >= 0 ? 'text-slate-700' : 'text-rose-500';
@@ -744,12 +755,14 @@
             });
 
             const totalSimpleYield = totalBuy > 0 ? (totalPnl / totalBuy) * 100 : 0;
+            const overallAnnual = calculateXIRR(totalCashFlows);
 
             const totalPnlEl = document.getElementById('perf-total-pnl');
             totalPnlEl.innerText = (totalPnl >= 0 ? '+' : '') + totalPnl.toLocaleString() + ' 원';
             totalPnlEl.className = totalPnl >= 0 ? 'text-3xl sm:text-4xl font-black text-emerald-600 truncate' : 'text-3xl sm:text-4xl font-black text-rose-500 truncate';
 
             document.getElementById('perf-avg-simple').innerText = totalSimpleYield.toFixed(2) + ' %';
+            document.getElementById('perf-avg-annual').innerText = overallAnnual.toFixed(2) + ' %';
         }
 
         function updateSummaryStats(items) {
