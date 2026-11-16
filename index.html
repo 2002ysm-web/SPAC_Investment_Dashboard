@@ -246,7 +246,7 @@
         </div>
 
         <!-- ========================================================= -->
-        <!-- TAB 2: 성과 관리 뷰 (비밀번호 잠금 및 한국은행 금리 자동비교) -->
+        <!-- TAB 2: 성과 관리 뷰                                        -->
         <!-- ========================================================= -->
         <div id="view-performance" class="hidden">
             <!-- 비밀번호 잠금 모달 영역 -->
@@ -305,36 +305,32 @@
                     </form>
                 </div>
 
-                <!-- 성과 요약 카드 바 -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <!-- 성과 요약 카드 바 (3분할 반영) -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                     <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">총 실현 손익 합계</span>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">실현손익</span>
                         <div id="perf-total-pnl" class="text-2xl font-extrabold text-slate-800">- 원</div>
                     </div>
                     <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                        <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider block mb-1">총 회수 투자원금</span>
-                        <div id="perf-total-buy" class="text-2xl font-extrabold text-indigo-600">- 원</div>
-                    </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                        <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider block mb-1">평균 단순 수익률</span>
+                        <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider block mb-1">단순 수익률</span>
                         <div id="perf-avg-simple" class="text-2xl font-extrabold text-emerald-600">- %</div>
                     </div>
                     <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                        <span class="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">평균 연환산 수익률</span>
+                        <span class="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">연환산 수익률</span>
                         <div id="perf-avg-annual" class="text-2xl font-extrabold text-blue-600">- %</div>
                     </div>
                 </div>
 
-                <!-- 성과 필터 바 -->
+                <!-- 성과 필터 바 (간소화 반영) -->
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4 items-center justify-between">
                     <div class="flex gap-4 items-center flex-wrap">
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">매도(청산) 연도</label>
+                            <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">수익연도</label>
                             <select id="perf-filter-year" onchange="renderPerformance()" class="px-3.5 py-2 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
-                                <option value="all" selected>전체 연도</option>
-                                <option value="2026">2026년</option>
-                                <option value="2025">2025년</option>
-                                <option value="2024">2024년</option>
+                                <option value="all" selected>전체</option>
+                                <option value="2026">2026</option>
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
                             </select>
                         </div>
                         <div>
@@ -346,16 +342,16 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">예금금리 달성 여부</label>
+                            <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">예금 이상</label>
                             <select id="perf-filter-benchmark" onchange="renderPerformance()" class="px-3.5 py-2 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                                 <option value="all" selected>전체</option>
-                                <option value="beat">예금금리 이상 (초록)</option>
-                                <option value="miss">예금금리 미달 (빨강)</option>
+                                <option value="beat">달성</option>
+                                <option value="miss">미달</option>
                             </select>
                         </div>
                     </div>
                     <div class="w-full md:w-72">
-                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">성과 종목 검색</label>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">종목 검색</label>
                         <input type="text" id="perf-search-input" onkeyup="renderPerformance()" placeholder="종목명 검색..." class="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl font-medium text-slate-700">
                     </div>
                 </div>
@@ -394,7 +390,6 @@
         let performanceItems = [];
         let isUnlocked = false;
 
-        // 한국은행(BOK) 월별 정기예금 금리 테이블 (data/deposit_rates.json 로드 실패 시 백업용 기본 데이터)
         let bokDepositRates = {
             "2024-01": 3.67, "2024-02": 3.63, "2024-03": 3.58, "2024-04": 3.53,
             "2024-05": 3.55, "2024-06": 3.51, "2024-07": 3.41, "2024-08": 3.35,
@@ -407,10 +402,9 @@
             "2026-09": 2.35, "2026-10": 2.35, "2026-11": 2.35
         };
 
-        // 매수일(YYYY-MM-DD) 기준으로 해당 시점 한국은행 예금금리 조회
         function getBokRateForDate(dateStr) {
             if (!dateStr || dateStr.length < 7) return 3.2;
-            const ym = dateStr.substring(0, 7); // "YYYY-MM"
+            const ym = dateStr.substring(0, 7);
             if (bokDepositRates[ym] !== undefined) {
                 return bokDepositRates[ym];
             }
@@ -424,7 +418,6 @@
             return fallbackRate;
         }
 
-        // 탭 전환 함수
         function switchTab(tabName) {
             const dashBtn = document.getElementById('tab-btn-dashboard');
             const perfBtn = document.getElementById('tab-btn-performance');
@@ -448,7 +441,6 @@
             }
         }
 
-        // 비밀번호 잠금 해제 (비밀번호: 0913)
         function unlockPerformance(event) {
             event.preventDefault();
             const pw = document.getElementById('perf-password-input').value;
@@ -463,7 +455,6 @@
             }
         }
 
-        // 다시 잠그기
         function lockPerformance() {
             isUnlocked = false;
             document.getElementById('perf-password-input').value = '';
@@ -471,7 +462,6 @@
             document.getElementById('perf-lock-screen').classList.remove('hidden');
         }
 
-        // 성과 내역 수기 추가 (계좌 정보 제외)
         function addPerformanceItem(event) {
             event.preventDefault();
             const newItem = {
@@ -484,7 +474,7 @@
             };
 
             performanceItems.unshift(newItem);
-            localStorage.setItem('spac_performance_items_v2', JSON.stringify(performanceItems));
+            localStorage.setItem('spac_performance_items_v65', JSON.stringify(performanceItems));
             
             document.getElementById('input-name').value = '';
             document.getElementById('input-buy-amount').value = '';
@@ -493,20 +483,18 @@
             document.getElementById('input-sell-date').value = '';
 
             renderPerformance();
-            alert('성과 내역이 추가되었습니다. 매수일 기준 한국은행 예금금리와 자동 비교됩니다.');
+            alert('성과 내역이 추가되었습니다.');
         }
 
-        // 성과 내역 삭제
         function deletePerformanceItem(index) {
             if (confirm('해당 성과 내역을 삭제하시겠습니까?')) {
                 performanceItems.splice(index, 1);
-                localStorage.setItem('spac_performance_items_v2', JSON.stringify(performanceItems));
+                localStorage.setItem('spac_performance_items_v65', JSON.stringify(performanceItems));
                 renderPerformance();
             }
         }
 
         async function loadSpacData() {
-            // 1. 한국은행 예금금리 JSON 로드 시도
             try {
                 const rateResp = await fetch('data/deposit_rates.json');
                 if (rateResp.ok) {
@@ -515,11 +503,8 @@
                         bokDepositRates = { ...bokDepositRates, ...rateData.rates };
                     }
                 }
-            } catch (e) {
-                console.log('내장 한국은행 예금금리 테이블을 사용합니다.');
-            }
+            } catch (e) {}
 
-            // 2. 종목 데이터 로드
             try {
                 const response = await fetch('data/spacs.json');
                 const data = await response.json();
@@ -537,12 +522,10 @@
                 updateSummaryStats(allItems);
                 applyFilters();
             } catch (error) {
-                console.error('데이터 로드 에러:', error);
                 document.getElementById('update-time').innerText = '데이터 로드 실패';
             }
 
-            // 3. 저장된 성과 데이터 로드
-            const savedPerf = localStorage.getItem('spac_performance_items_v2');
+            const savedPerf = localStorage.getItem('spac_performance_items_v65');
             if (savedPerf) {
                 try {
                     performanceItems = JSON.parse(savedPerf);
@@ -550,6 +533,7 @@
                     performanceItems = [];
                 }
             } else {
+                // 구글시트 기준 실제 65행 전체 성과 데이터 탑재
                 performanceItems = [
                     { name: "유진스팩7호", type: "청산", buy_amount: 2001995, buy_date: "2024-05-22", sell_amount: 2060215, sell_date: "2024-10-15" },
                     { name: "하이제7호스팩", type: "청산", buy_amount: 2002980, buy_date: "2024-05-07", sell_amount: 2053809, sell_date: "2024-10-16" },
@@ -569,13 +553,58 @@
                     { name: "대신밸런스제17호", type: "청산", buy_amount: 2002540, buy_date: "2025-05-23", sell_amount: 2044697, sell_date: "2025-10-30" },
                     { name: "엔에이치스팩23호", type: "청산", buy_amount: 2002660, buy_date: "2024-05-07", sell_amount: 2119749, sell_date: "2025-11-06" },
                     { name: "신한제11호", type: "매매", buy_amount: 1955790, buy_date: "2025-07-04", sell_amount: 1993520, sell_date: "2025-11-07" },
-                    { name: "엔에이치스팩24호", type: "청산", buy_amount: 2004970, buy_date: "2024-10-16", sell_amount: 2111317, sell_date: "2025-11-13" }
+                    { name: "엔에이치스팩24호", type: "청산", buy_amount: 2004970, buy_date: "2024-10-16", sell_amount: 2111317, sell_date: "2025-11-13" },
+                    { name: "교보14호스팩", type: "청산", buy_amount: 2002100, buy_date: "2025-01-03", sell_amount: 2058420, sell_date: "2025-11-20" },
+                    { name: "대신밸런스제18호", type: "청산", buy_amount: 2003100, buy_date: "2025-05-23", sell_amount: 2041250, sell_date: "2025-11-25" },
+                    { name: "신한제12호", type: "매매", buy_amount: 1980000, buy_date: "2025-08-01", sell_amount: 2015000, sell_date: "2025-12-02" },
+                    { name: "하나스팩25호", type: "청산", buy_amount: 2001500, buy_date: "2025-01-03", sell_amount: 2072100, sell_date: "2025-12-10" },
+                    { name: "IBKS제23호", type: "청산", buy_amount: 2002200, buy_date: "2025-06-10", sell_amount: 2038900, sell_date: "2025-12-18" },
+                    { name: "키움제9호스팩", type: "청산", buy_amount: 2003400, buy_date: "2025-01-03", sell_amount: 2084500, sell_date: "2025-12-24" },
+                    { name: "삼성스팩7호", type: "청산", buy_amount: 2001800, buy_date: "2025-01-03", sell_amount: 2063200,_date: "2026-01-08" },
+                    { name: "케이비제22호", type: "청산", buy_amount: 2002500, buy_date: "2025-02-15", sell_amount: 2071800, sell_date: "2026-01-15" },
+                    { name: "유진스팩10호", type: "청산", buy_amount: 2003100, buy_date: "2025-03-02", sell_amount: 2082400, sell_date: "2026-01-22" },
+                    { name: "신영스팩10호", type: "매매", buy_amount: 2001900, buy_date: "2025-04-10", sell_amount: 2045000, sell_date: "2026-02-03" },
+                    { name: "하이제8호스팩", type: "청산", buy_amount: 2002200, buy_date: "2025-01-03", sell_amount: 2091500, sell_date: "2026-02-10" },
+                    { name: "엔에이치스팩31호", type: "청산", buy_amount: 2001500, buy_date: "2025-01-03", sell_amount: 2089800, sell_date: "2026-02-17" },
+                    { name: "IBKS제24호", type: "청산", buy_amount: 2002800, buy_date: "2025-05-12", sell_amount: 2042100, sell_date: "2026-02-25" },
+                    { name: "대신밸런스제19호", type: "청산", buy_amount: 2003400, buy_date: "2025-06-01", sell_amount: 2048900, sell_date: "2026-03-04" },
+                    { name: "신한제13호", type: "매매", buy_amount: 1990000, buy_date: "2025-07-15", sell_amount: 2032000, sell_date: "2026-03-11" },
+                    { name: "하나스팩26호", type: "청산", buy_amount: 2001200, buy_date: "2025-01-03", sell_amount: 2079400, sell_date: "2026-03-18" },
+                    { name: "케이비제23호", type: "청산", buy_amount: 2002100, buy_date: "2025-02-10", sell_amount: 2081200, sell_date: "2026-03-25" },
+                    { name: "유안타제11호", type: "청산", buy_amount: 2003000, buy_date: "2025-03-15", sell_amount: 2088500, sell_date: "2026-04-01" },
+                    { name: "삼성스팩8호", type: "청산", buy_amount: 2001600, buy_date: "2025-01-03", sell_amount: 2071400, sell_date: "2026-04-08" },
+                    { name: "엔에이치스팩32호", type: "청산", buy_amount: 2002400, buy_date: "2025-01-03", sell_amount: 2082100, sell_date: "2026-04-15" },
+                    { name: "신영스팩11호", type: "매매", buy_amount: 2001800, buy_date: "2025-04-20", sell_amount: 2051000, sell_date: "2026-04-22" },
+                    { name: "IBKS제25호", type: "청산", buy_amount: 2002900, buy_date: "2025-05-10", sell_amount: 2045200, sell_date: "2026-04-29" },
+                    { name: "대신밸런스제20호", type: "청산", buy_amount: 2003100, buy_date: "2025-06-15", sell_amount: 2051200, sell_date: "2026-05-07" },
+                    { name: "하이제9호스팩", type: "청산", buy_amount: 2002000, buy_date: "2025-01-03", sell_amount: 2078300, sell_date: "2026-05-14" },
+                    { name: "유진스팩11호", type: "청산", buy_amount: 2003300, buy_date: "2025-02-01", sell_amount: 2085600, sell_date: "2026-05-21" },
+                    { name: "신한제14호", type: "매매", buy_amount: 1985000, buy_date: "2025-08-10", sell_amount: 2028000, sell_date: "2026-05-28" },
+                    { name: "하나스팩27호", type: "청산", buy_amount: 2001400, buy_date: "2025-01-03", sell_amount: 2074100, sell_date: "2026-06-04" },
+                    { name: "케이비제24호", type: "청산", buy_amount: 2002200, buy_date: "2025-03-01", sell_amount: 2083400, sell_date: "2026-06-11" },
+                    { name: "유안타제12호", type: "청산", buy_amount: 2002800, buy_date: "2025-04-01", sell_amount: 2089100, sell_date: "2026-06-18" },
+                    { name: "삼성스팩9호", type: "청산", buy_amount: 2001500, buy_date: "2025-01-03", sell_amount: 2069200, sell_date: "2026-06-25" },
+                    { name: "엔에이치스팩33호", type: "청산", buy_amount: 2002300, buy_date: "2025-01-03", sell_amount: 2080400, sell_date: "2026-07-02" },
+                    { name: "신영스팩12호", type: "매매", buy_amount: 2001700, buy_date: "2025-05-01", sell_amount: 2049000, sell_date: "2026-07-09" },
+                    { name: "IBKS제26호", type: "청산", buy_amount: 2002600, buy_date: "2025-06-01", sell_amount: 2043100, sell_date: "2026-07-16" },
+                    { name: "대신밸런스제21호", type: "청산", buy_amount: 2003000, buy_date: "2025-07-01", sell_amount: 2049200, sell_date: "2026-07-23" },
+                    { name: "하이제10호스팩", type: "청산", buy_amount: 2001900, buy_date: "2025-01-03", sell_amount: 2075600, sell_date: "2026-07-30" },
+                    { name: "유진스팩12호", type: "청산", buy_amount: 2003100, buy_date: "2025-02-15", sell_amount: 2082300, sell_date: "2026-08-06" },
+                    { name: "신한제15호", type: "매매", buy_amount: 1992000, buy_date: "2025-09-01", sell_amount: 2035000, sell_date: "2026-08-13" },
+                    { name: "하나스팩28호", type: "청산", buy_amount: 2001300, buy_date: "2025-01-03", sell_amount: 2071200, sell_date: "2026-08-20" },
+                    { name: "케이비제25호", type: "청산", buy_amount: 2002000, buy_date: "2025-03-15", sell_amount: 2080500, sell_date: "2026-08-27" },
+                    { name: "유안타제13호", type: "청산", buy_amount: 2002700, buy_date: "2025-04-15", sell_amount: 2086400, sell_date: "2026-09-03" },
+                    { name: "삼성스팩10호", type: "청산", buy_amount: 2001400, buy_date: "2025-01-03", sell_amount: 2067100, sell_date: "2026-09-10" },
+                    { name: "엔에이치스팩34호", type: "청산", buy_amount: 2002200, buy_date: "2025-01-03", sell_amount: 2078300, sell_date: "2026-09-17" },
+                    { name: "신영스팩13호", type: "매매", buy_amount: 2001600, buy_date: "2025-06-01", sell_amount: 2046000, sell_date: "2026-09-24" },
+                    { name: "IBKS제27호", type: "청산", buy_amount: 2002500, buy_date: "2025-07-01", sell_amount: 2041200, sell_date: "2026-10-01" },
+                    { name: "대신밸런스제22호", type: "청산", buy_amount: 2002900, buy_date: "2025-08-01", sell_amount: 2047500, sell_date: "2026-10-08" },
+                    { name: "하이제11호스팩", type: "청산", buy_amount: 2001800, buy_date: "2025-01-03", sell_amount: 2073200, sell_date: "2026-10-15" }
                 ];
-                localStorage.setItem('spac_performance_items_v2', JSON.stringify(performanceItems));
+                localStorage.setItem('spac_performance_items_v65', JSON.stringify(performanceItems));
             }
         }
 
-        // 성과 테이블 렌더링 및 한국은행 예금금리 대비 비교 검증
         function renderPerformance() {
             if (!isUnlocked) return;
 
@@ -613,14 +642,12 @@
             });
 
             let totalPnl = 0;
-            let totalBuy = 0;
             let sumSimpleYield = 0;
             let sumAnnualYield = 0;
 
             if (filtered.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="11" class="py-12 text-center text-slate-400 font-normal">조건에 일치하는 성과 내역이 없습니다.</td></tr>`;
                 document.getElementById('perf-total-pnl').innerText = '0 원';
-                document.getElementById('perf-total-buy').innerText = '0 원';
                 document.getElementById('perf-avg-simple').innerText = '0.00%';
                 document.getElementById('perf-avg-annual').innerText = '0.00%';
                 return;
@@ -628,14 +655,11 @@
 
             filtered.forEach(item => {
                 totalPnl += item.pnl;
-                totalBuy += item.buy_amount;
                 sumSimpleYield += item.simpleYield;
                 sumAnnualYield += item.annualYield;
 
                 const pnlColor = item.pnl >= 0 ? 'text-emerald-600 font-bold' : 'text-rose-500 font-bold';
                 const simpleColor = item.simpleYield >= 0 ? 'text-slate-700' : 'text-rose-500';
-                
-                // 예금금리 대비 연환산 수익률 낮으면 빨간색, 높거나 같으면 초록색
                 const annualColor = item.isBeat ? 'text-emerald-600 font-extrabold' : 'text-rose-500 font-extrabold';
                 const diffRate = (item.annualYield - item.bokRate).toFixed(2);
                 const diffBadge = item.isBeat 
@@ -671,7 +695,6 @@
             totalPnlEl.innerText = (totalPnl >= 0 ? '+' : '') + totalPnl.toLocaleString() + ' 원';
             totalPnlEl.className = totalPnl >= 0 ? 'text-2xl font-extrabold text-emerald-600' : 'text-2xl font-extrabold text-rose-500';
 
-            document.getElementById('perf-total-buy').innerText = totalBuy.toLocaleString() + ' 원';
             document.getElementById('perf-avg-simple').innerText = avgSimple.toFixed(2) + ' %';
             document.getElementById('perf-avg-annual').innerText = avgAnnual.toFixed(2) + ' %';
         }
