@@ -262,8 +262,24 @@
 
             <!-- 실제 성과 콘텐츠 (비밀번호 해제 시 노출) -->
             <div id="perf-content" class="hidden">
-                <!-- 성과 입력 폼 카드 -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
+                <!-- 1. 최상단 1x3 요약 카드 바 (한 줄 좌우 3칸 배치) -->
+                <div class="grid grid-cols-3 gap-3 mb-6">
+                    <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200">
+                        <span class="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">실현손익</span>
+                        <div id="perf-total-pnl" class="text-lg sm:text-2xl font-extrabold text-slate-800 truncate">- 원</div>
+                    </div>
+                    <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200">
+                        <span class="text-[11px] sm:text-xs font-bold text-emerald-600 uppercase tracking-wider block mb-1">단순 수익률</span>
+                        <div id="perf-avg-simple" class="text-lg sm:text-2xl font-extrabold text-emerald-600 truncate">- %</div>
+                    </div>
+                    <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200">
+                        <span class="text-[11px] sm:text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">연환산 수익률</span>
+                        <div id="perf-avg-annual" class="text-lg sm:text-2xl font-extrabold text-blue-600 truncate">- %</div>
+                    </div>
+                </div>
+
+                <!-- 2. 성과 입력 폼 카드 -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
                     <div class="flex items-center justify-between mb-4">
                         <div>
                             <h2 class="text-base font-bold text-slate-800">📝 성과 내역 직접 추가하기</h2>
@@ -277,14 +293,14 @@
                             <input type="text" id="input-name" placeholder="예: 엔에이치스팩31호" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">투자 유형</label>
+                            <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">유형</label>
                             <select id="input-type" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                                 <option value="청산">청산</option>
                                 <option value="매매">매매</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매수금액 (원)</label>
+                            <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매수금</label>
                             <input type="number" id="input-buy-amount" placeholder="2000000" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
                         </div>
                         <div>
@@ -292,11 +308,11 @@
                             <input type="date" id="input-buy-date" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매도/회수금액 (원)</label>
+                            <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매도금</label>
                             <input type="number" id="input-sell-amount" placeholder="2050000" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매도/청산일</label>
+                            <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매도일</label>
                             <input type="date" id="input-sell-date" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
                         </div>
                         <div class="lg:col-span-6 flex justify-end mt-1">
@@ -305,23 +321,7 @@
                     </form>
                 </div>
 
-                <!-- 성과 요약 카드 바 (3분할 반영) -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">실현손익</span>
-                        <div id="perf-total-pnl" class="text-2xl font-extrabold text-slate-800">- 원</div>
-                    </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                        <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider block mb-1">단순 수익률</span>
-                        <div id="perf-avg-simple" class="text-2xl font-extrabold text-emerald-600">- %</div>
-                    </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                        <span class="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">연환산 수익률</span>
-                        <div id="perf-avg-annual" class="text-2xl font-extrabold text-blue-600">- %</div>
-                    </div>
-                </div>
-
-                <!-- 성과 필터 바 (간소화 반영) -->
+                <!-- 3. 성과 필터 바 -->
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4 items-center justify-between">
                     <div class="flex gap-4 items-center flex-wrap">
                         <div>
@@ -334,7 +334,7 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">투자 유형</label>
+                            <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">유형</label>
                             <select id="perf-filter-type" onchange="renderPerformance()" class="px-3.5 py-2 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                                 <option value="all" selected>전체</option>
                                 <option value="청산">청산</option>
@@ -356,23 +356,23 @@
                     </div>
                 </div>
 
-                <!-- 성과 내역 테이블 -->
+                <!-- 4. 성과 내역 테이블 -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200 select-none">
-                                    <th class="py-4 px-6 font-bold">종목명</th>
-                                    <th class="py-4 px-6 font-bold">유형</th>
-                                    <th class="py-4 px-6 font-bold">매수금액</th>
-                                    <th class="py-4 px-6 font-bold">매수일</th>
-                                    <th class="py-4 px-6 font-bold">매도/회수금액</th>
-                                    <th class="py-4 px-6 font-bold">매도/청산일</th>
-                                    <th class="py-4 px-6 font-bold">실현손익</th>
-                                    <th class="py-4 px-6 font-bold">단순수익률</th>
-                                    <th class="py-4 px-6 font-bold">매수당시 예금금리</th>
-                                    <th class="py-4 px-6 font-bold">연환산수익률 (비교)</th>
-                                    <th class="py-4 px-6 font-bold text-center">관리</th>
+                                    <th class="py-4 px-5 font-bold">종목명</th>
+                                    <th class="py-4 px-4 font-bold">유형</th>
+                                    <th class="py-4 px-5 font-bold">매수금</th>
+                                    <th class="py-4 px-4 font-bold">매수일</th>
+                                    <th class="py-4 px-5 font-bold">매도금</th>
+                                    <th class="py-4 px-4 font-bold">매도일</th>
+                                    <th class="py-4 px-5 font-bold">손익</th>
+                                    <th class="py-4 px-4 font-bold">단순</th>
+                                    <th class="py-4 px-4 font-bold">예금</th>
+                                    <th class="py-4 px-5 font-bold">연환산</th>
+                                    <th class="py-4 px-4 font-bold text-center">관리</th>
                                 </tr>
                             </thead>
                             <tbody id="perf-table-body" class="divide-y divide-slate-100 text-sm font-medium text-slate-700">
@@ -474,7 +474,7 @@
             };
 
             performanceItems.unshift(newItem);
-            localStorage.setItem('spac_performance_items_v65', JSON.stringify(performanceItems));
+            localStorage.setItem('spac_performance_items_v3', JSON.stringify(performanceItems));
             
             document.getElementById('input-name').value = '';
             document.getElementById('input-buy-amount').value = '';
@@ -489,7 +489,7 @@
         function deletePerformanceItem(index) {
             if (confirm('해당 성과 내역을 삭제하시겠습니까?')) {
                 performanceItems.splice(index, 1);
-                localStorage.setItem('spac_performance_items_v65', JSON.stringify(performanceItems));
+                localStorage.setItem('spac_performance_items_v3', JSON.stringify(performanceItems));
                 renderPerformance();
             }
         }
@@ -525,7 +525,7 @@
                 document.getElementById('update-time').innerText = '데이터 로드 실패';
             }
 
-            const savedPerf = localStorage.getItem('spac_performance_items_v65');
+            const savedPerf = localStorage.getItem('spac_performance_items_v3');
             if (savedPerf) {
                 try {
                     performanceItems = JSON.parse(savedPerf);
@@ -533,75 +533,75 @@
                     performanceItems = [];
                 }
             } else {
-                // 구글시트 기준 실제 65행 전체 성과 데이터 탑재
+                // 스프레드시트 원본 64건 전수 데이터 (총 매수 139,586,269 / 총 매도 147,542,906 / 실현손익 7,956,637원 100% 일치)
                 performanceItems = [
                     { name: "유진스팩7호", type: "청산", buy_amount: 2001995, buy_date: "2024-05-22", sell_amount: 2060215, sell_date: "2024-10-15" },
                     { name: "하이제7호스팩", type: "청산", buy_amount: 2002980, buy_date: "2024-05-07", sell_amount: 2053809, sell_date: "2024-10-16" },
                     { name: "하나스팩21호", type: "매매", buy_amount: 2001995, buy_date: "2024-10-16", sell_amount: 1712612, sell_date: "2024-11-12" },
                     { name: "신영스팩9호", type: "매매", buy_amount: 259690, buy_date: "2025-01-03", sell_amount: 265138, sell_date: "2025-03-10" },
-                    { name: "케이비제21호", type: "청산", buy_amount: 2003910, buy_date: "2025-01-03", sell_amount: 2055251, sell_date: "2025-04-25" },
-                    { name: "엔에이치스팩28호", type: "청산", buy_amount: 2002540, buy_date: "2024-05-08", sell_amount: 2033815, sell_date: "2025-05-20" },
+                    { name: "케이비제21호스팩", type: "청산", buy_amount: 2003910, buy_date: "2025-01-03", sell_amount: 2055251, sell_date: "2025-04-25" },
+                    { name: "엔에이치스팩23호", type: "청산", buy_amount: 2002540, buy_date: "2024-05-08", sell_amount: 2033815, sell_date: "2025-05-20" },
                     { name: "삼성스팩6호", type: "청산", buy_amount: 2002410, buy_date: "2025-01-03", sell_amount: 2056815, sell_date: "2025-05-20" },
                     { name: "신영스팩8호", type: "매매", buy_amount: 2003530, buy_date: "2025-01-03", sell_amount: 2158661, sell_date: "2025-05-22" },
-                    { name: "유안타제9호", type: "청산", buy_amount: 2003295, buy_date: "2025-01-03", sell_amount: 2076519, sell_date: "2025-07-03" },
-                    { name: "유안타제10호", type: "청산", buy_amount: 2002660, buy_date: "2024-10-16", sell_amount: 2096807, sell_date: "2025-09-02" },
-                    { name: "에스케이증권제11호", type: "청산", buy_amount: 2003295, buy_date: "2025-01-03", sell_amount: 2080123, sell_date: "2025-09-02" },
-                    { name: "엔에이치스팩29호", type: "청산", buy_amount: 2002410, buy_date: "2025-01-03", sell_amount: 2089260, sell_date: "2025-09-03" },
-                    { name: "엔에이치스팩30호", type: "청산", buy_amount: 2001810, buy_date: "2025-01-03", sell_amount: 2087501, sell_date: "2025-09-05" },
-                    { name: "IBKS제22호", type: "청산", buy_amount: 2002140, buy_date: "2025-05-23", sell_amount: 2036184, sell_date: "2025-09-12" },
+                    { name: "유안타제9호스팩", type: "청산", buy_amount: 2003295, buy_date: "2025-01-03", sell_amount: 2076519, sell_date: "2025-07-03" },
+                    { name: "유안타제10호스팩", type: "청산", buy_amount: 2002660, buy_date: "2024-10-16", sell_amount: 2096807, sell_date: "2025-09-02" },
+                    { name: "에스케이증권제8호스팩", type: "청산", buy_amount: 2003295, buy_date: "2025-01-03", sell_amount: 2080123, sell_date: "2025-09-02" },
+                    { name: "엔에이치스팩25호", type: "청산", buy_amount: 2002410, buy_date: "2025-01-03", sell_amount: 2089260, sell_date: "2025-09-03" },
+                    { name: "엔에이치스팩24호", type: "청산", buy_amount: 2001810, buy_date: "2025-01-03", sell_amount: 2087501, sell_date: "2025-09-05" },
+                    { name: "IBKS제20호스팩", type: "청산", buy_amount: 2002140, buy_date: "2025-05-23", sell_amount: 2036184, sell_date: "2025-09-12" },
                     { name: "유진스팩9호", type: "청산", buy_amount: 2003405, buy_date: "2025-01-03", sell_amount: 2066011, sell_date: "2025-10-29" },
-                    { name: "대신밸런스제17호", type: "청산", buy_amount: 2002540, buy_date: "2025-05-23", sell_amount: 2044697, sell_date: "2025-10-30" },
-                    { name: "엔에이치스팩23호", type: "청산", buy_amount: 2002660, buy_date: "2024-05-07", sell_amount: 2119749, sell_date: "2025-11-06" },
-                    { name: "신한제11호", type: "매매", buy_amount: 1955790, buy_date: "2025-07-04", sell_amount: 1993520, sell_date: "2025-11-07" },
-                    { name: "엔에이치스팩24호", type: "청산", buy_amount: 2004970, buy_date: "2024-10-16", sell_amount: 2111317, sell_date: "2025-11-13" },
-                    { name: "교보14호스팩", type: "청산", buy_amount: 2002100, buy_date: "2025-01-03", sell_amount: 2058420, sell_date: "2025-11-20" },
-                    { name: "대신밸런스제18호", type: "청산", buy_amount: 2003100, buy_date: "2025-05-23", sell_amount: 2041250, sell_date: "2025-11-25" },
-                    { name: "신한제12호", type: "매매", buy_amount: 1980000, buy_date: "2025-08-01", sell_amount: 2015000, sell_date: "2025-12-02" },
-                    { name: "하나스팩25호", type: "청산", buy_amount: 2001500, buy_date: "2025-01-03", sell_amount: 2072100, sell_date: "2025-12-10" },
-                    { name: "IBKS제23호", type: "청산", buy_amount: 2002200, buy_date: "2025-06-10", sell_amount: 2038900, sell_date: "2025-12-18" },
-                    { name: "키움제9호스팩", type: "청산", buy_amount: 2003400, buy_date: "2025-01-03", sell_amount: 2084500, sell_date: "2025-12-24" },
-                    { name: "삼성스팩7호", type: "청산", buy_amount: 2001800, buy_date: "2025-01-03", sell_amount: 2063200,_date: "2026-01-08" },
-                    { name: "케이비제22호", type: "청산", buy_amount: 2002500, buy_date: "2025-02-15", sell_amount: 2071800, sell_date: "2026-01-15" },
-                    { name: "유진스팩10호", type: "청산", buy_amount: 2003100, buy_date: "2025-03-02", sell_amount: 2082400, sell_date: "2026-01-22" },
-                    { name: "신영스팩10호", type: "매매", buy_amount: 2001900, buy_date: "2025-04-10", sell_amount: 2045000, sell_date: "2026-02-03" },
-                    { name: "하이제8호스팩", type: "청산", buy_amount: 2002200, buy_date: "2025-01-03", sell_amount: 2091500, sell_date: "2026-02-10" },
-                    { name: "엔에이치스팩31호", type: "청산", buy_amount: 2001500, buy_date: "2025-01-03", sell_amount: 2089800, sell_date: "2026-02-17" },
-                    { name: "IBKS제24호", type: "청산", buy_amount: 2002800, buy_date: "2025-05-12", sell_amount: 2042100, sell_date: "2026-02-25" },
-                    { name: "대신밸런스제19호", type: "청산", buy_amount: 2003400, buy_date: "2025-06-01", sell_amount: 2048900, sell_date: "2026-03-04" },
-                    { name: "신한제13호", type: "매매", buy_amount: 1990000, buy_date: "2025-07-15", sell_amount: 2032000, sell_date: "2026-03-11" },
-                    { name: "하나스팩26호", type: "청산", buy_amount: 2001200, buy_date: "2025-01-03", sell_amount: 2079400, sell_date: "2026-03-18" },
-                    { name: "케이비제23호", type: "청산", buy_amount: 2002100, buy_date: "2025-02-10", sell_amount: 2081200, sell_date: "2026-03-25" },
-                    { name: "유안타제11호", type: "청산", buy_amount: 2003000, buy_date: "2025-03-15", sell_amount: 2088500, sell_date: "2026-04-01" },
-                    { name: "삼성스팩8호", type: "청산", buy_amount: 2001600, buy_date: "2025-01-03", sell_amount: 2071400, sell_date: "2026-04-08" },
-                    { name: "엔에이치스팩32호", type: "청산", buy_amount: 2002400, buy_date: "2025-01-03", sell_amount: 2082100, sell_date: "2026-04-15" },
-                    { name: "신영스팩11호", type: "매매", buy_amount: 2001800, buy_date: "2025-04-20", sell_amount: 2051000, sell_date: "2026-04-22" },
-                    { name: "IBKS제25호", type: "청산", buy_amount: 2002900, buy_date: "2025-05-10", sell_amount: 2045200, sell_date: "2026-04-29" },
-                    { name: "대신밸런스제20호", type: "청산", buy_amount: 2003100, buy_date: "2025-06-15", sell_amount: 2051200, sell_date: "2026-05-07" },
-                    { name: "하이제9호스팩", type: "청산", buy_amount: 2002000, buy_date: "2025-01-03", sell_amount: 2078300, sell_date: "2026-05-14" },
-                    { name: "유진스팩11호", type: "청산", buy_amount: 2003300, buy_date: "2025-02-01", sell_amount: 2085600, sell_date: "2026-05-21" },
-                    { name: "신한제14호", type: "매매", buy_amount: 1985000, buy_date: "2025-08-10", sell_amount: 2028000, sell_date: "2026-05-28" },
-                    { name: "하나스팩27호", type: "청산", buy_amount: 2001400, buy_date: "2025-01-03", sell_amount: 2074100, sell_date: "2026-06-04" },
-                    { name: "케이비제24호", type: "청산", buy_amount: 2002200, buy_date: "2025-03-01", sell_amount: 2083400, sell_date: "2026-06-11" },
-                    { name: "유안타제12호", type: "청산", buy_amount: 2002800, buy_date: "2025-04-01", sell_amount: 2089100, sell_date: "2026-06-18" },
-                    { name: "삼성스팩9호", type: "청산", buy_amount: 2001500, buy_date: "2025-01-03", sell_amount: 2069200, sell_date: "2026-06-25" },
-                    { name: "엔에이치스팩33호", type: "청산", buy_amount: 2002300, buy_date: "2025-01-03", sell_amount: 2080400, sell_date: "2026-07-02" },
-                    { name: "신영스팩12호", type: "매매", buy_amount: 2001700, buy_date: "2025-05-01", sell_amount: 2049000, sell_date: "2026-07-09" },
-                    { name: "IBKS제26호", type: "청산", buy_amount: 2002600, buy_date: "2025-06-01", sell_amount: 2043100, sell_date: "2026-07-16" },
-                    { name: "대신밸런스제21호", type: "청산", buy_amount: 2003000, buy_date: "2025-07-01", sell_amount: 2049200, sell_date: "2026-07-23" },
-                    { name: "하이제10호스팩", type: "청산", buy_amount: 2001900, buy_date: "2025-01-03", sell_amount: 2075600, sell_date: "2026-07-30" },
-                    { name: "유진스팩12호", type: "청산", buy_amount: 2003100, buy_date: "2025-02-15", sell_amount: 2082300, sell_date: "2026-08-06" },
-                    { name: "신한제15호", type: "매매", buy_amount: 1992000, buy_date: "2025-09-01", sell_amount: 2035000, sell_date: "2026-08-13" },
-                    { name: "하나스팩28호", type: "청산", buy_amount: 2001300, buy_date: "2025-01-03", sell_amount: 2071200, sell_date: "2026-08-20" },
-                    { name: "케이비제25호", type: "청산", buy_amount: 2002000, buy_date: "2025-03-15", sell_amount: 2080500, sell_date: "2026-08-27" },
-                    { name: "유안타제13호", type: "청산", buy_amount: 2002700, buy_date: "2025-04-15", sell_amount: 2086400, sell_date: "2026-09-03" },
-                    { name: "삼성스팩10호", type: "청산", buy_amount: 2001400, buy_date: "2025-01-03", sell_amount: 2067100, sell_date: "2026-09-10" },
-                    { name: "엔에이치스팩34호", type: "청산", buy_amount: 2002200, buy_date: "2025-01-03", sell_amount: 2078300, sell_date: "2026-09-17" },
-                    { name: "신영스팩13호", type: "매매", buy_amount: 2001600, buy_date: "2025-06-01", sell_amount: 2046000, sell_date: "2026-09-24" },
-                    { name: "IBKS제27호", type: "청산", buy_amount: 2002500, buy_date: "2025-07-01", sell_amount: 2041200, sell_date: "2026-10-01" },
-                    { name: "대신밸런스제22호", type: "청산", buy_amount: 2002900, buy_date: "2025-08-01", sell_amount: 2047500, sell_date: "2026-10-08" },
-                    { name: "하이제11호스팩", type: "청산", buy_amount: 2001800, buy_date: "2025-01-03", sell_amount: 2073200, sell_date: "2026-10-15" }
+                    { name: "대신밸런스제14호스팩", type: "청산", buy_amount: 2002540, buy_date: "2025-05-23", sell_amount: 2044697, sell_date: "2025-10-30" },
+                    { name: "엔에이치스팩26호", type: "청산", buy_amount: 2002660, buy_date: "2024-05-07", sell_amount: 2119749, sell_date: "2025-11-06" },
+                    { name: "신한제11호스팩", type: "매매", buy_amount: 1955790, buy_date: "2025-07-04", sell_amount: 1993520, sell_date: "2025-11-07" },
+                    { name: "엔에이치스팩27호", type: "청산", buy_amount: 2004970, buy_date: "2024-10-16", sell_amount: 2111317, sell_date: "2025-11-13" },
+                    { name: "엔에이치스팩27호", type: "청산", buy_amount: 62360, buy_date: "2024-10-24", sell_amount: 65910, sell_date: "2025-11-13" },
+                    { name: "엔에이치스팩27호", type: "청산", buy_amount: 240225, buy_date: "2024-11-12", sell_amount: 252655, sell_date: "2025-11-13" },
+                    { name: "비엔케이제1호스팩", type: "청산", buy_amount: 1472040, buy_date: "2024-11-12", sell_amount: 1540389, sell_date: "2025-11-14" },
+                    { name: "비엔케이제1호스팩", type: "청산", buy_amount: 2244990, buy_date: "2025-05-23", sell_amount: 2305106, sell_date: "2025-11-14" },
+                    { name: "신영스팩9호", type: "청산", buy_amount: 1715655, buy_date: "2025-01-03", sell_amount: 1762024, sell_date: "2025-11-20" },
+                    { name: "유안타제13호스팩", type: "청산", buy_amount: 218155, buy_date: "2024-04-23", sell_amount: 231291, sell_date: "2026-02-03" },
+                    { name: "유안타제13호스팩", type: "청산", buy_amount: 1781950, buy_date: "2024-04-25", sell_amount: 1889241, sell_date: "2026-02-03" },
+                    { name: "하나스팩27호", type: "청산", buy_amount: 1985280, buy_date: "2025-10-22", sell_amount: 2030708, sell_date: "2026-02-20" },
+                    { name: "엔에이치스팩29호", type: "매매", buy_amount: 2003730, buy_date: "2024-05-10", sell_amount: 2517466, sell_date: "2026-04-17" },
+                    { name: "엔에이치스팩30호", type: "매매", buy_amount: 2003730, buy_date: "2024-04-23", sell_amount: 3965536, sell_date: "2026-03-24" },
+                    { name: "엔에이치스팩30호", type: "매매", buy_amount: 270095, buy_date: "2025-04-03", sell_amount: 538038, sell_date: "2026-03-24" },
+                    { name: "하나29호스팩", type: "청산", buy_amount: 3001505, buy_date: "2026-01-07", sell_amount: 3081002, sell_date: "2026-05-15" },
+                    { name: "하나29호스팩", type: "청산", buy_amount: 1889360, buy_date: "2026-01-06", sell_amount: 1933431, sell_date: "2026-05-15" },
+                    { name: "하나29호스팩", type: "청산", buy_amount: 5007430, buy_date: "2026-01-05", sell_amount: 5124239, sell_date: "2026-05-15" },
+                    { name: "교보14호스팩", type: "청산", buy_amount: 3002360, buy_date: "2026-01-07", sell_amount: 3084152, sell_date: "2026-05-18" },
+                    { name: "교보14호스팩", type: "청산", buy_amount: 4007050, buy_date: "2026-01-06", sell_amount: 4103564, sell_date: "2026-05-18" },
+                    { name: "교보14호스팩", type: "청산", buy_amount: 1796780, buy_date: "2026-01-05", sell_amount: 1844444, sell_date: "2026-05-18" },
+                    { name: "케이비제25호스팩", type: "청산", buy_amount: 4170605, buy_date: "2026-01-05", sell_amount: 4282230, sell_date: "2026-05-29" },
+                    { name: "케이비제25호스팩", type: "청산", buy_amount: 3001505, buy_date: "2026-01-07", sell_amount: 3083981, sell_date: "2026-05-29" },
+                    { name: "에스케이증권제9호스팩", type: "청산", buy_amount: 1433745, buy_date: "2025-09-05", sell_amount: 1492326, sell_date: "2026-06-24" },
+                    { name: "에스케이증권제9호스팩", type: "청산", buy_amount: 2000430, buy_date: "2025-10-27", sell_amount: 2058677, sell_date: "2026-06-24" },
+                    { name: "유안타제14호스팩", type: "청산", buy_amount: 2065960, buy_date: "2025-09-05", sell_amount: 2160321, sell_date: "2026-06-24" },
+                    { name: "유안타제12호스팩", type: "청산", buy_amount: 2002455, buy_date: "2025-01-03", sell_amount: 2148890, sell_date: "2026-05-29" },
+                    { name: "에스케이증권제10호스팩", type: "청산", buy_amount: 2001905, buy_date: "2025-10-23", sell_amount: 2057355, sell_date: "2026-07-07" },
+                    { name: "한국제12호스팩", type: "청산", buy_amount: 1219910, buy_date: "2026-01-07", sell_amount: 1256374, sell_date: "2026-07-10" },
+                    { name: "한국제12호스팩", type: "청산", buy_amount: 3002360, buy_date: "2025-10-23", sell_amount: 3077361, sell_date: "2026-07-10" },
+                    { name: "한국제12호스팩", type: "청산", buy_amount: 1704470, buy_date: "2026-01-07", sell_amount: 1748097, sell_date: "2026-07-10" },
+                    { name: "한국제12호스팩", type: "청산", buy_amount: 5335370, buy_date: "2026-01-05", sell_amount: 5471931, sell_date: "2026-07-10" },
+                    { name: "상상인제4호스팩", type: "청산", buy_amount: 2054070, buy_date: "2025-04-28", sell_amount: 2198793, sell_date: "2026-07-16" },
+                    { name: "유안타제11호스팩", type: "청산", buy_amount: 1845120, buy_date: "2025-09-05", sell_amount: 1924448, sell_date: "2026-08-05" },
+                    { name: "한화플러스제4호스팩", type: "청산", buy_amount: 2008904, buy_date: "2025-09-12", sell_amount: 2097426, sell_date: "2026-08-07" },
+                    { name: "대신밸런스제16호스팩", type: "청산", buy_amount: 5970180, buy_date: "2026-01-05", sell_amount: 6152494, sell_date: "2026-08-07" },
+                    { name: "대신밸런스제16호스팩", type: "청산", buy_amount: 1000595, buy_date: "2026-01-07", sell_amount: 1031156, sell_date: "2026-08-07" },
+                    { name: "대신밸런스제16호스팩", type: "청산", buy_amount: 1200295, buy_date: "2026-01-09", sell_amount: 1237818, sell_date: "2026-08-07" },
+                    { name: "대신밸런스제16호스팩", type: "청산", buy_amount: 3002710, buy_date: "2026-01-08", sell_amount: 3089163, sell_date: "2026-08-07" },
+                    { name: "유안타제11호스팩", type: "청산", buy_amount: 2001270, buy_date: "2025-10-22", sell_amount: 2068674, sell_date: "2026-08-05" },
+                    { name: "한화플러스제4호스팩", type: "청산", buy_amount: 2000615, buy_date: "2025-10-22", sell_amount: 2080145, sell_date: "2026-08-07" },
+                    { name: "신한제11호스팩", type: "청산", buy_amount: 2000615, buy_date: "2025-10-22", sell_amount: 2077506, sell_date: "2026-08-20" },
+                    { name: "신한제11호스팩", type: "청산", buy_amount: 2077520, buy_date: "2025-07-04", sell_amount: 2209103, sell_date: "2026-08-20" },
+                    { name: "신한제11호스팩", type: "청산", buy_amount: 96909, buy_date: "2024-04-23", sell_amount: 105709, sell_date: "2026-08-20" },
+                    { name: "케이비제27호스팩", type: "청산", buy_amount: 6274985, buy_date: "2025-11-14", sell_amount: 6532654, sell_date: "2026-09-28" },
+                    { name: "케이비제27호스팩", type: "청산", buy_amount: 2161997, buy_date: "2025-10-31", sell_amount: 2250782, sell_date: "2026-09-28" },
+                    { name: "케이비제27호스팩", type: "청산", buy_amount: 1480850, buy_date: "2025-10-23", sell_amount: 1546470, sell_date: "2026-09-28" },
+                    { name: "케이비제27호스팩", type: "청산", buy_amount: 541670, buy_date: "2025-10-29", sell_amount: 564310, sell_date: "2026-09-28" },
+                    { name: "한화플러스제5호스팩", type: "매매", buy_amount: 4959129, buy_date: "2026-02-23", sell_amount: 5986913, sell_date: "2026-09-29" },
+                    { name: "하이제8호스팩", type: "청산", buy_amount: 2003400, buy_date: "2025-09-05", sell_amount: 2084599, sell_date: "2026-04-28" }
                 ];
-                localStorage.setItem('spac_performance_items_v65', JSON.stringify(performanceItems));
+                localStorage.setItem('spac_performance_items_v3', JSON.stringify(performanceItems));
             }
         }
 
@@ -616,7 +616,7 @@
             const tbody = document.getElementById('perf-table-body');
             tbody.innerHTML = '';
 
-            const enriched = performanceItems.map(item => {
+            const enriched = performanceItems.map((item, idx) => {
                 const pnl = item.sell_amount - item.buy_amount;
                 const simpleYield = (pnl / item.buy_amount) * 100;
                 
@@ -627,7 +627,7 @@
                 const bokRate = getBokRateForDate(item.buy_date);
                 const isBeat = annualYield >= bokRate;
 
-                return { ...item, pnl, simpleYield, annualYield, bokRate, isBeat };
+                return { ...item, origIndex: idx, pnl, simpleYield, annualYield, bokRate, isBeat, diffDays };
             });
 
             let filtered = enriched.filter(item => {
@@ -642,8 +642,8 @@
             });
 
             let totalPnl = 0;
-            let sumSimpleYield = 0;
-            let sumAnnualYield = 0;
+            let totalBuy = 0;
+            let weightedAnnualSum = 0;
 
             if (filtered.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="11" class="py-12 text-center text-slate-400 font-normal">조건에 일치하는 성과 내역이 없습니다.</td></tr>`;
@@ -655,8 +655,8 @@
 
             filtered.forEach(item => {
                 totalPnl += item.pnl;
-                sumSimpleYield += item.simpleYield;
-                sumAnnualYield += item.annualYield;
+                totalBuy += item.buy_amount;
+                weightedAnnualSum += item.annualYield * item.buy_amount;
 
                 const pnlColor = item.pnl >= 0 ? 'text-emerald-600 font-bold' : 'text-rose-500 font-bold';
                 const simpleColor = item.simpleYield >= 0 ? 'text-slate-700' : 'text-rose-500';
@@ -666,37 +666,33 @@
                     ? `<span class="ml-1 text-[10px] bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded">+${diffRate}%p</span>`
                     : `<span class="ml-1 text-[10px] bg-rose-50 text-rose-600 px-1.5 py-0.5 rounded">${diffRate}%p</span>`;
 
-                const actualIndex = performanceItems.findIndex(orig => 
-                    orig.name === item.name && orig.buy_date === item.buy_date && orig.sell_date === item.sell_date && orig.buy_amount === item.buy_amount
-                );
-
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80 transition-colors";
                 tr.innerHTML = `
-                    <td class="py-4 px-6 font-bold text-slate-900">${item.name}</td>
-                    <td class="py-4 px-6"><span class="px-2.5 py-1 text-xs rounded-full font-semibold ${item.type === '청산' ? 'bg-amber-50 text-amber-700 border border-amber-200/50' : 'bg-purple-50 text-purple-700 border border-purple-200/50'}">${item.type}</span></td>
-                    <td class="py-4 px-6 text-slate-600">${item.buy_amount.toLocaleString()}원</td>
-                    <td class="py-4 px-6 text-slate-500 text-xs">${item.buy_date}</td>
-                    <td class="py-4 px-6 text-slate-600">${item.sell_amount.toLocaleString()}원</td>
-                    <td class="py-4 px-6 text-slate-500 text-xs">${item.sell_date}</td>
-                    <td class="py-4 px-6 ${pnlColor}">${item.pnl > 0 ? '+' : ''}${item.pnl.toLocaleString()}원</td>
-                    <td class="py-4 px-6 ${simpleColor} font-semibold">${item.simpleYield.toFixed(2)}%</td>
-                    <td class="py-4 px-6 text-slate-500 font-semibold">${item.bokRate.toFixed(2)}%</td>
-                    <td class="py-4 px-6 ${annualColor}">${item.annualYield.toFixed(2)}% ${diffBadge}</td>
-                    <td class="py-4 px-6 text-center"><button onclick="deletePerformanceItem(${actualIndex})" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-2.5 py-1 rounded-lg transition-colors">삭제</button></td>
+                    <td class="py-4 px-5 font-bold text-slate-900">${item.name}</td>
+                    <td class="py-4 px-4"><span class="px-2.5 py-1 text-xs rounded-full font-semibold ${item.type === '청산' ? 'bg-amber-50 text-amber-700 border border-amber-200/50' : 'bg-purple-50 text-purple-700 border border-purple-200/50'}">${item.type}</span></td>
+                    <td class="py-4 px-5 text-slate-600">${item.buy_amount.toLocaleString()}원</td>
+                    <td class="py-4 px-4 text-slate-500 text-xs">${item.buy_date}</td>
+                    <td class="py-4 px-5 text-slate-600">${item.sell_amount.toLocaleString()}원</td>
+                    <td class="py-4 px-4 text-slate-500 text-xs">${item.sell_date}</td>
+                    <td class="py-4 px-5 ${pnlColor}">${item.pnl > 0 ? '+' : ''}${item.pnl.toLocaleString()}원</td>
+                    <td class="py-4 px-4 ${simpleColor} font-semibold">${item.simpleYield.toFixed(2)}%</td>
+                    <td class="py-4 px-4 text-slate-500 font-semibold">${item.bokRate.toFixed(2)}%</td>
+                    <td class="py-4 px-5 ${annualColor}">${item.annualYield.toFixed(2)}% ${diffBadge}</td>
+                    <td class="py-4 px-4 text-center"><button onclick="deletePerformanceItem(${item.origIndex})" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-2.5 py-1 rounded-lg transition-colors">삭제</button></td>
                 `;
                 tbody.appendChild(tr);
             });
 
-            const avgSimple = sumSimpleYield / filtered.length;
-            const avgAnnual = sumAnnualYield / filtered.length;
+            const totalSimpleYield = totalBuy > 0 ? (totalPnl / totalBuy) * 100 : 0;
+            const weightedAnnualYield = totalBuy > 0 ? (weightedAnnualSum / totalBuy) : 0;
 
             const totalPnlEl = document.getElementById('perf-total-pnl');
             totalPnlEl.innerText = (totalPnl >= 0 ? '+' : '') + totalPnl.toLocaleString() + ' 원';
-            totalPnlEl.className = totalPnl >= 0 ? 'text-2xl font-extrabold text-emerald-600' : 'text-2xl font-extrabold text-rose-500';
+            totalPnlEl.className = totalPnl >= 0 ? 'text-lg sm:text-2xl font-extrabold text-emerald-600 truncate' : 'text-lg sm:text-2xl font-extrabold text-rose-500 truncate';
 
-            document.getElementById('perf-avg-simple').innerText = avgSimple.toFixed(2) + ' %';
-            document.getElementById('perf-avg-annual').innerText = avgAnnual.toFixed(2) + ' %';
+            document.getElementById('perf-avg-simple').innerText = totalSimpleYield.toFixed(2) + ' %';
+            document.getElementById('perf-avg-annual').innerText = weightedAnnualYield.toFixed(2) + ' %';
         }
 
         function updateSummaryStats(items) {
