@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-16 03:55:58",
+  "updated_at": "2026-11-16 04:16:40",
   "count": 69,
   "items": [
     {
@@ -64,10 +64,10 @@
       "is_fair_buy": "O",
       "invest_type": "청산",
       "delisting_date": "2027-07-25",
-      "current_price": 2055,
+      "current_price": 2057,
       "liquidation_price": 2167,
-      "yield_general": 5.99,
-      "yield_isa": 7.08,
+      "yield_general": 5.88,
+      "yield_isa": 6.95,
       "deposit_rate": 3.2,
       "status": "정상",
       "fair_price_calc": 2129
@@ -325,6 +325,20 @@
       "fair_price_calc": 2074
     },
     {
+      "code": "0222E0",
+      "name": "아이엠스팩1호",
+      "is_fair_buy": "O",
+      "invest_type": "합병",
+      "delisting_date": "2029-11-03",
+      "current_price": 1880,
+      "liquidation_price": 2167,
+      "yield_general": 4.24,
+      "yield_isa": 5.01,
+      "deposit_rate": 3.2,
+      "status": "정상",
+      "fair_price_calc": 2002
+    },
+    {
       "code": "0072Z0",
       "name": "KB제33호스팩",
       "is_fair_buy": "O",
@@ -337,20 +351,6 @@
       "deposit_rate": 3.2,
       "status": "정상",
       "fair_price_calc": 2063
-    },
-    {
-      "code": "0222E0",
-      "name": "아이엠스팩1호",
-      "is_fair_buy": "O",
-      "invest_type": "합병",
-      "delisting_date": "2029-11-03",
-      "current_price": 1881,
-      "liquidation_price": 2167,
-      "yield_general": 4.22,
-      "yield_isa": 4.99,
-      "deposit_rate": 3.2,
-      "status": "정상",
-      "fair_price_calc": 2002
     },
     {
       "code": "0037T0",
@@ -367,20 +367,6 @@
       "fair_price_calc": 2076
     },
     {
-      "code": "0101C0",
-      "name": "하나36호스팩",
-      "is_fair_buy": "O",
-      "invest_type": "합병",
-      "delisting_date": "2028-12-21",
-      "current_price": 1956,
-      "liquidation_price": 2167,
-      "yield_general": 4.18,
-      "yield_isa": 4.95,
-      "deposit_rate": 3.2,
-      "status": "정상",
-      "fair_price_calc": 2050
-    },
-    {
       "code": "0044K0",
       "name": "삼성스팩10호",
       "is_fair_buy": "O",
@@ -393,34 +379,6 @@
       "deposit_rate": 3.2,
       "status": "정상",
       "fair_price_calc": 2069
-    },
-    {
-      "code": "0127E0",
-      "name": "한화플러스제6호스팩",
-      "is_fair_buy": "O",
-      "invest_type": "합병",
-      "delisting_date": "2029-10-29",
-      "current_price": 1891,
-      "liquidation_price": 2167,
-      "yield_general": 4.07,
-      "yield_isa": 4.81,
-      "deposit_rate": 3.2,
-      "status": "정상",
-      "fair_price_calc": 2003
-    },
-    {
-      "code": "0004Y0",
-      "name": "디비금융제14호스팩",
-      "is_fair_buy": "O",
-      "invest_type": "합병",
-      "delisting_date": "2028-07-21",
-      "current_price": 1998,
-      "liquidation_price": 2167,
-      "yield_general": 4.06,
-      "yield_isa": 4.8,
-      "deposit_rate": 3.2,
-      "status": "정상",
-      "fair_price_calc": 2074
     },
     {
       "code": "0209J0",
@@ -437,6 +395,34 @@
       "fair_price_calc": 2008
     },
     {
+      "code": "0101C0",
+      "name": "하나36호스팩",
+      "is_fair_buy": "O",
+      "invest_type": "합병",
+      "delisting_date": "2028-12-21",
+      "current_price": 1963,
+      "liquidation_price": 2167,
+      "yield_general": 4.03,
+      "yield_isa": 4.77,
+      "deposit_rate": 3.2,
+      "status": "정상",
+      "fair_price_calc": 2050
+    },
+    {
+      "code": "0004Y0",
+      "name": "디비금융제14호스팩",
+      "is_fair_buy": "O",
+      "invest_type": "합병",
+      "delisting_date": "2028-07-21",
+      "current_price": 1999,
+      "liquidation_price": 2167,
+      "yield_general": 4.04,
+      "yield_isa": 4.77,
+      "deposit_rate": 3.2,
+      "status": "정상",
+      "fair_price_calc": 2074
+    },
+    {
       "code": "489210",
       "name": "교보17호스팩",
       "is_fair_buy": "O",
@@ -449,6 +435,20 @@
       "deposit_rate": 3.2,
       "status": "정상",
       "fair_price_calc": 2111
+    },
+    {
+      "code": "0127E0",
+      "name": "한화플러스제6호스팩",
+      "is_fair_buy": "O",
+      "invest_type": "합병",
+      "delisting_date": "2029-10-29",
+      "current_price": 1895,
+      "liquidation_price": 2167,
+      "yield_general": 4.0,
+      "yield_isa": 4.73,
+      "deposit_rate": 3.2,
+      "status": "정상",
+      "fair_price_calc": 2003
     },
     {
       "code": "0197V0",
@@ -470,27 +470,27 @@
       "is_fair_buy": "O",
       "invest_type": "합병",
       "delisting_date": "2028-08-05",
-      "current_price": 1997,
+      "current_price": 1998,
       "liquidation_price": 2167,
-      "yield_general": 3.99,
-      "yield_isa": 4.72,
+      "yield_general": 3.97,
+      "yield_isa": 4.69,
       "deposit_rate": 3.2,
       "status": "정상",
       "fair_price_calc": 2071
     },
     {
-      "code": "0099W0",
-      "name": "미래에셋비전스팩11호",
+      "code": "0105P0",
+      "name": "유진스팩12호",
       "is_fair_buy": "O",
       "invest_type": "합병",
-      "delisting_date": "2028-12-21",
-      "current_price": 1968,
+      "delisting_date": "2028-12-10",
+      "current_price": 1971,
       "liquidation_price": 2167,
-      "yield_general": 3.92,
-      "yield_isa": 4.64,
+      "yield_general": 3.91,
+      "yield_isa": 4.62,
       "deposit_rate": 3.2,
       "status": "정상",
-      "fair_price_calc": 2050
+      "fair_price_calc": 2052
     },
     {
       "code": "0165X0",
@@ -519,6 +519,20 @@
       "deposit_rate": 3.2,
       "status": "정상",
       "fair_price_calc": 2008
+    },
+    {
+      "code": "0098T0",
+      "name": "교보19호스팩",
+      "is_fair_buy": "O",
+      "invest_type": "합병",
+      "delisting_date": "2028-12-11",
+      "current_price": 1976,
+      "liquidation_price": 2167,
+      "yield_general": 3.8,
+      "yield_isa": 4.49,
+      "deposit_rate": 3.2,
+      "status": "정상",
+      "fair_price_calc": 2052
     },
     {
       "code": "0068Y0",
@@ -563,18 +577,18 @@
       "fair_price_calc": 2053
     },
     {
-      "code": "0105P0",
-      "name": "유진스팩12호",
+      "code": "0097F0",
+      "name": "미래에셋비전스팩10호",
       "is_fair_buy": "O",
       "invest_type": "합병",
-      "delisting_date": "2028-12-10",
-      "current_price": 1980,
+      "delisting_date": "2028-12-22",
+      "current_price": 1981,
       "liquidation_price": 2167,
-      "yield_general": 3.72,
-      "yield_isa": 4.39,
+      "yield_general": 3.64,
+      "yield_isa": 4.3,
       "deposit_rate": 3.2,
       "status": "정상",
-      "fair_price_calc": 2052
+      "fair_price_calc": 2050
     },
     {
       "code": "0071M0",
@@ -591,6 +605,20 @@
       "fair_price_calc": 2063
     },
     {
+      "code": "0164H0",
+      "name": "한국제16호스팩",
+      "is_fair_buy": "O",
+      "invest_type": "합병",
+      "delisting_date": "2029-06-29",
+      "current_price": 1942,
+      "liquidation_price": 2167,
+      "yield_general": 3.63,
+      "yield_isa": 4.29,
+      "deposit_rate": 3.2,
+      "status": "정상",
+      "fair_price_calc": 2021
+    },
+    {
       "code": "0041B0",
       "name": "교보18호스팩",
       "is_fair_buy": "O",
@@ -605,32 +633,18 @@
       "fair_price_calc": 2070
     },
     {
-      "code": "0097F0",
-      "name": "미래에셋비전스팩10호",
+      "code": "0099W0",
+      "name": "미래에셋비전스팩11호",
       "is_fair_buy": "O",
       "invest_type": "합병",
-      "delisting_date": "2028-12-22",
-      "current_price": 1982,
+      "delisting_date": "2028-12-21",
+      "current_price": 1984,
       "liquidation_price": 2167,
-      "yield_general": 3.62,
-      "yield_isa": 4.27,
+      "yield_general": 3.58,
+      "yield_isa": 4.23,
       "deposit_rate": 3.2,
       "status": "정상",
       "fair_price_calc": 2050
-    },
-    {
-      "code": "0164H0",
-      "name": "한국제16호스팩",
-      "is_fair_buy": "O",
-      "invest_type": "합병",
-      "delisting_date": "2029-06-29",
-      "current_price": 1949,
-      "liquidation_price": 2167,
-      "yield_general": 3.5,
-      "yield_isa": 4.14,
-      "deposit_rate": 3.2,
-      "status": "정상",
-      "fair_price_calc": 2021
     },
     {
       "code": "0093G0",
@@ -647,6 +661,20 @@
       "fair_price_calc": 2054
     },
     {
+      "code": "482690",
+      "name": "대신밸런스제19호스팩",
+      "is_fair_buy": "O",
+      "invest_type": "합병",
+      "delisting_date": "2027-11-20",
+      "current_price": 2075,
+      "liquidation_price": 2167,
+      "yield_general": 3.43,
+      "yield_isa": 4.06,
+      "deposit_rate": 3.2,
+      "status": "정상",
+      "fair_price_calc": 2111
+    },
+    {
       "code": "0115H0",
       "name": "삼성스팩13호",
       "is_fair_buy": "O",
@@ -661,32 +689,18 @@
       "fair_price_calc": 2046
     },
     {
-      "code": "0098T0",
-      "name": "교보19호스팩",
+      "code": "0132G0",
+      "name": "교보20호스팩",
       "is_fair_buy": "O",
       "invest_type": "합병",
-      "delisting_date": "2028-12-11",
-      "current_price": 1994,
+      "delisting_date": "2029-04-01",
+      "current_price": 1976,
       "liquidation_price": 2167,
-      "yield_general": 3.41,
-      "yield_isa": 4.03,
+      "yield_general": 3.33,
+      "yield_isa": 3.93,
       "deposit_rate": 3.2,
       "status": "정상",
-      "fair_price_calc": 2052
-    },
-    {
-      "code": "0129K0",
-      "name": "신한제18호스팩",
-      "is_fair_buy": "O",
-      "invest_type": "합병",
-      "delisting_date": "2029-04-29",
-      "current_price": 1970,
-      "liquidation_price": 2167,
-      "yield_general": 3.34,
-      "yield_isa": 3.95,
-      "deposit_rate": 3.2,
-      "status": "정상",
-      "fair_price_calc": 2031
+      "fair_price_calc": 2035
     },
     {
       "code": "0054V0",
@@ -703,18 +717,18 @@
       "fair_price_calc": 2053
     },
     {
-      "code": "0132G0",
-      "name": "교보20호스팩",
+      "code": "0129K0",
+      "name": "신한제18호스팩",
       "is_fair_buy": "O",
       "invest_type": "합병",
-      "delisting_date": "2029-04-01",
-      "current_price": 1978,
+      "delisting_date": "2029-04-29",
+      "current_price": 1972,
       "liquidation_price": 2167,
-      "yield_general": 3.29,
-      "yield_isa": 3.89,
+      "yield_general": 3.3,
+      "yield_isa": 3.9,
       "deposit_rate": 3.2,
       "status": "정상",
-      "fair_price_calc": 2035
+      "fair_price_calc": 2031
     },
     {
       "code": "0130D0",
@@ -757,20 +771,6 @@
       "deposit_rate": 3.2,
       "status": "정상",
       "fair_price_calc": 2032
-    },
-    {
-      "code": "482690",
-      "name": "대신밸런스제19호스팩",
-      "is_fair_buy": "O",
-      "invest_type": "합병",
-      "delisting_date": "2027-11-20",
-      "current_price": 2085,
-      "liquidation_price": 2167,
-      "yield_general": 3.04,
-      "yield_isa": 3.6,
-      "deposit_rate": 3.2,
-      "status": "정상",
-      "fair_price_calc": 2111
     },
     {
       "code": "0134X0",
@@ -834,7 +834,7 @@
       "is_fair_buy": "X",
       "invest_type": "합병",
       "delisting_date": "2028-12-18",
-      "current_price": 1976,
+      "current_price": 1974,
       "liquidation_price": 2167,
       "yield_general": 0.0,
       "yield_isa": 0.0,
@@ -848,7 +848,7 @@
       "is_fair_buy": "X",
       "invest_type": "합병",
       "delisting_date": "2028-03-19",
-      "current_price": 2045,
+      "current_price": 2060,
       "liquidation_price": 2167,
       "yield_general": 0.0,
       "yield_isa": 0.0,
