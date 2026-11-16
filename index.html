@@ -407,15 +407,38 @@
             "2026-09": 2.35, "2026-10": 2.35, "2026-11": 2.35
         };
 
+        // 개별 건(단일 매수·매도)은 정확한 복리 연환산 공식으로 NaN 방지
+        function calculateSingleAnnualYield(buyAmount, sellAmount, buyDate, sellDate) {
+            if (!buyAmount || buyAmount <= 0 || !sellAmount || sellAmount <= 0) return -100;
+            const days = Math.max(1, (sellDate - buyDate) / (1000 * 60 * 60 * 24));
+            const ratio = sellAmount / buyAmount;
+            return (Math.pow(ratio, 365.0 / days) - 1) * 100;
+        }
+
+        // 다중 현금흐름 XIRR 계산 (음수 발산/NaN 방지 안전장치 포함)
         function calculateXIRR(cashFlows) {
             if (!cashFlows || cashFlows.length < 2) return 0;
+            if (cashFlows.length === 2) {
+                const sorted = [...cashFlows].sort((a, b) => a.date - b.date);
+                return calculateSingleAnnualYield(Math.abs(sorted[0].amount), sorted[1].amount, sorted[0].date, sorted[1].date);
+            }
+
             cashFlows.sort((a, b) => a.date - b.date);
             const t0 = cashFlows[0].date;
             const hasPos = cashFlows.some(cf => cf.amount > 0);
             const hasNeg = cashFlows.some(cf => cf.amount < 0);
             if (!hasPos || !hasNeg) return 0;
 
-            let rate = 0.1;
+            const evalNpv = (r) => {
+                let npv = 0;
+                for (let cf of cashFlows) {
+                    const years = (cf.date - t0) / (1000 * 60 * 60 * 24 * 365.0);
+                    npv += cf.amount / Math.pow(1 + r, years);
+                }
+                return npv;
+            };
+
+            let rate = 0.05;
             const maxIter = 100;
             const tol = 1e-7;
 
@@ -428,13 +451,27 @@
                     npv += cf.amount / denom;
                     dnpv -= years * cf.amount / (denom * (1 + rate));
                 }
+                if (!isFinite(npv) || !isFinite(dnpv)) break;
                 if (Math.abs(npv) < tol) return rate * 100;
                 if (Math.abs(dnpv) < 1e-12) break;
-                const newRate = rate - npv / dnpv;
+
+                let newRate = rate - npv / dnpv;
+                if (newRate <= -0.999999) newRate = -0.999999;
                 if (Math.abs(newRate - rate) < tol) return newRate * 100;
                 rate = newRate;
             }
-            return rate * 100;
+
+            // 뉴턴법 미수렴 시 이분법 fallback
+            let low = -0.9999;
+            let high = 100.0;
+            for (let i = 0; i < 100; i++) {
+                const mid = (low + high) / 2;
+                const val = evalNpv(mid);
+                if (Math.abs(val) < tol) return mid * 100;
+                if (val > 0) low = mid;
+                else high = mid;
+            }
+            return ((low + high) / 2) * 100;
         }
 
         function getBokRateForDate(dateStr) {
@@ -674,16 +711,12 @@
                 const d2 = new Date(item.sell_date);
                 const diffDays = Math.max(1, Math.round((d2 - d1) / (1000 * 60 * 60 * 24)));
                 
-                // 동일한 기준으로 개별/전체 XIRR 계산
-                const singleXirr = calculateXIRR([
-                    { date: d1, amount: -item.buy_amount },
-                    { date: d2, amount: item.sell_amount }
-                ]);
+                const singleAnnual = calculateSingleAnnualYield(item.buy_amount, item.sell_amount, d1, d2);
 
                 const bokRate = getBokRateForDate(item.buy_date);
-                const isBeat = singleXirr >= bokRate;
+                const isBeat = singleAnnual >= bokRate;
 
-                return { ...item, origIndex: idx, pnl, simpleYield, annualYield: singleXirr, bokRate, isBeat, diffDays };
+                return { ...item, origIndex: idx, pnl, simpleYield, annualYield: singleAnnual, bokRate, isBeat, diffDays };
             });
 
             let filtered = enriched.filter(item => {
@@ -717,8 +750,8 @@
             if (filtered.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="11" class="py-12 text-center text-slate-400 font-normal">조건에 일치하는 성과 내역이 없습니다.</td></tr>`;
                 document.getElementById('perf-total-pnl').innerText = '0 원';
-                document.getElementById('perf-avg-simple').innerText = '0.00%';
-                document.getElementById('perf-avg-annual').innerText = '0.00%';
+                document.getElementById('perf-avg-simple').innerText = '0.00 %';
+                document.getElementById('perf-avg-annual').innerText = '0.00 %';
                 return;
             }
 
