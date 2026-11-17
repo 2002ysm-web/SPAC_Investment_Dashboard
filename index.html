@@ -67,13 +67,13 @@
                     <div class="grid grid-cols-2 gap-3">
                         <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
                             <div>
-                                <span class="text-[10px] font-bold text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded">예금 이상 (ISA)</span>
-                                <h3 id="rec-merger-high-isa-name" class="text-sm font-bold mt-2 mb-2 truncate">-</h3>
+                                <span id="label-merger-high" class="text-[10px] font-bold text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded">예금 이상 (ISA)</span>
+                                <h3 id="rec-merger-high-name" class="text-sm font-bold mt-2 mb-2 truncate">-</h3>
                             </div>
                             <div class="space-y-1 text-xs text-slate-300">
-                                <div class="flex justify-between"><span>현재가</span><span id="rec-merger-high-isa-price" class="font-bold text-white">-</span></div>
-                                <div class="flex justify-between"><span>수익률(ISA)</span><span id="rec-merger-high-isa-yield" class="font-bold text-emerald-400">-</span></div>
-                                <div class="flex justify-between"><span>청산가</span><span id="rec-merger-high-isa-liq" class="font-bold text-white">-</span></div>
+                                <div class="flex justify-between"><span>현재가</span><span id="rec-merger-high-price" class="font-bold text-white">-</span></div>
+                                <div class="flex justify-between"><span id="title-merger-high-yield">수익률(ISA)</span><span id="rec-merger-high-yield" class="font-bold text-emerald-400">-</span></div>
+                                <div class="flex justify-between"><span>청산가</span><span id="rec-merger-high-liq" class="font-bold text-white">-</span></div>
                             </div>
                         </div>
                         <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
@@ -90,12 +90,12 @@
                         <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
                             <div>
                                 <span class="text-[10px] font-bold text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded">0%~예금미만 (ISA)</span>
-                                <h3 id="rec-merger-mid-isa-name" class="text-sm font-bold mt-2 mb-2 truncate">-</h3>
+                                <h3 id="rec-merger-mid-name" class="text-sm font-bold mt-2 mb-2 truncate">-</h3>
                             </div>
                             <div class="space-y-1 text-xs text-slate-300">
-                                <div class="flex justify-between"><span>현재가</span><span id="rec-merger-mid-isa-price" class="font-bold text-white">-</span></div>
-                                <div class="flex justify-between"><span>수익률(ISA)</span><span id="rec-merger-mid-isa-yield" class="font-bold text-emerald-400">-</span></div>
-                                <div class="flex justify-between"><span>청산가</span><span id="rec-merger-mid-isa-liq" class="font-bold text-white">-</span></div>
+                                <div class="flex justify-between"><span>현재가</span><span id="rec-merger-mid-price" class="font-bold text-white">-</span></div>
+                                <div class="flex justify-between"><span id="title-merger-mid-yield">수익률(ISA)</span><span id="rec-merger-mid-yield" class="font-bold text-emerald-400">-</span></div>
+                                <div class="flex justify-between"><span>청산가</span><span id="rec-merger-mid-liq" class="font-bold text-white">-</span></div>
                             </div>
                         </div>
                         <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
@@ -121,12 +121,12 @@
                         <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
                             <div>
                                 <span class="text-[10px] font-bold text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded">예금 이상 (ISA)</span>
-                                <h3 id="rec-liq-high-isa-name" class="text-sm font-bold mt-2 mb-2 truncate">-</h3>
+                                <h3 id="rec-liq-high-name" class="text-sm font-bold mt-2 mb-2 truncate">-</h3>
                             </div>
                             <div class="space-y-1 text-xs text-slate-300">
-                                <div class="flex justify-between"><span>현재가</span><span id="rec-liq-high-isa-price" class="font-bold text-white">-</span></div>
-                                <div class="flex justify-between"><span>수익률(ISA)</span><span id="rec-liq-high-isa-yield" class="font-bold text-emerald-400">-</span></div>
-                                <div class="flex justify-between"><span>청산가</span><span id="rec-liq-high-isa-liq" class="font-bold text-white">-</span></div>
+                                <div class="flex justify-between"><span>현재가</span><span id="rec-liq-high-price" class="font-bold text-white">-</span></div>
+                                <div class="flex justify-between"><span id="title-liq-high-yield">수익률(ISA)</span><span id="rec-liq-high-yield" class="font-bold text-emerald-400">-</span></div>
+                                <div class="flex justify-between"><span>청산가</span><span id="rec-liq-high-liq" class="font-bold text-white">-</span></div>
                             </div>
                         </div>
                         <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
@@ -143,12 +143,12 @@
                         <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
                             <div>
                                 <span class="text-[10px] font-bold text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded">0%~예금미만 (ISA)</span>
-                                <h3 id="rec-liq-mid-isa-name" class="text-sm font-bold mt-2 mb-2 truncate">-</h3>
+                                <h3 id="rec-liq-mid-name" class="text-sm font-bold mt-2 mb-2 truncate">-</h3>
                             </div>
                             <div class="space-y-1 text-xs text-slate-300">
-                                <div class="flex justify-between"><span>현재가</span><span id="rec-liq-mid-isa-price" class="font-bold text-white">-</span></div>
-                                <div class="flex justify-between"><span>수익률(ISA)</span><span id="rec-liq-mid-isa-yield" class="font-bold text-emerald-400">-</span></div>
-                                <div class="flex justify-between"><span>청산가</span><span id="rec-liq-mid-isa-liq" class="font-bold text-white">-</span></div>
+                                <div class="flex justify-between"><span>현재가</span><span id="rec-liq-mid-price" class="font-bold text-white">-</span></div>
+                                <div class="flex justify-between"><span id="title-liq-mid-yield">수익률(ISA)</span><span id="rec-liq-mid-yield" class="font-bold text-emerald-400">-</span></div>
+                                <div class="flex justify-between"><span>청산가</span><span id="rec-liq-mid-liq" class="font-bold text-white">-</span></div>
                             </div>
                         </div>
                         <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
@@ -166,7 +166,7 @@
                 </div>
             </div>
 
-            <!-- Filters & Search Bar (수정된 필터 레이블 적용) -->
+            <!-- Filters & Search Bar -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4 items-center">
                 <div>
                     <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">투자 유형</label>
@@ -1113,7 +1113,7 @@
                     { name: "엔에이치스팩23호", type: "청산", buy_amount: 2002540, buy_date: "2024-05-08", sell_amount: 2033815, sell_date: "2025-05-20" },
                     { name: "삼성스팩6호", type: "청산", buy_amount: 2002410, buy_date: "2025-01-03", sell_amount: 2056815, sell_date: "2025-05-20" },
                     { name: "신영스팩8호", type: "매매", buy_amount: 2003530, buy_date: "2025-01-03", sell_amount: 2158661, sell_date: "2025-05-22" },
-                    { name: "유안타제9호스팩", type: "청산", buy_amount: 2003295, buy_date: "2025-01-03", sell_amount: 2076519, sell_date: "2025-07-03" },
+                    { name: "유안타제9호ส팩", type: "청산", buy_amount: 2003295, buy_date: "2025-01-03", sell_amount: 2076519, sell_date: "2025-07-03" },
                     { name: "유안타제10호스팩", type: "청산", buy_amount: 2002660, buy_date: "2024-10-16", sell_amount: 2096807, sell_date: "2025-09-02" },
                     { name: "에스케이증권제8호스팩", type: "청산", buy_amount: 2003295, buy_date: "2025-01-03", sell_amount: 2080123, sell_date: "2025-09-02" },
                     { name: "엔에이치스팩25호", type: "청산", buy_amount: 2002410, buy_date: "2025-01-03", sell_amount: 2089260, sell_date: "2025-09-03" },
@@ -1185,16 +1185,18 @@
         }
 
         function fillRecCard(prefix, item, isIsa) {
-            const priceEl = document.getElementById(`rec-${prefix}-${isIsa ? 'isa' : 'gen'}-price`);
-            const yieldEl = document.getElementById(`rec-${prefix}-${isIsa ? 'isa' : 'gen'}-yield`);
-            const liqEl = document.getElementById(`rec-${prefix}-${isIsa ? 'isa' : 'gen'}-liq`);
+            const nameEl = document.getElementById(`rec-${prefix}-name`);
+            const priceEl = document.getElementById(`rec-${prefix}-price`);
+            const yieldTitleEl = document.getElementById(`title-${prefix}-yield`);
+            const yieldEl = document.getElementById(`rec-${prefix}-yield`);
+            const liqEl = document.getElementById(`rec-${prefix}-liq`);
 
-            const otherIsaName = document.getElementById(`rec-${prefix}-isa-name`);
-            const otherGenName = document.getElementById(`rec-${prefix}-gen-name`);
+            if (yieldTitleEl) {
+                yieldTitleEl.innerText = isIsa ? '수익률(ISA)' : '수익률(일반)';
+            }
 
             if (!item) {
-                if (otherIsaName) otherIsaName.innerText = '-';
-                if (otherGenName) otherGenName.innerText = '-';
+                if (nameEl) nameEl.innerText = '-';
                 if (priceEl) priceEl.innerText = '-';
                 if (yieldEl) yieldEl.innerText = '-';
                 if (liqEl) liqEl.innerText = '-';
@@ -1202,8 +1204,7 @@
             }
 
             const yVal = isIsa ? item.yield_isa : item.yield_general;
-            if (otherIsaName) otherIsaName.innerText = item.name;
-            if (otherGenName) otherGenName.innerText = item.name;
+            if (nameEl) nameEl.innerText = item.name;
             if (priceEl) priceEl.innerText = item.current_price.toLocaleString() + '원';
             if (yieldEl) yieldEl.innerText = yVal.toFixed(2) + '%';
             if (liqEl) liqEl.innerText = item.liquidation_price.toLocaleString() + '원';
@@ -1251,6 +1252,9 @@
 
             const baseRate = allItems.length > 0 && allItems[0].deposit_rate ? allItems[0].deposit_rate : 2.4;
 
+            // 추천 카드 갱신 반영
+            updateRecommendations(allItems);
+
             let filtered = allItems.filter(item => {
                 if (typeVal !== 'all' && item.invest_type !== typeVal) return false;
                 if (fairVal !== 'all' && item.is_fair_buy !== fairVal) return false;
@@ -1285,7 +1289,6 @@
 
             updateSortIcons();
             renderTable(filtered, accountVal);
-            updateSummaryStats(allItems);
         }
 
         function renderTable(items, accountVal) {
