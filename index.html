@@ -65,7 +65,6 @@
                         <h2 class="text-base font-bold tracking-tight text-indigo-200">🤝 합병형 추천</h2>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
-                        <!-- 예금 이상 (ISA) -->
                         <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
                             <div>
                                 <span class="text-[10px] font-bold text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded">예금 이상 (ISA)</span>
@@ -77,7 +76,6 @@
                                 <div class="flex justify-between"><span>청산가</span><span id="rec-merger-high-isa-liq" class="font-bold text-white">-</span></div>
                             </div>
                         </div>
-                        <!-- 예금 이상 (일반) -->
                         <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
                             <div>
                                 <span class="text-[10px] font-bold text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded">예금 이상 (일반)</span>
@@ -89,7 +87,6 @@
                                 <div class="flex justify-between"><span>청산가</span><span id="rec-merger-high-gen-liq" class="font-bold text-white">-</span></div>
                             </div>
                         </div>
-                        <!-- 0%~예금미만 (ISA) -->
                         <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
                             <div>
                                 <span class="text-[10px] font-bold text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded">0%~예금미만 (ISA)</span>
@@ -101,7 +98,6 @@
                                 <div class="flex justify-between"><span>청산가</span><span id="rec-merger-mid-isa-liq" class="font-bold text-white">-</span></div>
                             </div>
                         </div>
-                        <!-- 0%~예금미만 (일반) -->
                         <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
                             <div>
                                 <span class="text-[10px] font-bold text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded">0%~예금미만 (일반)</span>
@@ -122,7 +118,6 @@
                         <h2 class="text-base font-bold tracking-tight text-blue-200">🛡️ 청산형 추천</h2>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
-                        <!-- 예금 이상 (ISA) -->
                         <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
                             <div>
                                 <span class="text-[10px] font-bold text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded">예금 이상 (ISA)</span>
@@ -134,7 +129,6 @@
                                 <div class="flex justify-between"><span>청산가</span><span id="rec-liq-high-isa-liq" class="font-bold text-white">-</span></div>
                             </div>
                         </div>
-                        <!-- 예금 이상 (일반) -->
                         <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
                             <div>
                                 <span class="text-[10px] font-bold text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded">예금 이상 (일반)</span>
@@ -146,7 +140,6 @@
                                 <div class="flex justify-between"><span>청산가</span><span id="rec-liq-high-gen-liq" class="font-bold text-white">-</span></div>
                             </div>
                         </div>
-                        <!-- 0%~예금미만 (ISA) -->
                         <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
                             <div>
                                 <span class="text-[10px] font-bold text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded">0%~예금미만 (ISA)</span>
@@ -158,7 +151,6 @@
                                 <div class="flex justify-between"><span>청산가</span><span id="rec-liq-mid-isa-liq" class="font-bold text-white">-</span></div>
                             </div>
                         </div>
-                        <!-- 0%~예금미만 (일반) -->
                         <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
                             <div>
                                 <span class="text-[10px] font-bold text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded">0%~예금미만 (일반)</span>
@@ -297,7 +289,7 @@
                     </div>
                 </div>
 
-                <!-- 2. 보유 종목 추가 폼 -->
+                <!-- 2. 보유 종목 추가 폼 (날짜 높이 최적화 적용) -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
                     <div class="flex items-center justify-between mb-4">
                         <div>
@@ -332,7 +324,41 @@
                     </form>
                 </div>
 
-                <!-- 3. 보유 종목 테이블 -->
+                <!-- 3. 보유 종목 필터 바 (신규 추가) -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-center">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">청산 연도</label>
+                        <select id="hold-filter-delisting-year" onchange="renderHoldings()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                            <option value="all" selected>전체</option>
+                            <option value="2027">2027</option>
+                            <option value="2028">2028</option>
+                            <option value="2029">2029</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">예금 이상</label>
+                        <select id="hold-filter-benchmark" onchange="renderHoldings()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                            <option value="all" selected>전체</option>
+                            <option value="beat">달성</option>
+                            <option value="miss">미달</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">거래 상태</label>
+                        <select id="hold-filter-status" onchange="renderHoldings()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                            <option value="all" selected>전체</option>
+                            <option value="일반">일반</option>
+                            <option value="정지">정지</option>
+                            <option value="합병">합병</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">종목 검색</label>
+                        <input type="text" id="hold-search-input" onkeyup="renderHoldings()" placeholder="종목명 검색..." class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700">
+                    </div>
+                </div>
+
+                <!-- 4. 보유 종목 테이블 -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
@@ -390,7 +416,7 @@
                     </div>
                 </div>
 
-                <!-- 2. 성과 입력 폼 카드 -->
+                <!-- 2. 성과 입력 폼 카드 (날짜 높이 최적화 적용) -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
                     <div class="flex items-center justify-between mb-4">
                         <div>
@@ -787,6 +813,11 @@
             const tbody = document.getElementById('holdings-table-body');
             tbody.innerHTML = '';
 
+            const filterDelYear = document.getElementById('hold-filter-delisting-year').value;
+            const filterBenchmark = document.getElementById('hold-filter-benchmark').value;
+            const filterStatus = document.getElementById('hold-filter-status').value;
+            const searchKeyword = document.getElementById('hold-search-input').value.trim().toLowerCase();
+
             let totalBuy = 0;
             let totalEval = 0;
             const todayStr = getTodayStr();
@@ -805,6 +836,9 @@
             const enrichedHoldings = holdingItems.map((item, idx) => {
                 const matchedSpac = allItems.find(s => s.name === item.name);
                 const currentPrice = matchedSpac ? matchedSpac.current_price : 0;
+                const delistingDate = matchedSpac ? matchedSpac.delisting_date : '';
+                const delistingYear = delistingDate ? delistingDate.substring(0, 4) : '';
+                const spacStatus = matchedSpac ? matchedSpac.status : '일반';
                 
                 let estimatedEval = item.buy_amount;
                 if (item.quantity && item.quantity > 0 && currentPrice > 0) {
@@ -820,10 +854,19 @@
                 const bokRate = getBokRateForDate(item.buy_date);
                 const isBeat = currentAnnual >= bokRate;
 
-                return { ...item, origIndex: idx, estimatedEval, evalDiff, simpleYield, currentAnnual, bokRate, isBeat };
+                return { ...item, origIndex: idx, estimatedEval, evalDiff, simpleYield, currentAnnual, bokRate, isBeat, delistingYear, spacStatus };
             });
 
-            enrichedHoldings.sort((a, b) => {
+            const filteredHoldings = enrichedHoldings.filter(item => {
+                if (filterDelYear !== 'all' && item.delistingYear !== filterDelYear) return false;
+                if (filterBenchmark === 'beat' && !item.isBeat) return false;
+                if (filterBenchmark === 'miss' && item.isBeat) return false;
+                if (filterStatus !== 'all' && item.spacStatus !== filterStatus) return false;
+                if (searchKeyword && !item.name.toLowerCase().includes(searchKeyword)) return false;
+                return true;
+            });
+
+            filteredHoldings.sort((a, b) => {
                 let valA, valB;
                 if (holdingSortColumn === 'eval_amount') {
                     valA = a.estimatedEval;
@@ -845,7 +888,11 @@
 
             updateHoldingSortIcons();
 
-            enrichedHoldings.forEach(item => {
+            if (filteredHoldings.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-12 text-center text-slate-400 font-normal">조건에 일치하는 보유 종목이 없습니다.</td></tr>`;
+            }
+
+            filteredHoldings.forEach(item => {
                 totalBuy += item.buy_amount;
                 totalEval += item.estimatedEval;
 
@@ -870,7 +917,7 @@
                     <td class="py-4 px-4"><div class="${annualColor}">${item.currentAnnual.toFixed(2)}% ${diffBadge}</div><div class="${simpleColor} text-xs mt-0.5">${item.simpleYield.toFixed(2)}%</div></td>
                     <td class="py-4 px-4 text-center space-x-1">
                         <button onclick="openSellModal(${item.origIndex}, ${item.estimatedEval})" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1.5 rounded-lg transition-colors shadow-xs">매도/청산</button>
-                        <button onclick="deleteHoldingItem(${item.origIndex})" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-2 py-1.5 rounded-lg transition-colors">삭제</button>
+                        <button onclick="deleteHoldingItem(${item.origIndex})" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-2.5 py-1.5 rounded-lg transition-colors">삭제</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -1178,19 +1225,15 @@
             const mergerItems = items.filter(i => i.invest_type === '합병' && i.is_fair_buy === 'O' && i.status === '일반');
             const liqItems = items.filter(i => i.invest_type === '청산' && i.is_fair_buy === 'O' && i.status === '일반');
 
-            // 합병형 - ISA
             const mergerIsaHigh = mergerItems.filter(i => i.yield_isa >= baseRate).sort((a,b) => b.yield_isa - a.yield_isa);
             const mergerIsaMid = mergerItems.filter(i => i.yield_isa >= 0 && i.yield_isa < baseRate).sort((a,b) => b.yield_isa - a.yield_isa);
 
-            // 합병형 - 일반
             const mergerGenHigh = mergerItems.filter(i => i.yield_general >= baseRate).sort((a,b) => b.yield_general - a.yield_general);
             const mergerGenMid = mergerItems.filter(i => i.yield_general >= 0 && i.yield_general < baseRate).sort((a,b) => b.yield_general - a.yield_general);
 
-            // 청산형 - ISA
             const liqIsaHigh = liqItems.filter(i => i.yield_isa >= baseRate).sort((a,b) => b.yield_isa - a.yield_isa);
             const liqIsaMid = liqItems.filter(i => i.yield_isa >= 0 && i.yield_isa < baseRate).sort((a,b) => b.yield_isa - a.yield_isa);
 
-            // 청산형 - 일반
             const liqGenHigh = liqItems.filter(i => i.yield_general >= baseRate).sort((a,b) => b.yield_general - a.yield_general);
             const liqGenMid = liqItems.filter(i => i.yield_general >= 0 && i.yield_general < baseRate).sort((a,b) => b.yield_general - a.yield_general);
 
@@ -1268,7 +1311,6 @@
 
             const baseRate = allItems.length > 0 && allItems[0].deposit_rate ? allItems[0].deposit_rate : 2.4;
 
-            // 추천 카드 최신 데이터로 동기화 반영
             updateRecommendations(allItems);
 
             let filtered = allItems.filter(item => {
