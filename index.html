@@ -166,10 +166,10 @@
                 </div>
             </div>
 
-            <!-- Filters & Search Bar -->
+            <!-- Filters & Search Bar (수정된 필터 레이블 적용) -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4 items-center">
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">투자유형</label>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">투자 유형</label>
                     <select id="filter-type" onchange="applyFilters()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                         <option value="all">전체</option>
                         <option value="합병">합병</option>
@@ -177,7 +177,7 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">매수적정</label>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">매수 적정</label>
                     <select id="filter-fair" onchange="applyFilters()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                         <option value="all">전체</option>
                         <option value="O">O</option>
@@ -185,7 +185,7 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">거래상태</label>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">거래 상태</label>
                     <select id="filter-status" onchange="applyFilters()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                         <option value="all">전체</option>
                         <option value="일반" selected>일반</option>
@@ -194,14 +194,14 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">투자계좌</label>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">투자 계좌</label>
                     <select id="filter-account" onchange="applyFilters()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                         <option value="isa" selected>ISA</option>
                         <option value="general">일반</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">청산 예상년도</label>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">청산 연도</label>
                     <select id="filter-delisting-year" onchange="applyFilters()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                         <option value="all" selected>전체</option>
                         <option value="2027">2027</option>
@@ -219,7 +219,7 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">검색</label>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">종목 검색</label>
                     <input type="text" id="search-input" onkeyup="applyFilters()" placeholder="종목명 입력..." class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700">
                 </div>
             </div>
@@ -382,7 +382,7 @@
                     </div>
                 </div>
 
-                <!-- 2. 성과 입력 폼 카드 (6열 유지 및 날짜 칸 높이 고정 수정 완료) -->
+                <!-- 2. 성과 입력 폼 카드 -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
                     <div class="flex items-center justify-between mb-4">
                         <div>
