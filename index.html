@@ -42,18 +42,18 @@
         <!-- ========================================================= -->
         <div id="view-dashboard">
             <!-- Summary Stats Bar -->
-            <div class="grid grid-cols-3 gap-3 mb-8">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
                 <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
                     <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">전체 스팩 수</span>
                     <div id="stat-total-count" class="text-xl font-extrabold text-slate-800">- 개</div>
                 </div>
                 <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-                    <span class="text-[11px] font-bold text-indigo-600 uppercase tracking-wider block mb-1">합병형 (매수적정, 0%↑)</span>
-                    <div id="stat-merger-count" class="text-xl font-extrabold text-indigo-600">- 개</div>
+                    <span class="text-[11px] font-bold text-indigo-600 uppercase tracking-wider block mb-1">합병형 <span class="block sm:inline text-slate-500 font-normal mt-0.5 sm:mt-0">(매수적정, 0%↑)</span></span>
+                    <div id="stat-merger-count" class="text-xl font-extrabold text-indigo-600 mt-1">- 개</div>
                 </div>
                 <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-                    <span class="text-[11px] font-bold text-blue-600 uppercase tracking-wider block mb-1">청산형 (매수적정, 예금↑)</span>
-                    <div id="stat-liq-count" class="text-xl font-extrabold text-blue-600">- 개</div>
+                    <span class="text-[11px] font-bold text-blue-600 uppercase tracking-wider block mb-1">청산형 <span class="block sm:inline text-slate-500 font-normal mt-0.5 sm:mt-0">(매수적정, 예금↑)</span></span>
+                    <div id="stat-liq-count" class="text-xl font-extrabold text-blue-600 mt-1">- 개</div>
                 </div>
             </div>
 
@@ -267,7 +267,6 @@
             <div id="holdings-content" class="hidden">
                 <!-- 1. 보유 종목 요약 카드 (1x2 그리드 배치 2행) -->
                 <div class="space-y-3 mb-6">
-                    <!-- 1행: 매수금 / 평가금액 (1x2) -->
                     <div class="grid grid-cols-2 gap-3 sm:gap-4">
                         <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
                             <span class="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">매수금</span>
@@ -278,7 +277,6 @@
                             <div id="hold-total-eval" class="text-2xl sm:text-4xl font-black text-indigo-600 truncate">- 원</div>
                         </div>
                     </div>
-                    <!-- 2행: 단순 수익률 / 연환산 수익률 (1x2) -->
                     <div class="grid grid-cols-2 gap-3 sm:gap-4">
                         <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
                             <span class="text-[11px] sm:text-xs font-bold text-emerald-600 uppercase tracking-wider block mb-1">단순 수익률</span>
@@ -384,7 +382,7 @@
                     </div>
                 </div>
 
-                <!-- 2. 성과 입력 폼 카드 -->
+                <!-- 2. 성과 입력 폼 카드 (그리드 레이아웃 고정 및 높이 균일화) -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
                     <div class="flex items-center justify-between mb-4">
                         <div>
