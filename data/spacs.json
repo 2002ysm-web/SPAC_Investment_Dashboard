@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-17 08:31:57",
+  "updated_at": "2026-11-17 09:03:40",
   "count": 70,
   "items": [
     {
@@ -101,6 +101,20 @@
       "fair_price_calc": 2138
     },
     {
+      "code": "488060",
+      "name": "유진스팩11호",
+      "is_fair_buy": "O",
+      "invest_type": "청산",
+      "delisting_date": "2027-10-31",
+      "current_price": 2025,
+      "liquidation_price": 2167,
+      "yield_general": 5.73,
+      "yield_isa": 6.77,
+      "deposit_rate": 3.2,
+      "status": "정상",
+      "fair_price_calc": 2114
+    },
+    {
       "code": "478110",
       "name": "이베스트스팩6호",
       "is_fair_buy": "O",
@@ -127,20 +141,6 @@
       "deposit_rate": 3.2,
       "status": "정상",
       "fair_price_calc": 2119
-    },
-    {
-      "code": "488060",
-      "name": "유진스팩11호",
-      "is_fair_buy": "O",
-      "invest_type": "청산",
-      "delisting_date": "2027-10-31",
-      "current_price": 2035,
-      "liquidation_price": 2167,
-      "yield_general": 5.3,
-      "yield_isa": 6.26,
-      "deposit_rate": 3.2,
-      "status": "정상",
-      "fair_price_calc": 2114
     },
     {
       "code": "477470",
@@ -717,6 +717,20 @@
       "fair_price_calc": 2031
     },
     {
+      "code": "0115H0",
+      "name": "삼성스팩13호",
+      "is_fair_buy": "O",
+      "invest_type": "합병",
+      "delisting_date": "2029-01-20",
+      "current_price": 1992,
+      "liquidation_price": 2167,
+      "yield_general": 3.29,
+      "yield_isa": 3.89,
+      "deposit_rate": 3.2,
+      "status": "정상",
+      "fair_price_calc": 2046
+    },
+    {
       "code": "0131D0",
       "name": "키움히어로제2호스팩",
       "is_fair_buy": "O",
@@ -743,20 +757,6 @@
       "deposit_rate": 3.2,
       "status": "정상",
       "fair_price_calc": 2111
-    },
-    {
-      "code": "0115H0",
-      "name": "삼성스팩13호",
-      "is_fair_buy": "O",
-      "invest_type": "합병",
-      "delisting_date": "2029-01-20",
-      "current_price": 1995,
-      "liquidation_price": 2167,
-      "yield_general": 3.23,
-      "yield_isa": 3.81,
-      "deposit_rate": 3.2,
-      "status": "정상",
-      "fair_price_calc": 2046
     },
     {
       "code": "0134X0",
