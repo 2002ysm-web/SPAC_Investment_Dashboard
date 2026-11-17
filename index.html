@@ -28,7 +28,7 @@
                         📂 보유 종목 🔒
                     </button>
                     <button id="tab-btn-performance" onclick="switchTab('performance')" class="px-3.5 py-2 rounded-lg text-xs font-extrabold transition-all text-slate-600 hover:text-slate-900">
-                        💰 성과 관리 🔒
+                        💰 성과 내역 🔒
                     </button>
                 </div>
                 <div id="update-time" class="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200 text-xs font-semibold text-slate-600">
@@ -300,49 +300,41 @@
                         </div>
                         <button onclick="lockPrivateTabs()" class="text-xs text-rose-500 hover:underline font-semibold">🔒 다시 잠그기</button>
                     </div>
-                    <form onsubmit="addHoldingItem(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
+                    <form onsubmit="addHoldingItem(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
                         <div class="lg:col-span-2">
                             <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">종목명</label>
                             <input type="text" id="hold-input-name" list="spac-name-list" placeholder="종목명 입력 또는 선택" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
                             <datalist id="spac-name-list"></datalist>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">계좌</label>
-                            <select id="hold-input-account" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
-                                <option value="ISA">ISA</option>
-                                <option value="일반">일반</option>
-                            </select>
-                        </div>
-                        <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매수금액 (원)</label>
-                            <input type="number" id="hold-input-amount" placeholder="예: 2005000" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                            <input type="number" id="hold-input-amount" placeholder="예: 2000000" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매수단가 (원)</label>
-                            <input type="number" id="hold-input-unit-price" placeholder="예: 2005원" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                            <input type="number" id="hold-input-unit-price" placeholder="예: 2000원" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매수 세금/수수료 (원)</label>
                             <input type="number" id="hold-input-tax" placeholder="예: 500" value="0" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700">
                         </div>
-                        <div class="sm:col-span-2 lg:col-span-6">
+                        <div class="lg:col-span-2">
                             <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매수일</label>
                             <input type="date" id="hold-input-date" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
                         </div>
-                        <div class="lg:col-span-6 flex justify-end mt-1">
-                            <button type="submit" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-colors shadow-sm">➕ 보유 종목</button>
+                        <div class="lg:col-span-3 flex justify-end mt-1">
+                            <button type="submit" class="w-full sm:w-auto px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-colors shadow-sm">➕ 보유 종목</button>
                         </div>
                     </form>
                 </div>
 
-                <!-- 3. 보유 종목 테이블 -->
+                <!-- 3. 보유 종목 테이블 (계좌 열 제거됨) -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200 select-none">
                                     <th class="py-4 px-5 font-bold">종목명</th>
-                                    <th class="py-4 px-3 font-bold">계좌</th>
                                     <th class="py-4 px-4 font-bold">매수금</th>
                                     <th class="py-4 px-4 font-bold">매수일</th>
                                     <th class="py-4 px-4 font-bold">평가금(손익)</th>
@@ -693,7 +685,6 @@
             
             const newItem = {
                 name: document.getElementById('hold-input-name').value.trim(),
-                account: document.getElementById('hold-input-account').value,
                 buy_amount: rawBuyAmount + taxAmount, // 세금(수수료)을 포함한 총 매수원가
                 unit_price: Number(document.getElementById('hold-input-unit-price').value),
                 tax: taxAmount,
@@ -701,7 +692,7 @@
             };
 
             holdingItems.unshift(newItem);
-            localStorage.setItem('spac_holding_items_v3', JSON.stringify(holdingItems));
+            localStorage.setItem('spac_holding_items_v4', JSON.stringify(holdingItems));
 
             document.getElementById('hold-input-name').value = '';
             document.getElementById('hold-input-amount').value = '';
@@ -716,7 +707,7 @@
         function deleteHoldingItem(index) {
             if (confirm('해당 보유 종목을 삭제하시겠습니까?')) {
                 holdingItems.splice(index, 1);
-                localStorage.setItem('spac_holding_items_v3', JSON.stringify(holdingItems));
+                localStorage.setItem('spac_holding_items_v4', JSON.stringify(holdingItems));
                 renderHoldings();
             }
         }
@@ -753,7 +744,7 @@
             localStorage.setItem('spac_performance_items_v3', JSON.stringify(performanceItems));
 
             holdingItems.splice(index, 1);
-            localStorage.setItem('spac_holding_items_v3', JSON.stringify(holdingItems));
+            localStorage.setItem('spac_holding_items_v4', JSON.stringify(holdingItems));
 
             closeSellModal();
             renderHoldings();
@@ -774,7 +765,7 @@
             let totalCashFlows = [];
 
             if (holdingItems.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="py-12 text-center text-slate-400 font-normal">등록된 보유 종목이 없습니다. 위 폼에서 보유 중인 스팩을 추가해보세요.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="py-12 text-center text-slate-400 font-normal">등록된 보유 종목이 없습니다. 위 폼에서 보유 중인 스팩을 추가해보세요.</td></tr>`;
                 document.getElementById('hold-total-buy').innerText = '0 원';
                 document.getElementById('hold-total-eval').innerText = '0 원';
                 document.getElementById('hold-total-simple').innerText = '0.00 %';
@@ -789,7 +780,6 @@
                 const currentPrice = matchedSpac ? matchedSpac.current_price : 0;
                 
                 let estimatedEval = item.buy_amount;
-                // 매수단가와 현재가를 기준으로 평가금액 계산 (세금이 포함된 총 매수원가 대비 수량 비례)
                 if (item.unit_price && item.unit_price > 0 && currentPrice > 0) {
                     const rawBuyOnly = item.buy_amount - (item.tax || 0);
                     const quantity = rawBuyOnly / item.unit_price;
@@ -822,7 +812,6 @@
                 tr.className = "hover:bg-slate-50/80 transition-colors";
                 tr.innerHTML = `
                     <td class="py-4 px-5 font-bold text-slate-900">${item.name}</td>
-                    <td class="py-4 px-3"><span class="px-2 py-0.5 text-xs rounded-full font-semibold ${item.account === 'ISA' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/50' : 'bg-slate-100 text-slate-700'}">${item.account}</span></td>
                     <td class="py-4 px-4 text-slate-700 font-semibold">${item.buy_amount.toLocaleString()}원</td>
                     <td class="py-4 px-4 text-slate-500 text-xs">${item.buy_date}</td>
                     <td class="py-4 px-4 ${evalColor}">${estimatedEval.toLocaleString()}원<br><span class="text-xs font-normal">(${evalDiff >= 0 ? '+' : ''}${evalDiff.toLocaleString()}원)</span></td>
@@ -881,7 +870,7 @@
                 document.getElementById('update-time').innerText = '데이터 로드 실패';
             }
 
-            const savedHoldings = localStorage.getItem('spac_holding_items_v3');
+            const savedHoldings = localStorage.getItem('spac_holding_items_v4');
             if (savedHoldings) {
                 try {
                     holdingItems = JSON.parse(savedHoldings);
@@ -890,11 +879,11 @@
                 }
             } else {
                 // 이전 버전 호환용 마이그레이션
-                const oldHoldings = localStorage.getItem('spac_holding_items_v2') || localStorage.getItem('spac_holding_items_v1');
+                const oldHoldings = localStorage.getItem('spac_holding_items_v3') || localStorage.getItem('spac_holding_items_v2') || localStorage.getItem('spac_holding_items_v1');
                 if (oldHoldings) {
                     try {
                         holdingItems = JSON.parse(oldHoldings).map(h => ({ ...h, unit_price: h.unit_price || 2000, tax: h.tax || 0 }));
-                        localStorage.setItem('spac_holding_items_v3', JSON.stringify(holdingItems));
+                        localStorage.setItem('spac_holding_items_v4', JSON.stringify(holdingItems));
                     } catch(e) {
                         holdingItems = [];
                     }
