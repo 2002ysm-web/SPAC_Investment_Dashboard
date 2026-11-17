@@ -170,7 +170,7 @@
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4 items-center">
                 <div>
                     <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">투자유형</label>
-                    <select id="filter-type" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                    <select id="filter-type" onchange="applyFilters()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                         <option value="all">전체</option>
                         <option value="합병">합병</option>
                         <option value="청산">청산</option>
@@ -178,7 +178,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">매수적정</label>
-                    <select id="filter-fair" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                    <select id="filter-fair" onchange="applyFilters()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                         <option value="all">전체</option>
                         <option value="O">O</option>
                         <option value="X">X</option>
@@ -186,7 +186,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">거래상태</label>
-                    <select id="filter-status" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                    <select id="filter-status" onchange="applyFilters()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                         <option value="all">전체</option>
                         <option value="일반" selected>일반</option>
                         <option value="정지">정지</option>
@@ -195,14 +195,14 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">투자계좌</label>
-                    <select id="filter-account" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                    <select id="filter-account" onchange="applyFilters()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                         <option value="isa" selected>ISA</option>
                         <option value="general">일반</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">청산 예상년도</label>
-                    <select id="filter-delisting-year" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                    <select id="filter-delisting-year" onchange="applyFilters()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                         <option value="all" selected>전체</option>
                         <option value="2027">2027</option>
                         <option value="2028">2028</option>
@@ -211,7 +211,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">예상 수익률</label>
-                    <select id="filter-yield-range" onchange="applyFilters()" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                    <select id="filter-yield-range" onchange="applyFilters()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                         <option value="all" selected>전체</option>
                         <option value="above_deposit">예금 이상</option>
                         <option value="low_positive">0% 이상 ~ 예금 미만</option>
@@ -220,7 +220,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">검색</label>
-                    <input type="text" id="search-input" onkeyup="applyFilters()" placeholder="종목명 입력..." class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700">
+                    <input type="text" id="search-input" onkeyup="applyFilters()" placeholder="종목명 입력..." class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700">
                 </div>
             </div>
 
@@ -267,25 +267,25 @@
             <div id="holdings-content" class="hidden">
                 <!-- 1. 보유 종목 요약 카드 (1x2 그리드 배치 2행) -->
                 <div class="space-y-3 mb-6">
-                    <!-- 1행: 매수금액 / 현재 추정 평가금액 (1x2) -->
+                    <!-- 1행: 매수금액 / 평가금액 (1x2) -->
                     <div class="grid grid-cols-2 gap-3 sm:gap-4">
                         <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
                             <span class="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">매수금액</span>
                             <div id="hold-total-buy" class="text-2xl sm:text-4xl font-black text-slate-800 truncate">- 원</div>
                         </div>
                         <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
-                            <span class="text-[11px] sm:text-xs font-bold text-indigo-600 uppercase tracking-wider block mb-1">현재 추정 평가금액</span>
+                            <span class="text-[11px] sm:text-xs font-bold text-indigo-600 uppercase tracking-wider block mb-1">평가금액</span>
                             <div id="hold-total-eval" class="text-2xl sm:text-4xl font-black text-indigo-600 truncate">- 원</div>
                         </div>
                     </div>
                     <!-- 2행: 단순 수익률 / 연환산 수익률 (1x2) -->
                     <div class="grid grid-cols-2 gap-3 sm:gap-4">
                         <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
-                            <span class="text-[11px] sm:text-xs font-bold text-emerald-600 uppercase tracking-wider block mb-1">전체 단순 수익률</span>
+                            <span class="text-[11px] sm:text-xs font-bold text-emerald-600 uppercase tracking-wider block mb-1">단순 수익률</span>
                             <div id="hold-total-simple" class="text-2xl sm:text-4xl font-black text-emerald-600 truncate">- %</div>
                         </div>
                         <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
-                            <span class="text-[11px] sm:text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">전체 연환산 수익률</span>
+                            <span class="text-[11px] sm:text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">연환산 수익률</span>
                             <div id="hold-total-annual" class="text-2xl sm:text-4xl font-black text-blue-600 truncate">- %</div>
                         </div>
                     </div>
@@ -304,24 +304,24 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">종목명</label>
-                                <input type="text" id="hold-input-name" list="spac-name-list" placeholder="종목명 입력 또는 선택" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                                <input type="text" id="hold-input-name" list="spac-name-list" placeholder="종목명 입력 또는 선택" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
                                 <datalist id="spac-name-list"></datalist>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">총 매수금액 (원)</label>
-                                <input type="number" id="hold-input-amount" placeholder="예: 2005000" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매수금액</label>
+                                <input type="number" id="hold-input-amount" placeholder="예: 2005000" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매수량 (주수)</label>
-                                <input type="number" id="hold-input-quantity" placeholder="예: 1000" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매수량</label>
+                                <input type="number" id="hold-input-quantity" placeholder="예: 1000" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매수일</label>
-                                <input type="date" id="hold-input-date" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                                <input type="date" id="hold-input-date" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
                             </div>
                         </div>
                         <div>
-                            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-colors shadow-sm">➕ 보유 종목 등록</button>
+                            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-colors shadow-sm">➕ 보유 종목</button>
                         </div>
                     </form>
                 </div>
@@ -369,16 +369,16 @@
                 <!-- 1. 최상단 요약 카드 바 -->
                 <div class="space-y-3 mb-6">
                     <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">전체 실현손익금액</span>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">실현손익금액</span>
                         <div id="perf-total-pnl" class="text-3xl sm:text-4xl font-black text-slate-800 truncate">- 원</div>
                     </div>
                     <div class="grid grid-cols-2 gap-3 sm:gap-4">
                         <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
-                            <span class="text-[11px] sm:text-xs font-bold text-emerald-600 uppercase tracking-wider block mb-1">전체 단순 수익률</span>
+                            <span class="text-[11px] sm:text-xs font-bold text-emerald-600 uppercase tracking-wider block mb-1">단순 수익률</span>
                             <div id="perf-avg-simple" class="text-2xl sm:text-4xl font-black text-emerald-600 truncate">- %</div>
                         </div>
                         <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
-                            <span class="text-[11px] sm:text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">전체 연환산 수익률</span>
+                            <span class="text-[11px] sm:text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">연환산 수익률</span>
                             <div id="perf-avg-annual" class="text-2xl sm:text-4xl font-black text-blue-600 truncate">- %</div>
                         </div>
                     </div>
@@ -397,34 +397,34 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">종목명</label>
-                                <input type="text" id="input-name" placeholder="예: 엔에이치스팩31호" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                                <input type="text" id="input-name" placeholder="예: 엔에이치스팩31호" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">유형</label>
-                                <select id="input-type" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                                <select id="input-type" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                                     <option value="청산">청산</option>
                                     <option value="매매">매매</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매수금</label>
-                                <input type="number" id="input-buy-amount" placeholder="2000000" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                                <input type="number" id="input-buy-amount" placeholder="2000000" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매수일</label>
-                                <input type="date" id="input-buy-date" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                                <input type="date" id="input-buy-date" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매도금</label>
-                                <input type="number" id="input-sell-amount" placeholder="2050000" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                                <input type="number" id="input-sell-amount" placeholder="2050000" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매도일</label>
-                                <input type="date" id="input-sell-date" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                                <input type="date" id="input-sell-date" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
                             </div>
                         </div>
                         <div>
-                            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-colors shadow-sm">➕ 성과 내역 등록</button>
+                            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-colors shadow-sm">➕ 성과 내역</button>
                         </div>
                     </form>
                 </div>
@@ -433,8 +433,8 @@
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4 items-center justify-between">
                     <div class="flex gap-4 items-center flex-wrap">
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">수익연도</label>
-                            <select id="perf-filter-year" onchange="renderPerformance()" class="px-3.5 py-2 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                            <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">수익 연도</label>
+                            <select id="perf-filter-year" onchange="renderPerformance()" class="h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                                 <option value="all" selected>전체</option>
                                 <option value="2026">2026</option>
                                 <option value="2025">2025</option>
@@ -442,8 +442,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">유형</label>
-                            <select id="perf-filter-type" onchange="renderPerformance()" class="px-3.5 py-2 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                            <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">투자 유형</label>
+                            <select id="perf-filter-type" onchange="renderPerformance()" class="h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                                 <option value="all" selected>전체</option>
                                 <option value="청산">청산</option>
                                 <option value="매매">매매</option>
@@ -451,7 +451,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">예금 이상</label>
-                            <select id="perf-filter-benchmark" onchange="renderPerformance()" class="px-3.5 py-2 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                            <select id="perf-filter-benchmark" onchange="renderPerformance()" class="h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                                 <option value="all" selected>전체</option>
                                 <option value="beat">달성</option>
                                 <option value="miss">미달</option>
@@ -460,7 +460,7 @@
                     </div>
                     <div class="w-full md:w-72">
                         <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">종목 검색</label>
-                        <input type="text" id="perf-search-input" onkeyup="renderPerformance()" placeholder="종목명 검색..." class="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl font-medium text-slate-700">
+                        <input type="text" id="perf-search-input" onkeyup="renderPerformance()" placeholder="종목명 검색..." class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700">
                     </div>
                 </div>
 
@@ -477,8 +477,7 @@
                                     <th onclick="sortPerformanceData('sell_amount')" class="py-4 px-5 font-bold cursor-pointer hover:bg-slate-200 transition-colors">매도금 <span id="perf-sort-icon-sell_amount" class="text-slate-400">↕</span></th>
                                     <th onclick="sortPerformanceData('sell_date')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors">매도일 <span id="perf-sort-icon-sell_date" class="text-slate-400">↕</span></th>
                                     <th onclick="sortPerformanceData('pnl')" class="py-4 px-5 font-bold cursor-pointer hover:bg-slate-200 transition-colors">손익 <span id="perf-sort-icon-pnl" class="text-slate-400">↕</span></th>
-                                    <th onclick="sortPerformanceData('simpleYield')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors">단순 <span id="perf-sort-icon-simpleYield" class="text-slate-400">↕</span></th>
-                                    <th onclick="sortPerformanceData('annualYield')" class="py-4 px-5 font-bold cursor-pointer hover:bg-slate-200 transition-colors">연환산 <span id="perf-sort-icon-annualYield" class="text-slate-400">↕</span></th>
+                                    <th onclick="sortPerformanceData('simpleYield')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors">수익률(단순/연환산) <span id="perf-sort-icon-simpleYield" class="text-slate-400">↕</span></th>
                                     <th class="py-4 px-4 font-bold text-center">관리</th>
                                 </tr>
                             </thead>
@@ -493,28 +492,28 @@
     </div>
 
     <!-- ========================================================= -->
-    <!-- 매도 완료 처리 모달 (보유 종목 -> 성과 관리 자동 이관)       -->
+    <!-- 매도/청산 완료 처리 모달 (보유 종목 -> 성과 관리 자동 이관)   -->
     <!-- ========================================================= -->
     <div id="sell-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden flex items-center justify-center z-50 px-4">
         <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-md w-full p-6">
-            <h3 class="text-lg font-extrabold text-slate-800 mb-1">💰 매도 완료 및 성과 기록</h3>
-            <p id="sell-modal-subtitle" class="text-xs text-slate-500 mb-5">실제 매도된 총 금액을 입력하면 성과 관리 탭으로 자동 이관됩니다.</p>
+            <h3 class="text-lg font-extrabold text-slate-800 mb-1">💰 매도/청산 및 성과 기록</h3>
+            <p id="sell-modal-subtitle" class="text-xs text-slate-500 mb-5">실제 매도/청산된 총 금액을 입력하면 성과 관리 탭으로 자동 이관됩니다.</p>
             <form onsubmit="confirmSellHolding(event)" class="space-y-4">
                 <input type="hidden" id="sell-modal-index">
                 <div>
                     <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">구분</label>
-                    <select id="sell-modal-type" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                    <select id="sell-modal-type" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                         <option value="매매">매매 (중도 매도)</option>
                         <option value="청산">청산 (예치금 반환)</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">실제 매도 총금액 (원)</label>
-                    <input type="number" id="sell-modal-amount" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-bold text-slate-800" required>
+                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">실제 매도/청산 총금액 (원)</label>
+                    <input type="number" id="sell-modal-amount" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-bold text-slate-800" required>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매도일 (자동 입력)</label>
-                    <input type="date" id="sell-modal-date" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매도/청산일 (오늘 날짜 자동)</label>
+                    <input type="date" id="sell-modal-date" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
                 </div>
                 <div class="flex justify-end gap-2 pt-2">
                     <button type="button" onclick="closeSellModal()" class="px-4 py-2.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">취소</button>
@@ -747,7 +746,7 @@
             closeSellModal();
             renderHoldings();
             renderPerformance();
-            alert('매도 완료 처리되어 성과 관리 탭에 자동으로 기록되었습니다.');
+            alert('매도/청산 완료 처리되어 성과 관리 탭에 자동으로 기록되었습니다.');
         }
 
         function sortHoldingData(column) {
@@ -864,7 +863,7 @@
                     <td class="py-4 px-4 ${evalColor}">${item.estimatedEval.toLocaleString()}원<br><span class="text-xs font-normal">(${item.evalDiff >= 0 ? '+' : ''}${item.evalDiff.toLocaleString()}원)</span></td>
                     <td class="py-4 px-4"><div class="${simpleColor} font-semibold">${item.simpleYield.toFixed(2)}%</div><div class="${annualColor} text-xs mt-0.5">${item.currentAnnual.toFixed(2)}% ${diffBadge}</div></td>
                     <td class="py-4 px-4 text-center space-x-1">
-                        <button onclick="openSellModal(${item.origIndex}, ${item.estimatedEval})" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2 py-1.5 rounded-lg transition-colors shadow-xs">매도완료</button>
+                        <button onclick="openSellModal(${item.origIndex}, ${item.estimatedEval})" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1.5 rounded-lg transition-colors shadow-xs">매도/청산</button>
                         <button onclick="deleteHoldingItem(${item.origIndex})" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-2 py-1.5 rounded-lg transition-colors">삭제</button>
                     </td>
                 `;
@@ -879,6 +878,177 @@
             document.getElementById('hold-total-eval').innerText = totalEval.toLocaleString() + ' 원';
             document.getElementById('hold-total-simple').innerText = totalSimpleYield.toFixed(2) + ' %';
             document.getElementById('hold-total-annual').innerText = totalAnnualYield.toFixed(2) + ' %';
+        }
+
+        // =========================================================
+        // 성과 관리 로직
+        // =========================================================
+        function addPerformanceItem(event) {
+            event.preventDefault();
+            const newItem = {
+                name: document.getElementById('input-name').value.trim(),
+                type: document.getElementById('input-type').value,
+                buy_amount: Number(document.getElementById('input-buy-amount').value),
+                buy_date: document.getElementById('input-buy-date').value,
+                sell_amount: Number(document.getElementById('input-sell-amount').value),
+                sell_date: document.getElementById('input-sell-date').value
+            };
+
+            performanceItems.unshift(newItem);
+            localStorage.setItem('spac_performance_items_v3', JSON.stringify(performanceItems));
+
+            document.getElementById('input-name').value = '';
+            document.getElementById('input-buy-amount').value = '';
+            document.getElementById('input-buy-date').value = '';
+            document.getElementById('input-sell-amount').value = '';
+            document.getElementById('input-sell-date').value = '';
+
+            renderPerformance();
+            alert('성과 내역이 추가되었습니다.');
+        }
+
+        function deletePerformanceItem(index) {
+            if (confirm('해당 성과 기록을 삭제하시겠습니까?')) {
+                performanceItems.splice(index, 1);
+                localStorage.setItem('spac_performance_items_v3', JSON.stringify(performanceItems));
+                renderPerformance();
+            }
+        }
+
+        function sortPerformanceData(column) {
+            if (perfSortColumn === column) {
+                perfSortDirection = perfSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                perfSortColumn = column;
+                perfSortDirection = (column === 'name' || column === 'type' || column === 'buy_date' || column === 'buy_amount') ? 'asc' : 'desc';
+            }
+            renderPerformance();
+        }
+
+        function updatePerfSortIcons() {
+            const columns = ['name', 'type', 'buy_amount', 'buy_date', 'sell_amount', 'sell_date', 'pnl', 'simpleYield'];
+            columns.forEach(col => {
+                const iconEl = document.getElementById(`perf-sort-icon-${col}`);
+                if (iconEl) {
+                    if (perfSortColumn === col) {
+                        iconEl.innerText = perfSortDirection === 'asc' ? ' ▲' : ' ▼';
+                        iconEl.className = 'text-indigo-600 font-bold';
+                    } else {
+                        iconEl.innerText = ' ↕';
+                        iconEl.className = 'text-slate-400';
+                    }
+                }
+            });
+        }
+
+        function renderPerformance() {
+            if (!isUnlocked) return;
+
+            const tbody = document.getElementById('perf-table-body');
+            tbody.innerHTML = '';
+
+            const filterYear = document.getElementById('perf-filter-year').value;
+            const filterType = document.getElementById('perf-filter-type').value;
+            const filterBenchmark = document.getElementById('perf-filter-benchmark').value;
+            const searchKeyword = document.getElementById('perf-search-input').value.trim().toLowerCase();
+
+            let totalPnl = 0;
+            let totalBuyForAvg = 0;
+            let totalSellForAvg = 0;
+            let perfCashFlows = [];
+
+            const processedItems = performanceItems.map((item, idx) => {
+                const pnl = item.sell_amount - item.buy_amount;
+                const simpleYield = (pnl / item.buy_amount) * 100;
+                const buyDateObj = new Date(item.buy_date);
+                const sellDateObj = new Date(item.sell_date);
+                const annualYield = calculateSingleAnnualYield(item.buy_amount, item.sell_amount, buyDateObj, sellDateObj);
+                const bokRate = getBokRateForDate(item.buy_date);
+                const isBeat = annualYield >= bokRate;
+                const sellYear = item.sell_date ? item.sell_date.substring(0, 4) : '';
+
+                return { ...item, origIndex: idx, pnl, simpleYield, annualYield, bokRate, isBeat, sellYear };
+            });
+
+            const filteredItems = processedItems.filter(item => {
+                if (filterYear !== 'all' && item.sellYear !== filterYear) return false;
+                if (filterType !== 'all' && item.type !== filterType) return false;
+                if (filterBenchmark === 'beat' && !item.isBeat) return false;
+                if (filterBenchmark === 'miss' && item.isBeat) return false;
+                if (searchKeyword && !item.name.toLowerCase().includes(searchKeyword)) return false;
+                return true;
+            });
+
+            filteredItems.sort((a, b) => {
+                let valA, valB;
+                if (perfSortColumn === 'pnl') {
+                    valA = a.pnl;
+                    valB = b.pnl;
+                } else if (perfSortColumn === 'simpleYield') {
+                    valA = a.simpleYield;
+                    valB = b.simpleYield;
+                } else {
+                    valA = a[perfSortColumn];
+                    valB = b[perfSortColumn];
+                }
+
+                if (typeof valA === 'string') {
+                    return perfSortDirection === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                } else {
+                    return perfSortDirection === 'asc' ? valA - valB : valB - valA;
+                }
+            });
+
+            updatePerfSortIcons();
+
+            if (filteredItems.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="py-12 text-center text-slate-400 font-normal">조건에 일치하는 성과 내역이 없습니다.</td></tr>`;
+            }
+
+            filteredItems.forEach(item => {
+                totalPnl += item.pnl;
+                totalBuyForAvg += item.buy_amount;
+                totalSellForAvg += item.sell_amount;
+
+                perfCashFlows.push({ date: new Date(item.buy_date), amount: -item.buy_amount });
+                perfCashFlows.push({ date: new Date(item.sell_date), amount: item.sell_amount });
+
+                const diffRate = (item.annualYield - item.bokRate).toFixed(2);
+                const pnlColor = item.pnl >= 0 ? 'text-emerald-600 font-bold' : 'text-rose-500 font-bold';
+                const simpleColor = item.simpleYield >= 0 ? 'text-slate-700' : 'text-rose-500';
+                const annualColor = item.isBeat ? 'text-emerald-600 font-extrabold' : 'text-rose-500 font-extrabold';
+                const diffBadge = item.isBeat
+                    ? `<span class="ml-1 text-[10px] bg-emerald-50 text-emerald-700 px-1 py-0.5 rounded">예금대비 +${diffRate}%p</span>`
+                    : `<span class="ml-1 text-[10px] bg-rose-50 text-rose-600 px-1 py-0.5 rounded">예금대비 ${diffRate}%p</span>`;
+
+                const typeBadge = item.type === '청산' 
+                    ? `<span class="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-md font-semibold">청산</span>` 
+                    : `<span class="bg-purple-50 text-purple-700 text-xs px-2 py-0.5 rounded-md font-semibold">매매</span>`;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition-colors";
+                tr.innerHTML = `
+                    <td class="py-4 px-5 font-bold text-slate-900">${item.name}</td>
+                    <td class="py-4 px-4">${typeBadge}</td>
+                    <td class="py-4 px-5 text-slate-700 font-semibold">${item.buy_amount.toLocaleString()}원</td>
+                    <td class="py-4 px-4 text-slate-500 text-xs">${item.buy_date}</td>
+                    <td class="py-4 px-5 text-slate-700 font-semibold">${item.sell_amount.toLocaleString()}원</td>
+                    <td class="py-4 px-4 text-slate-500 text-xs">${item.sell_date}</td>
+                    <td class="py-4 px-5 ${pnlColor}">${item.pnl >= 0 ? '+' : ''}${item.pnl.toLocaleString()}원</td>
+                    <td class="py-4 px-4"><div class="${simpleColor} font-semibold">${item.simpleYield.toFixed(2)}%</div><div class="${annualColor} text-xs mt-0.5">${item.annualYield.toFixed(2)}% ${diffBadge}</div></td>
+                    <td class="py-4 px-4 text-center">
+                        <button onclick="deletePerformanceItem(${item.origIndex})" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-2.5 py-1.5 rounded-lg transition-colors">삭제</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            const overallSimpleYield = totalBuyForAvg > 0 ? (totalPnl / totalBuyForAvg) * 100 : 0;
+            const overallAnnualYield = calculateXIRR(perfCashFlows);
+
+            document.getElementById('perf-total-pnl').innerText = (totalPnl >= 0 ? '+' : '') + totalPnl.toLocaleString() + ' 원';
+            document.getElementById('perf-avg-simple').innerText = overallSimpleYield.toFixed(2) + ' %';
+            document.getElementById('perf-avg-annual').innerText = overallAnnualYield.toFixed(2) + ' %';
         }
 
         // =========================================================
@@ -925,21 +1095,7 @@
                     holdingItems = [];
                 }
             } else {
-                // 이전 버전 호환 마이그레이션 (세금 필드 제거 버전)
-                const oldHoldings = localStorage.getItem('spac_holding_items_v4') || localStorage.getItem('spac_holding_items_v3');
-                if (oldHoldings) {
-                    try {
-                        holdingItems = JSON.parse(oldHoldings).map(h => ({
-                            name: h.name,
-                            buy_amount: h.buy_amount,
-                            quantity: h.unit_price ? Math.round((h.buy_amount - (h.tax || 0)) / h.unit_price) : 1000,
-                            buy_date: h.buy_date
-                        }));
-                        localStorage.setItem('spac_holding_items_v5', JSON.stringify(holdingItems));
-                    } catch(e) {
-                        holdingItems = [];
-                    }
-                }
+                holdingItems = [];
             }
 
             const savedPerf = localStorage.getItem('spac_performance_items_v3');
@@ -990,268 +1146,78 @@
                     { name: "케이비제25호스팩", type: "청산", buy_amount: 4170605, buy_date: "2026-01-05", sell_amount: 4282230, sell_date: "2026-05-29" },
                     { name: "케이비제25호스팩", type: "청산", buy_amount: 3001505, buy_date: "2026-01-07", sell_amount: 3083981, sell_date: "2026-05-29" },
                     { name: "에스케이증권제9호스팩", type: "청산", buy_amount: 1433745, buy_date: "2025-09-05", sell_amount: 1492326, sell_date: "2026-06-24" },
-                    { name: "에스케이증권제9호스팩", type: "청산", buy_amount: 2000430, buy_date: "2025-10-27", sell_amount: 2058677, sell_date: "2026-06-24" },
-                    { name: "유안타제14호스팩", type: "청산", buy_amount: 2065960, buy_date: "2025-09-05", sell_amount: 2160321, sell_date: "2026-06-24" },
-                    { name: "유안타제12호스팩", type: "청산", buy_amount: 2002455, buy_date: "2025-01-03", sell_amount: 2148890, sell_date: "2026-05-29" },
-                    { name: "에스케이증권제10호스팩", type: "청산", buy_amount: 2001905, buy_date: "2025-10-23", sell_amount: 2057355, sell_date: "2026-07-07" },
-                    { name: "한국제12호스팩", type: "청산", buy_amount: 1219910, buy_date: "2026-01-07", sell_amount: 1256374, sell_date: "2026-07-10" },
-                    { name: "한국제12호스팩", type: "청산", buy_amount: 3002360, buy_date: "2025-10-23", sell_amount: 3077361, sell_date: "2026-07-10" },
-                    { name: "한국제12호스팩", type: "청산", buy_amount: 1704470, buy_date: "2026-01-07", sell_amount: 1748097, sell_date: "2026-07-10" },
-                    { name: "한국제12호스팩", type: "청산", buy_amount: 5335370, buy_date: "2026-01-05", sell_amount: 5471931, sell_date: "2026-07-10" },
-                    { name: "상상인제4호스팩", type: "청산", buy_amount: 2054070, buy_date: "2025-04-28", sell_amount: 2198793, sell_date: "2026-07-16" },
-                    { name: "유안타제11호스팩", type: "청산", buy_amount: 1845120, buy_date: "2025-09-05", sell_amount: 1924448, sell_date: "2026-08-05" },
-                    { name: "한화플러스제4호스팩", type: "청산", buy_amount: 2008904, buy_date: "2025-09-12", sell_amount: 2097426, sell_date: "2026-08-07" },
-                    { name: "대신밸런스제16호스팩", type: "청산", buy_amount: 5970180, buy_date: "2026-01-05", sell_amount: 6152494, sell_date: "2026-08-07" },
-                    { name: "대신밸런스제16호스팩", type: "청산", buy_amount: 1000595, buy_date: "2026-01-07", sell_amount: 1031156, sell_date: "2026-08-07" },
-                    { name: "대신밸런스제16호스팩", type: "청산", buy_amount: 1200295, buy_date: "2026-01-09", sell_amount: 1237818, sell_date: "2026-08-07" },
-                    { name: "대신밸런스제16호스팩", type: "청산", buy_amount: 3002710, buy_date: "2026-01-08", sell_amount: 3089163, sell_date: "2026-08-07" },
-                    { name: "유안타제11호스팩", type: "청산", buy_amount: 2001270, buy_date: "2025-10-22", sell_amount: 2068674, sell_date: "2026-08-05" },
-                    { name: "한화플러스제4호스팩", type: "청산", buy_amount: 2000615, buy_date: "2025-10-22", sell_amount: 2080145, sell_date: "2026-08-07" },
-                    { name: "신한제11호스팩", type: "청산", buy_amount: 2000615, buy_date: "2025-10-22", sell_amount: 2077506, sell_date: "2026-08-20" },
-                    { name: "신한제11호스팩", type: "청산", buy_amount: 2077520, buy_date: "2025-07-04", sell_amount: 2209103, sell_date: "2026-08-20" },
-                    { name: "신한제11호스팩", type: "청산", buy_amount: 96909, buy_date: "2024-04-23", sell_amount: 105709, sell_date: "2026-08-20" },
-                    { name: "케이비제27호스팩", type: "청산", buy_amount: 6274985, buy_date: "2025-11-14", sell_amount: 6532654, sell_date: "2026-09-28" },
-                    { name: "케이비제27호스팩", type: "청산", buy_amount: 2161997, buy_date: "2025-10-31", sell_amount: 2250782, sell_date: "2026-09-28" },
-                    { name: "케이비제27호스팩", type: "청산", buy_amount: 1480850, buy_date: "2025-10-23", sell_amount: 1546470, sell_date: "2026-09-28" },
-                    { name: "케이비제27호스팩", type: "청산", buy_amount: 541670, buy_date: "2025-10-29", sell_amount: 564310, sell_date: "2026-09-28" },
-                    { name: "한화플러스제5호스팩", type: "매매", buy_amount: 4959129, buy_date: "2026-02-23", sell_amount: 5986913, sell_date: "2026-09-29" },
-                    { name: "하이제8호스팩", type: "청산", buy_amount: 2003400, buy_date: "2025-09-05", sell_amount: 2084599, sell_date: "2026-04-28" }
+                    { name: "에스케이증권제9호스팩", type: "청산", buy_amount: 2000430, buy_date: "2025-10-27", sell_amount: 2058677, sell_date: "2026-06-24" }
                 ];
-                localStorage.setItem('spac_performance_items_v3', JSON.stringify(performanceItems));
             }
         }
 
         // =========================================================
-        // 성과 관리 로직
+        // 종목 분석 탭 필터링 및 렌더링 로직
         // =========================================================
-        function addPerformanceItem(event) {
-            event.preventDefault();
-            const newItem = {
-                name: document.getElementById('input-name').value.trim(),
-                type: document.getElementById('input-type').value,
-                buy_amount: Number(document.getElementById('input-buy-amount').value),
-                buy_date: document.getElementById('input-buy-date').value,
-                sell_amount: Number(document.getElementById('input-sell-amount').value),
-                sell_date: document.getElementById('input-sell-date').value
-            };
+        let currentSortColumn = 'current_price';
+        let currentSortDirection = 'asc';
 
-            performanceItems.unshift(newItem);
-            localStorage.setItem('spac_performance_items_v3', JSON.stringify(performanceItems));
-            
-            document.getElementById('input-name').value = '';
-            document.getElementById('input-buy-amount').value = '';
-            document.getElementById('input-buy-date').value = '';
-            document.getElementById('input-sell-amount').value = '';
-            document.getElementById('input-sell-date').value = '';
-
-            renderPerformance();
-            alert('성과 내역이 추가되었습니다.');
-        }
-
-        function deletePerformanceItem(index) {
-            if (confirm('해당 성과 내역을 삭제하시겠습니까?')) {
-                performanceItems.splice(index, 1);
-                localStorage.setItem('spac_performance_items_v3', JSON.stringify(performanceItems));
-                renderPerformance();
-            }
-        }
-
-        function sortPerformanceData(column) {
-            if (perfSortColumn === column) {
-                perfSortDirection = perfSortDirection === 'asc' ? 'desc' : 'asc';
-            } else {
-                perfSortColumn = column;
-                perfSortDirection = (column === 'name' || column === 'type' || column === 'buy_date' || column === 'sell_date') ? 'asc' : 'desc';
-            }
-            renderPerformance();
-        }
-
-        function updatePerfSortIcons() {
-            const columns = ['name', 'type', 'buy_amount', 'buy_date', 'sell_amount', 'sell_date', 'pnl', 'simpleYield', 'annualYield'];
-            columns.forEach(col => {
-                const iconEl = document.getElementById(`perf-sort-icon-${col}`);
-                if (iconEl) {
-                    if (perfSortColumn === col) {
-                        iconEl.innerText = perfSortDirection === 'asc' ? ' ▲' : ' ▼';
-                        iconEl.className = 'text-indigo-600 font-bold';
-                    } else {
-                        iconEl.innerText = ' ↕';
-                        iconEl.className = 'text-slate-400';
-                    }
-                }
-            });
-        }
-
-        function renderPerformance() {
-            if (!isUnlocked) return;
-
-            const yearFilter = document.getElementById('perf-filter-year').value;
-            const typeFilter = document.getElementById('perf-filter-type').value;
-            const benchmarkFilter = document.getElementById('perf-filter-benchmark').value;
-            const searchQuery = document.getElementById('perf-search-input').value.toLowerCase();
-
-            const tbody = document.getElementById('perf-table-body');
-            tbody.innerHTML = '';
-
-            const enriched = performanceItems.map((item, idx) => {
-                const pnl = item.sell_amount - item.buy_amount;
-                const simpleYield = (pnl / item.buy_amount) * 100;
-                
-                const d1 = new Date(item.buy_date);
-                const d2 = new Date(item.sell_date);
-                const diffDays = Math.max(1, Math.round((d2 - d1) / (1000 * 60 * 60 * 24)));
-                
-                const singleAnnual = calculateSingleAnnualYield(item.buy_amount, item.sell_amount, d1, d2);
-
-                const bokRate = getBokRateForDate(item.buy_date);
-                const isBeat = singleAnnual >= bokRate;
-
-                return { ...item, origIndex: idx, pnl, simpleYield, annualYield: singleAnnual, bokRate, isBeat, diffDays };
-            });
-
-            let filtered = enriched.filter(item => {
-                if (searchQuery && !item.name.toLowerCase().includes(searchQuery)) return false;
-                if (typeFilter !== 'all' && item.type !== typeFilter) return false;
-                if (yearFilter !== 'all') {
-                    if (!item.sell_date || !item.sell_date.startsWith(yearFilter)) return false;
-                }
-                if (benchmarkFilter === 'beat' && !item.isBeat) return false;
-                if (benchmarkFilter === 'miss' && item.isBeat) return false;
-                return true;
-            });
-
-            filtered.sort((a, b) => {
-                let valA = a[perfSortColumn];
-                let valB = b[perfSortColumn];
-
-                if (typeof valA === 'string') {
-                    return perfSortDirection === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
-                } else {
-                    return perfSortDirection === 'asc' ? valA - valB : valB - valA;
-                }
-            });
-
-            updatePerfSortIcons();
-
-            let totalPnl = 0;
-            let totalBuy = 0;
-            let totalCashFlows = [];
-
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="10" class="py-12 text-center text-slate-400 font-normal">조건에 일치하는 성과 내역이 없습니다.</td></tr>`;
-                document.getElementById('perf-total-pnl').innerText = '0 원';
-                document.getElementById('perf-avg-simple').innerText = '0.00 %';
-                document.getElementById('perf-avg-annual').innerText = '0.00 %';
-                return;
-            }
-
-            filtered.forEach(item => {
-                totalPnl += item.pnl;
-                totalBuy += item.buy_amount;
-
-                totalCashFlows.push({ date: new Date(item.buy_date), amount: -item.buy_amount });
-                totalCashFlows.push({ date: new Date(item.sell_date), amount: item.sell_amount });
-
-                const pnlColor = item.pnl >= 0 ? 'text-emerald-600 font-bold' : 'text-rose-500 font-bold';
-                const simpleColor = item.simpleYield >= 0 ? 'text-slate-700' : 'text-rose-500';
-                const annualColor = item.isBeat ? 'text-emerald-600 font-extrabold' : 'text-rose-500 font-extrabold';
-                const diffRate = (item.annualYield - item.bokRate).toFixed(2);
-                const diffBadge = item.isBeat 
-                    ? `<span class="ml-1 text-[10px] bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded">+${diffRate}%p</span>`
-                    : `<span class="ml-1 text-[10px] bg-rose-50 text-rose-600 px-1.5 py-0.5 rounded">${diffRate}%p</span>`;
-
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50/80 transition-colors";
-                tr.innerHTML = `
-                    <td class="py-4 px-5 font-bold text-slate-900">${item.name}</td>
-                    <td class="py-4 px-4"><span class="px-2.5 py-1 text-xs rounded-full font-semibold ${item.type === '청산' ? 'bg-amber-50 text-amber-700 border border-amber-200/50' : 'bg-purple-50 text-purple-700 border border-purple-200/50'}">${item.type}</span></td>
-                    <td class="py-4 px-5 text-slate-600">${item.buy_amount.toLocaleString()}원</td>
-                    <td class="py-4 px-4 text-slate-500 text-xs">${item.buy_date}</td>
-                    <td class="py-4 px-5 text-slate-600">${item.sell_amount.toLocaleString()}원</td>
-                    <td class="py-4 px-4 text-slate-500 text-xs">${item.sell_date}</td>
-                    <td class="py-4 px-5 ${pnlColor}">${item.pnl > 0 ? '+' : ''}${item.pnl.toLocaleString()}원</td>
-                    <td class="py-4 px-4 ${simpleColor} font-semibold">${item.simpleYield.toFixed(2)}%</td>
-                    <td class="py-4 px-5 ${annualColor}">${item.annualYield.toFixed(2)}% ${diffBadge}</td>
-                    <td class="py-4 px-4 text-center"><button onclick="deletePerformanceItem(${item.origIndex})" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-2.5 py-1 rounded-lg transition-colors">삭제</button></td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            const totalSimpleYield = totalBuy > 0 ? (totalPnl / totalBuy) * 100 : 0;
-            const overallAnnual = calculateXIRR(totalCashFlows);
-
-            const totalPnlEl = document.getElementById('perf-total-pnl');
-            totalPnlEl.innerText = (totalPnl >= 0 ? '+' : '') + totalPnl.toLocaleString() + ' 원';
-            totalPnlEl.className = totalPnl >= 0 ? 'text-3xl sm:text-4xl font-black text-emerald-600 truncate' : 'text-3xl sm:text-4xl font-black text-rose-500 truncate';
-
-            document.getElementById('perf-avg-simple').innerText = totalSimpleYield.toFixed(2) + ' %';
-            document.getElementById('perf-avg-annual').innerText = overallAnnual.toFixed(2) + ' %';
-        }
-
-        // =========================================================
-        // 종목 분석 로직
-        // =========================================================
         function updateSummaryStats(items) {
-            const depositRate = items.length > 0 && items[0].deposit_rate ? items[0].deposit_rate : 3.2;
-            const accountType = document.getElementById('filter-account').value;
-
-            const validItems = items.filter(i => i.current_price > 0);
-            document.getElementById('stat-total-count').innerText = `${validItems.length} 개`;
-
-            const mergerMatch = validItems.filter(i => {
-                const y = accountType === 'isa' ? i.yield_isa : i.yield_general;
-                return i.invest_type === '합병' && i.status === '일반' && i.is_fair_buy === 'O' && y >= 0;
-            });
-            document.getElementById('stat-merger-count').innerText = `${mergerMatch.length} 개`;
-
-            const liqMatch = validItems.filter(i => {
-                const y = accountType === 'isa' ? i.yield_isa : i.yield_general;
-                return i.invest_type === '청산' && i.status === '일반' && i.is_fair_buy === 'O' && y >= depositRate;
-            });
-            document.getElementById('stat-liq-count').innerText = `${liqMatch.length} 개`;
+            document.getElementById('stat-total-count').innerText = items.length + ' 개';
+            const mergerFairCount = items.filter(i => i.invest_type === '합병' && i.is_fair_buy === 'O' && (i.yield_isa > 0 || i.yield_general > 0)).length;
+            const liqFairCount = items.filter(i => i.invest_type === '청산' && i.is_fair_buy === 'O').length;
+            document.getElementById('stat-merger-count').innerText = mergerFairCount + ' 개';
+            document.getElementById('stat-liq-count').innerText = liqFairCount + ' 개';
+            updateRecommendations(items);
         }
 
         function updateRecommendations(items) {
-            const validItems = items.filter(i => i.is_fair_buy === 'O' && i.status === '일반');
-            const depositRate = items.length > 0 && items[0].deposit_rate ? items[0].deposit_rate : 3.2;
+            const isIsa = document.getElementById('filter-account').value === 'isa';
+            const getYield = (item) => isIsa ? item.yield_isa : item.yield_general;
+            const baseRate = allItems.length > 0 && allItems[0].deposit_rate ? allItems[0].deposit_rate : 2.4;
 
-            const mergerItems = validItems.filter(i => i.invest_type === '합병');
-            setCardData('rec-merger-high-isa', mergerItems.filter(i => i.yield_isa >= depositRate).sort((a, b) => b.yield_isa - a.yield_isa)[0], 'isa');
-            setCardData('rec-merger-high-gen', mergerItems.filter(i => i.yield_general >= depositRate).sort((a, b) => b.yield_general - a.yield_general)[0], 'general');
-            setCardData('rec-merger-mid-isa', mergerItems.filter(i => i.yield_isa >= 0 && i.yield_isa < depositRate).sort((a, b) => b.yield_isa - a.yield_isa)[0], 'isa');
-            setCardData('rec-merger-mid-gen', mergerItems.filter(i => i.yield_general >= 0 && i.yield_general < depositRate).sort((a, b) => b.yield_general - a.yield_general)[0], 'general');
+            const mergerItems = items.filter(i => i.invest_type === '합병' && i.is_fair_buy === 'O' && i.status === '일반');
+            const liqItems = items.filter(i => i.invest_type === '청산' && i.is_fair_buy === 'O' && i.status === '일반');
 
-            const liqItems = validItems.filter(i => i.invest_type === '청산');
-            setCardData('rec-liq-high-isa', liqItems.filter(i => i.yield_isa >= depositRate).sort((a, b) => b.yield_isa - a.yield_isa)[0], 'isa');
-            setCardData('rec-liq-high-gen', liqItems.filter(i => i.yield_general >= depositRate).sort((a, b) => b.yield_general - a.yield_general)[0], 'general');
-            setCardData('rec-liq-mid-isa', liqItems.filter(i => i.yield_isa >= 0 && i.yield_isa < depositRate).sort((a, b) => b.yield_isa - a.yield_isa)[0], 'isa');
-            setCardData('rec-liq-mid-gen', liqItems.filter(i => i.yield_general >= 0 && i.yield_general < depositRate).sort((a, b) => b.yield_general - a.yield_general)[0], 'general');
+            const mergerHigh = mergerItems.filter(i => getYield(i) >= baseRate).sort((a,b) => getYield(b) - getYield(a));
+            const mergerMid = mergerItems.filter(i => getYield(i) >= 0 && getYield(i) < baseRate).sort((a,b) => getYield(b) - getYield(a));
+
+            const liqHigh = liqItems.filter(i => getYield(i) >= baseRate).sort((a,b) => getYield(b) - getYield(a));
+            const liqMid = liqItems.filter(i => getYield(i) >= 0 && getYield(i) < baseRate).sort((a,b) => getYield(b) - getYield(a));
+
+            fillRecCard('merger-high', mergerHigh[0], isIsa);
+            fillRecCard('merger-mid', mergerMid[0], isIsa);
+            fillRecCard('liq-high', liqHigh[0], isIsa);
+            fillRecCard('liq-mid', liqMid[0], isIsa);
         }
 
-        function setCardData(prefix, item, accType) {
-            if (item) {
-                document.getElementById(`${prefix}-name`).innerText = item.name;
-                document.getElementById(`${prefix}-price`).innerText = item.current_price.toLocaleString() + '원';
-                const targetY = accType === 'isa' ? item.yield_isa : item.yield_general;
-                document.getElementById(`${prefix}-yield`).innerText = targetY + '%';
-                document.getElementById(`${prefix}-liq`).innerText = item.liquidation_price.toLocaleString() + '원';
-            } else {
-                document.getElementById(`${prefix}-name`).innerText = '조건 만족 종목 없음';
-                document.getElementById(`${prefix}-price`).innerText = '-';
-                document.getElementById(`${prefix}-yield`).innerText = '-';
-                document.getElementById(`${prefix}-liq`).innerText = '-';
+        function fillRecCard(prefix, item, isIsa) {
+            const nameEl = document.getElementById(`rec-${prefix}-${isIsa ? 'isa' : 'gen'}-name`);
+            const priceEl = document.getElementById(`rec-${prefix}-${isIsa ? 'isa' : 'gen'}-price`);
+            const yieldEl = document.getElementById(`rec-${prefix}-${isIsa ? 'isa' : 'gen'}-yield`);
+            const liqEl = document.getElementById(`rec-${prefix}-${isIsa ? 'isa' : 'gen'}-liq`);
+
+            const otherIsaName = document.getElementById(`rec-${prefix}-isa-name`);
+            const otherGenName = document.getElementById(`rec-${prefix}-gen-name`);
+
+            if (!item) {
+                if (otherIsaName) otherIsaName.innerText = '-';
+                if (otherGenName) otherGenName.innerText = '-';
+                if (priceEl) priceEl.innerText = '-';
+                if (yieldEl) yieldEl.innerText = '-';
+                if (liqEl) liqEl.innerText = '-';
+                return;
             }
-        }
 
-        let currentSortColumn = 'yield';
-        let currentSortDirection = 'desc';
+            const yVal = isIsa ? item.yield_isa : item.yield_general;
+            if (otherIsaName) otherIsaName.innerText = item.name;
+            if (otherGenName) otherGenName.innerText = item.name;
+            if (priceEl) priceEl.innerText = item.current_price.toLocaleString() + '원';
+            if (yieldEl) yieldEl.innerText = yVal.toFixed(2) + '%';
+            if (liqEl) liqEl.innerText = item.liquidation_price.toLocaleString() + '원';
+        }
 
         function sortData(column) {
             if (currentSortColumn === column) {
                 currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
             } else {
                 currentSortColumn = column;
-                currentSortDirection = (column === 'name' || column === 'invest_type' || column === 'status' || column === 'delisting_date') ? 'asc' : 'desc';
+                currentSortDirection = (column === 'name' || column === 'invest_type' || column === 'delisting_date' || column === 'status') ? 'asc' : 'desc';
             }
             applyFilters();
         }
@@ -1272,80 +1238,42 @@
             });
         }
 
-        function renderTable(items, accountType) {
-            const tbody = document.getElementById('spac-table-body');
-            tbody.innerHTML = '';
+        function applyFilters() {
+            const typeVal = document.getElementById('filter-type').value;
+            const fairVal = document.getElementById('filter-fair').value;
+            const statusVal = document.getElementById('filter-status').value;
+            const accountVal = document.getElementById('filter-account').value;
+            const delYearVal = document.getElementById('filter-delisting-year').value;
+            const yieldRangeVal = document.getElementById('filter-yield-range').value;
+            const searchVal = document.getElementById('search-input').value.trim().toLowerCase();
 
             const yieldHeader = document.getElementById('yield-header-col');
-            yieldHeader.innerText = accountType === 'isa' ? '예상수익률 (ISA)' : '예상수익률 (일반)';
-
-            if (items.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="py-12 text-center text-slate-400 font-normal">조건에 일치하는 종목이 없습니다.</td></tr>`;
-                return;
+            if (yieldHeader) {
+                yieldHeader.innerText = accountVal === 'isa' ? '예상수익률 (ISA)' : '예상수익률 (일반)';
             }
 
-            items.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50/80 transition-colors";
-                
-                const targetYield = accountType === 'isa' ? item.yield_isa : item.yield_general;
-                const yieldColorClass = targetYield < 0 ? 'text-rose-500 font-bold' : 'text-emerald-600 font-bold';
-                
-                let statusBadgeClass = 'text-slate-500';
-                if (item.status === '정지') statusBadgeClass = 'bg-rose-50 text-rose-600 font-bold border border-rose-200 px-2 py-1 rounded-md text-xs';
-                else if (item.status === '합병') statusBadgeClass = 'bg-purple-50 text-purple-700 font-bold border border-purple-200 px-2 py-1 rounded-md text-xs';
-
-                tr.innerHTML = `
-                    <td class="py-4 px-6 font-bold text-slate-900">${item.name}</td>
-                    <td class="py-4 px-6 text-slate-600">${item.current_price > 0 ? item.current_price.toLocaleString() + '원' : '-'}</td>
-                    <td class="py-4 px-6 text-slate-600">${item.liquidation_price.toLocaleString()}원</td>
-                    <td class="py-4 px-6"><span class="font-bold ${item.is_fair_buy === 'O' ? 'text-indigo-600' : 'text-slate-400'}">${item.is_fair_buy}</span></td>
-                    <td class="py-4 px-6"><span class="px-2.5 py-1 text-xs rounded-full font-semibold ${item.invest_type === '합병' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/50' : 'bg-amber-50 text-amber-700 border border-amber-200/50'}">${item.invest_type}</span></td>
-                    <td class="py-4 px-6 ${yieldColorClass}">${targetYield}%</td>
-                    <td class="py-4 px-6 text-slate-600 text-xs font-semibold">${item.delisting_date || '-'}</td>
-                    <td class="py-4 px-6"><span class="${statusBadgeClass}">${item.status}</span></td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function applyFilters() {
-            const typeFilter = document.getElementById('filter-type').value;
-            const fairFilter = document.getElementById('filter-fair').value;
-            const statusFilter = document.getElementById('filter-status').value;
-            const accountType = document.getElementById('filter-account').value;
-            const yearFilter = document.getElementById('filter-delisting-year').value;
-            const yieldRange = document.getElementById('filter-yield-range').value;
-            const searchQuery = document.getElementById('search-input').value.toLowerCase();
-
-            updateSummaryStats(allItems);
-            updateRecommendations(allItems);
+            const baseRate = allItems.length > 0 && allItems[0].deposit_rate ? allItems[0].deposit_rate : 2.4;
 
             let filtered = allItems.filter(item => {
-                if (searchQuery && !item.name.toLowerCase().includes(searchQuery)) return false;
-                if (typeFilter !== 'all' && item.invest_type !== typeFilter) return false;
-                if (fairFilter !== 'all' && item.is_fair_buy !== fairFilter) return false;
-                if (statusFilter !== 'all' && item.status !== statusFilter) return false;
-                
-                if (yearFilter !== 'all') {
-                    if (!item.delisting_date || !item.delisting_date.startsWith(yearFilter)) return false;
-                }
+                if (typeVal !== 'all' && item.invest_type !== typeVal) return false;
+                if (fairVal !== 'all' && item.is_fair_buy !== fairVal) return false;
+                if (statusVal !== 'all' && item.status !== statusVal) return false;
+                if (delYearVal !== 'all' && (!item.delisting_date || !item.delisting_date.startsWith(delYearVal))) return false;
 
-                const currentYield = accountType === 'isa' ? item.yield_isa : item.yield_general;
-                const depositRate = item.deposit_rate || 3.2;
+                const yVal = accountVal === 'isa' ? item.yield_isa : item.yield_general;
+                if (yieldRangeVal === 'above_deposit' && yVal < baseRate) return false;
+                if (yieldRangeVal === 'low_positive' && (yVal < 0 || yVal >= baseRate)) return false;
+                if (yieldRangeVal === 'negative' && yVal >= 0) return false;
 
-                if (yieldRange === 'above_deposit' && currentYield < depositRate) return false;
-                if (yieldRange === 'low_positive' && (currentYield < 0 || currentYield >= depositRate)) return false;
-                if (yieldRange === 'negative' && currentYield >= 0) return false;
-
+                if (searchVal && !item.name.toLowerCase().includes(searchVal)) return false;
                 return true;
             });
 
             filtered.sort((a, b) => {
                 let valA, valB;
                 if (currentSortColumn === 'yield') {
-                    valA = accountType === 'isa' ? a.yield_isa : a.yield_general;
-                    valB = accountType === 'isa' ? b.yield_isa : b.yield_general;
+                    valA = accountVal === 'isa' ? a.yield_isa : a.yield_general;
+                    valB = accountVal === 'isa' ? b.yield_isa : b.yield_general;
                 } else {
                     valA = a[currentSortColumn];
                     valB = b[currentSortColumn];
@@ -1359,10 +1287,52 @@
             });
 
             updateSortIcons();
-            renderTable(filtered, accountType);
+            renderTable(filtered, accountVal);
+            updateSummaryStats(allItems);
         }
 
-        loadSpacData();
+        function renderTable(items, accountVal) {
+            const tbody = document.getElementById('spac-table-body');
+            tbody.innerHTML = '';
+
+            if (items.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="py-12 text-center text-slate-400 font-normal">조건에 일치하는 스팩 종목이 없습니다.</td></tr>`;
+                return;
+            }
+
+            items.forEach(item => {
+                const yVal = accountVal === 'isa' ? item.yield_isa : item.yield_general;
+                const fairBadge = item.is_fair_buy === 'O' 
+                    ? `<span class="bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded text-xs">O</span>` 
+                    : `<span class="bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-xs">X</span>`;
+
+                const typeBadge = item.invest_type === '청산'
+                    ? `<span class="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded font-semibold">청산</span>`
+                    : `<span class="bg-indigo-50 text-indigo-700 text-xs px-2 py-0.5 rounded font-semibold">합병</span>`;
+
+                const statusBadge = item.status === '일반'
+                    ? `<span class="text-slate-700 font-normal">일반</span>`
+                    : `<span class="bg-rose-50 text-rose-600 text-xs px-2 py-0.5 rounded font-bold">${item.status}</span>`;
+
+                const yieldColor = yVal >= 0 ? 'text-emerald-600 font-bold' : 'text-rose-500 font-bold';
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition-colors";
+                tr.innerHTML = `
+                    <td class="py-4 px-6 font-bold text-slate-900">${item.name}</td>
+                    <td class="py-4 px-6 text-slate-700 font-semibold">${item.current_price.toLocaleString()}원</td>
+                    <td class="py-4 px-6 text-slate-600">${item.liquidation_price.toLocaleString()}원</td>
+                    <td class="py-4 px-6 text-center">${fairBadge}</td>
+                    <td class="py-4 px-6">${typeBadge}</td>
+                    <td class="py-4 px-6 ${yieldColor}">${yVal.toFixed(2)}%</td>
+                    <td class="py-4 px-6 text-slate-500 text-xs">${item.delisting_date || '-'}</td>
+                    <td class="py-4 px-6">${statusBadge}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        window.onload = loadSpacData;
     </script>
 </body>
 </html>
