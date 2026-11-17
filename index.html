@@ -21,10 +21,13 @@
             <div class="flex items-center gap-3 flex-wrap">
                 <!-- 탭 전환 버튼 -->
                 <div class="bg-slate-200/80 p-1 rounded-xl flex gap-1">
-                    <button id="tab-btn-dashboard" onclick="switchTab('dashboard')" class="px-4 py-2 rounded-lg text-xs font-extrabold transition-all bg-white text-indigo-600 shadow-sm">
+                    <button id="tab-btn-dashboard" onclick="switchTab('dashboard')" class="px-3.5 py-2 rounded-lg text-xs font-extrabold transition-all bg-white text-indigo-600 shadow-sm">
                         📊 종목 분석
                     </button>
-                    <button id="tab-btn-performance" onclick="switchTab('performance')" class="px-4 py-2 rounded-lg text-xs font-extrabold transition-all text-slate-600 hover:text-slate-900">
+                    <button id="tab-btn-holdings" onclick="switchTab('holdings')" class="px-3.5 py-2 rounded-lg text-xs font-extrabold transition-all text-slate-600 hover:text-slate-900">
+                        📂 보유 종목 🔒
+                    </button>
+                    <button id="tab-btn-performance" onclick="switchTab('performance')" class="px-3.5 py-2 rounded-lg text-xs font-extrabold transition-all text-slate-600 hover:text-slate-900">
                         💰 성과 관리 🔒
                     </button>
                 </div>
@@ -246,15 +249,109 @@
         </div>
 
         <!-- ========================================================= -->
-        <!-- TAB 2: 성과 관리 뷰                                        -->
+        <!-- TAB 2: 보유 종목 뷰                                        -->
+        <!-- ========================================================= -->
+        <div id="view-holdings" class="hidden">
+            <!-- 비밀번호 잠금 모달 영역 -->
+            <div id="holdings-lock-screen" class="bg-white p-10 rounded-2xl shadow-sm border border-slate-200 text-center max-w-md mx-auto my-20">
+                <div class="text-4xl mb-4">🔒</div>
+                <h2 class="text-xl font-extrabold text-slate-800 mb-2">보유 종목 탭 보호</h2>
+                <p class="text-xs text-slate-500 mb-6">보유 종목에 접근하려면 비밀번호를 입력해주세요.</p>
+                <form onsubmit="unlockPrivateTabs(event, 'holdings')" class="space-y-4">
+                    <input type="password" id="holdings-password-input" placeholder="비밀번호 4자리 입력" maxlength="4" class="w-full px-4 py-3 text-center text-lg tracking-widest border border-slate-300 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                    <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors shadow-sm">잠금 해제</button>
+                </form>
+            </div>
+
+            <!-- 실제 보유 종목 콘텐츠 -->
+            <div id="holdings-content" class="hidden">
+                <!-- 1. 보유 종목 요약 카드 -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">총 매수 원금</span>
+                        <div id="hold-total-buy" class="text-2xl sm:text-3xl font-black text-slate-800 truncate">- 원</div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                        <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider block mb-1">현재 추정 평가금액</span>
+                        <div id="hold-total-eval" class="text-2xl sm:text-3xl font-black text-indigo-600 truncate">- 원</div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                        <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider block mb-1">보유 종목 수</span>
+                        <div id="hold-total-count" class="text-2xl sm:text-3xl font-black text-emerald-600 truncate">- 개</div>
+                    </div>
+                </div>
+
+                <!-- 2. 보유 종목 추가 폼 -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="text-base font-bold text-slate-800">📥 보유 종목 등록하기</h2>
+                            <p class="text-xs text-slate-400 mt-0.5">종목 분석 탭의 현재가와 연동되어 오늘 기준 연환산 수익률과 매수 당시 예금 금리를 비교해 줍니다.</p>
+                        </div>
+                        <button onclick="lockPrivateTabs()" class="text-xs text-rose-500 hover:underline font-semibold">🔒 다시 잠그기</button>
+                    </div>
+                    <form onsubmit="addHoldingItem(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                        <div class="lg:col-span-2">
+                            <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">종목명</label>
+                            <input type="text" id="hold-input-name" list="spac-name-list" placeholder="종목명 입력 또는 선택" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                            <datalist id="spac-name-list"></datalist>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">계좌</label>
+                            <select id="hold-input-account" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                                <option value="ISA">ISA</option>
+                                <option value="일반">일반</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">총 매수금액 (원)</label>
+                            <input type="number" id="hold-input-amount" placeholder="예: 2005000" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매수일</label>
+                            <input type="date" id="hold-input-date" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                        </div>
+                        <div class="lg:col-span-5 flex justify-end mt-1">
+                            <button type="submit" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-colors shadow-sm">➕ 보유 종목 추가</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 3. 보유 종목 테이블 -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200 select-none">
+                                    <th class="py-4 px-5 font-bold">종목명</th>
+                                    <th class="py-4 px-4 font-bold">계좌</th>
+                                    <th class="py-4 px-5 font-bold">매수금액</th>
+                                    <th class="py-4 px-4 font-bold">매수일 (보유일)</th>
+                                    <th class="py-4 px-5 font-bold">현재가</th>
+                                    <th class="py-4 px-5 font-bold">현재 평가금액 (추정)</th>
+                                    <th class="py-4 px-5 font-bold">현재 기준 연환산 (예금 비교)</th>
+                                    <th class="py-4 px-4 font-bold text-center">관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="holdings-table-body" class="divide-y divide-slate-100 text-sm font-medium text-slate-700">
+                                <!-- 동적 삽입 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- TAB 3: 성과 관리 뷰                                        -->
         <!-- ========================================================= -->
         <div id="view-performance" class="hidden">
             <!-- 비밀번호 잠금 모달 영역 -->
             <div id="perf-lock-screen" class="bg-white p-10 rounded-2xl shadow-sm border border-slate-200 text-center max-w-md mx-auto my-20">
                 <div class="text-4xl mb-4">🔒</div>
-                <h2 class="text-xl font-extrabold text-slate-800 mb-2">성과관리 탭 보호</h2>
-                <p class="text-xs text-slate-500 mb-6">성과관리 탭에 접근하려면 비밀번호를 입력해주세요.</p>
-                <form onsubmit="unlockPerformance(event)" class="space-y-4">
+                <h2 class="text-xl font-extrabold text-slate-800 mb-2">성과 관리 탭 보호</h2>
+                <p class="text-xs text-slate-500 mb-6">성과 관리 탭에 접근하려면 비밀번호를 입력해주세요.</p>
+                <form onsubmit="unlockPrivateTabs(event, 'performance')" class="space-y-4">
                     <input type="password" id="perf-password-input" placeholder="비밀번호 4자리 입력" maxlength="4" class="w-full px-4 py-3 text-center text-lg tracking-widest border border-slate-300 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
                     <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors shadow-sm">잠금 해제</button>
                 </form>
@@ -262,7 +359,7 @@
 
             <!-- 실제 성과 콘텐츠 (비밀번호 해제 시 노출) -->
             <div id="perf-content" class="hidden">
-                <!-- 1. 최상단 요약 카드 바 (1행: 실현손익 단독 / 2행: 단순 & 연환산 좌우 1x2 고정) -->
+                <!-- 1. 최상단 요약 카드 바 -->
                 <div class="space-y-3 mb-6">
                     <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">전체 실현손익금액</span>
@@ -287,7 +384,7 @@
                             <h2 class="text-base font-bold text-slate-800">📝 성과 내역 직접 추가하기</h2>
                             <p class="text-xs text-slate-400 mt-0.5">매수일을 입력하면 해당 시점의 한국은행 정기예금 금리가 자동으로 조회되어 비교됩니다.</p>
                         </div>
-                        <button onclick="lockPerformance()" class="text-xs text-rose-500 hover:underline font-semibold">🔒 다시 잠그기</button>
+                        <button onclick="lockPrivateTabs()" class="text-xs text-rose-500 hover:underline font-semibold">🔒 다시 잠그기</button>
                     </div>
                     <form onsubmit="addPerformanceItem(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
                         <div>
@@ -386,8 +483,41 @@
         </div>
     </div>
 
+    <!-- ========================================================= -->
+    <!-- 매도 완료 처리 모달 (보유 종목 -> 성과 관리 자동 이관)       -->
+    <!-- ========================================================= -->
+    <div id="sell-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden flex items-center justify-center z-50 px-4">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-md w-full p-6">
+            <h3 class="text-lg font-extrabold text-slate-800 mb-1">💰 매도 완료 및 성과 기록</h3>
+            <p id="sell-modal-subtitle" class="text-xs text-slate-500 mb-5">실제 매도된 총 금액을 입력하면 성과 관리 탭으로 자동 이관됩니다.</p>
+            <form onsubmit="confirmSellHolding(event)" class="space-y-4">
+                <input type="hidden" id="sell-modal-index">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">구분</label>
+                    <select id="sell-modal-type" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                        <option value="매매">매매 (중도 매도)</option>
+                        <option value="청산">청산 (예치금 반환)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">실제 매도 총금액 (원)</label>
+                    <input type="number" id="sell-modal-amount" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-bold text-slate-800" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매도일 (자동 입력)</label>
+                    <input type="date" id="sell-modal-date" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeSellModal()" class="px-4 py-2.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">취소</button>
+                    <button type="submit" class="px-5 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors shadow-sm">성과 관리로 이관</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         let allItems = [];
+        let holdingItems = [];
         let performanceItems = [];
         let isUnlocked = false;
 
@@ -405,6 +535,14 @@
             "2026-05": 2.38, "2026-06": 2.35, "2026-07": 2.35, "2026-08": 2.35,
             "2026-09": 2.35, "2026-10": 2.35, "2026-11": 2.35
         };
+
+        function getTodayStr() {
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
 
         function calculateSingleAnnualYield(buyAmount, sellAmount, buyDate, sellDate) {
             if (!buyAmount || buyAmount <= 0 || !sellAmount || sellAmount <= 0) return -100;
@@ -483,78 +621,195 @@
         }
 
         function switchTab(tabName) {
-            const dashBtn = document.getElementById('tab-btn-dashboard');
-            const perfBtn = document.getElementById('tab-btn-performance');
-            const dashView = document.getElementById('view-dashboard');
-            const perfView = document.getElementById('view-performance');
+            const tabs = ['dashboard', 'holdings', 'performance'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-btn-${t}`);
+                const view = document.getElementById(`view-${t}`);
+                if (t === tabName) {
+                    btn.className = "px-3.5 py-2 rounded-lg text-xs font-extrabold transition-all bg-white text-indigo-600 shadow-sm";
+                    view.classList.remove('hidden');
+                } else {
+                    btn.className = "px-3.5 py-2 rounded-lg text-xs font-extrabold transition-all text-slate-600 hover:text-slate-900";
+                    view.classList.add('hidden');
+                }
+            });
 
-            if (tabName === 'dashboard') {
-                dashBtn.className = "px-4 py-2 rounded-lg text-xs font-extrabold transition-all bg-white text-indigo-600 shadow-sm";
-                perfBtn.className = "px-4 py-2 rounded-lg text-xs font-extrabold transition-all text-slate-600 hover:text-slate-900";
-                dashView.classList.remove('hidden');
-                perfView.classList.add('hidden');
-            } else {
-                perfBtn.className = "px-4 py-2 rounded-lg text-xs font-extrabold transition-all bg-white text-indigo-600 shadow-sm";
-                dashBtn.className = "px-4 py-2 rounded-lg text-xs font-extrabold transition-all text-slate-600 hover:text-slate-900";
-                perfView.classList.remove('hidden');
-                dashView.classList.add('hidden');
-                if (isUnlocked) renderPerformance();
-            }
+            if (tabName === 'holdings' && isUnlocked) renderHoldings();
+            if (tabName === 'performance' && isUnlocked) renderPerformance();
         }
 
-        function unlockPerformance(event) {
+        function unlockPrivateTabs(event, sourceTab) {
             event.preventDefault();
-            const pw = document.getElementById('perf-password-input').value;
+            const inputId = sourceTab === 'holdings' ? 'holdings-password-input' : 'perf-password-input';
+            const pw = document.getElementById(inputId).value;
             if (pw === '0913') {
                 isUnlocked = true;
+                document.getElementById('holdings-lock-screen').classList.add('hidden');
+                document.getElementById('holdings-content').classList.remove('hidden');
                 document.getElementById('perf-lock-screen').classList.add('hidden');
                 document.getElementById('perf-content').classList.remove('hidden');
+                renderHoldings();
                 renderPerformance();
             } else {
                 alert('비밀번호가 올바르지 않습니다.');
-                document.getElementById('perf-password-input').value = '';
+                document.getElementById(inputId).value = '';
             }
         }
 
-        function lockPerformance() {
+        function lockPrivateTabs() {
             isUnlocked = false;
+            document.getElementById('holdings-password-input').value = '';
             document.getElementById('perf-password-input').value = '';
+            document.getElementById('holdings-content').classList.add('hidden');
+            document.getElementById('holdings-lock-screen').classList.remove('hidden');
             document.getElementById('perf-content').classList.add('hidden');
             document.getElementById('perf-lock-screen').classList.remove('hidden');
         }
 
-        function addPerformanceItem(event) {
+        // =========================================================
+        // 보유 종목 관리 로직
+        // =========================================================
+        function addHoldingItem(event) {
             event.preventDefault();
             const newItem = {
-                name: document.getElementById('input-name').value.trim(),
-                type: document.getElementById('input-type').value,
-                buy_amount: Number(document.getElementById('input-buy-amount').value),
-                buy_date: document.getElementById('input-buy-date').value,
-                sell_amount: Number(document.getElementById('input-sell-amount').value),
-                sell_date: document.getElementById('input-sell-date').value
+                name: document.getElementById('hold-input-name').value.trim(),
+                account: document.getElementById('hold-input-account').value,
+                buy_amount: Number(document.getElementById('hold-input-amount').value),
+                buy_date: document.getElementById('hold-input-date').value
             };
 
-            performanceItems.unshift(newItem);
-            localStorage.setItem('spac_performance_items_v3', JSON.stringify(performanceItems));
-            
-            document.getElementById('input-name').value = '';
-            document.getElementById('input-buy-amount').value = '';
-            document.getElementById('input-buy-date').value = '';
-            document.getElementById('input-sell-amount').value = '';
-            document.getElementById('input-sell-date').value = '';
+            holdingItems.unshift(newItem);
+            localStorage.setItem('spac_holding_items_v1', JSON.stringify(holdingItems));
 
-            renderPerformance();
-            alert('성과 내역이 추가되었습니다.');
+            document.getElementById('hold-input-name').value = '';
+            document.getElementById('hold-input-amount').value = '';
+            document.getElementById('hold-input-date').value = '';
+
+            renderHoldings();
+            alert('보유 종목이 등록되었습니다.');
         }
 
-        function deletePerformanceItem(index) {
-            if (confirm('해당 성과 내역을 삭제하시겠습니까?')) {
-                performanceItems.splice(index, 1);
-                localStorage.setItem('spac_performance_items_v3', JSON.stringify(performanceItems));
-                renderPerformance();
+        function deleteHoldingItem(index) {
+            if (confirm('해당 보유 종목을 삭제하시겠습니까?')) {
+                holdingItems.splice(index, 1);
+                localStorage.setItem('spac_holding_items_v1', JSON.stringify(holdingItems));
+                renderHoldings();
             }
         }
 
+        function openSellModal(index, estimatedEval) {
+            const item = holdingItems[index];
+            document.getElementById('sell-modal-index').value = index;
+            document.getElementById('sell-modal-subtitle').innerText = `[${item.name}] 매수금 ${item.buy_amount.toLocaleString()}원 (${item.buy_date})`;
+            document.getElementById('sell-modal-amount').value = estimatedEval > 0 ? Math.round(estimatedEval) : item.buy_amount;
+            document.getElementById('sell-modal-date').value = getTodayStr();
+            document.getElementById('sell-modal').classList.remove('hidden');
+        }
+
+        function closeSellModal() {
+            document.getElementById('sell-modal').classList.add('hidden');
+        }
+
+        function confirmSellHolding(event) {
+            event.preventDefault();
+            const index = Number(document.getElementById('sell-modal-index').value);
+            const item = holdingItems[index];
+            if (!item) return;
+
+            const perfRecord = {
+                name: item.name,
+                type: document.getElementById('sell-modal-type').value,
+                buy_amount: item.buy_amount,
+                buy_date: item.buy_date,
+                sell_amount: Number(document.getElementById('sell-modal-amount').value),
+                sell_date: document.getElementById('sell-modal-date').value
+            };
+
+            // 성과 관리에 추가
+            performanceItems.unshift(perfRecord);
+            localStorage.setItem('spac_performance_items_v3', JSON.stringify(performanceItems));
+
+            // 보유 종목에서 제거
+            holdingItems.splice(index, 1);
+            localStorage.setItem('spac_holding_items_v1', JSON.stringify(holdingItems));
+
+            closeSellModal();
+            renderHoldings();
+            renderPerformance();
+            alert('매도 완료 처리되어 성과 관리 탭에 자동으로 기록되었습니다.');
+        }
+
+        function renderHoldings() {
+            if (!isUnlocked) return;
+
+            const tbody = document.getElementById('holdings-table-body');
+            tbody.innerHTML = '';
+
+            let totalBuy = 0;
+            let totalEval = 0;
+            const todayStr = getTodayStr();
+            const todayDate = new Date(todayStr);
+
+            if (holdingItems.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="py-12 text-center text-slate-400 font-normal">등록된 보유 종목이 없습니다. 위 폼에서 보유 중인 스팩을 추가해보세요.</td></tr>`;
+                document.getElementById('hold-total-buy').innerText = '0 원';
+                document.getElementById('hold-total-eval').innerText = '0 원';
+                document.getElementById('hold-total-count').innerText = '0 개';
+                return;
+            }
+
+            holdingItems.forEach((item, idx) => {
+                totalBuy += item.buy_amount;
+
+                // 종목 분석 탭 데이터와 매칭하여 현재가 조회
+                const matchedSpac = allItems.find(s => s.name === item.name);
+                const currentPrice = matchedSpac ? matchedSpac.current_price : 0;
+
+                // 스팩 공모가(2,000원) 기준 현재가 비율로 평가금 추정 (수량/단가 없이 금액만 입력할 때의 표준 환산)
+                const estimatedEval = currentPrice > 0 ? Math.round(item.buy_amount * (currentPrice / 2000)) : item.buy_amount;
+                totalEval += estimatedEval;
+
+                const buyDateObj = new Date(item.buy_date);
+                const diffDays = Math.max(1, Math.round((todayDate - buyDateObj) / (1000 * 60 * 60 * 24)));
+
+                const currentAnnual = calculateSingleAnnualYield(item.buy_amount, estimatedEval, buyDateObj, todayDate);
+                const bokRate = getBokRateForDate(item.buy_date);
+                const isBeat = currentAnnual >= bokRate;
+                const diffRate = (currentAnnual - bokRate).toFixed(2);
+
+                const evalDiff = estimatedEval - item.buy_amount;
+                const evalColor = evalDiff >= 0 ? 'text-emerald-600 font-bold' : 'text-rose-500 font-bold';
+                const annualColor = isBeat ? 'text-emerald-600 font-extrabold' : 'text-rose-500 font-extrabold';
+                const diffBadge = isBeat
+                    ? `<span class="ml-1 text-[10px] bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded">예금 대비 +${diffRate}%p</span>`
+                    : `<span class="ml-1 text-[10px] bg-rose-50 text-rose-600 px-1.5 py-0.5 rounded">예금 대비 ${diffRate}%p</span>`;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition-colors";
+                tr.innerHTML = `
+                    <td class="py-4 px-5 font-bold text-slate-900">${item.name}</td>
+                    <td class="py-4 px-4"><span class="px-2.5 py-1 text-xs rounded-full font-semibold ${item.account === 'ISA' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/50' : 'bg-slate-100 text-slate-700'}">${item.account}</span></td>
+                    <td class="py-4 px-5 text-slate-700 font-semibold">${item.buy_amount.toLocaleString()}원</td>
+                    <td class="py-4 px-4 text-slate-500 text-xs">${item.buy_date} <span class="text-slate-400">(${diffDays}일)</span></td>
+                    <td class="py-4 px-5 text-slate-700 font-semibold">${currentPrice > 0 ? currentPrice.toLocaleString() + '원' : '<span class="text-xs text-slate-400">미연동</span>'}</td>
+                    <td class="py-4 px-5 ${evalColor}">${estimatedEval.toLocaleString()}원 <span class="text-xs font-normal">(${evalDiff >= 0 ? '+' : ''}${evalDiff.toLocaleString()}원)</span></td>
+                    <td class="py-4 px-5 ${annualColor}">${currentAnnual.toFixed(2)}% ${diffBadge}</td>
+                    <td class="py-4 px-4 text-center space-x-1">
+                        <button onclick="openSellModal(${idx}, ${estimatedEval})" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1 rounded-lg transition-colors shadow-xs">매도 완료</button>
+                        <button onclick="deleteHoldingItem(${idx})" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-2 py-1 rounded-lg transition-colors">삭제</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('hold-total-buy').innerText = totalBuy.toLocaleString() + ' 원';
+            document.getElementById('hold-total-eval').innerText = totalEval.toLocaleString() + ' 원';
+            document.getElementById('hold-total-count').innerText = holdingItems.length + ' 개';
+        }
+
+        // =========================================================
+        // 데이터 로드 및 초기화
+        // =========================================================
         async function loadSpacData() {
             try {
                 const rateResp = await fetch('data/deposit_rates.json');
@@ -573,6 +828,12 @@
                     status: item.status === '정상' ? '일반' : item.status
                 }));
 
+                // 보유 종목 입력창 자동완성(datalist) 채우기
+                const datalist = document.getElementById('spac-name-list');
+                if (datalist) {
+                    datalist.innerHTML = allItems.map(i => `<option value="${i.name}">`).join('');
+                }
+
                 if (allItems.length > 0 && allItems[0].deposit_rate) {
                     document.getElementById('deposit-rate-badge').innerText = `기준 예금금리: 연 ${allItems[0].deposit_rate}%`;
                 }
@@ -583,6 +844,17 @@
                 document.getElementById('update-time').innerText = '데이터 로드 실패';
             }
 
+            // 보유 종목 로드
+            const savedHoldings = localStorage.getItem('spac_holding_items_v1');
+            if (savedHoldings) {
+                try {
+                    holdingItems = JSON.parse(savedHoldings);
+                } catch(e) {
+                    holdingItems = [];
+                }
+            }
+
+            // 성과 내역 로드
             const savedPerf = localStorage.getItem('spac_performance_items_v3');
             if (savedPerf) {
                 try {
@@ -659,6 +931,41 @@
                     { name: "하이제8호스팩", type: "청산", buy_amount: 2003400, buy_date: "2025-09-05", sell_amount: 2084599, sell_date: "2026-04-28" }
                 ];
                 localStorage.setItem('spac_performance_items_v3', JSON.stringify(performanceItems));
+            }
+        }
+
+        // =========================================================
+        // 성과 관리 로직
+        // =========================================================
+        function addPerformanceItem(event) {
+            event.preventDefault();
+            const newItem = {
+                name: document.getElementById('input-name').value.trim(),
+                type: document.getElementById('input-type').value,
+                buy_amount: Number(document.getElementById('input-buy-amount').value),
+                buy_date: document.getElementById('input-buy-date').value,
+                sell_amount: Number(document.getElementById('input-sell-amount').value),
+                sell_date: document.getElementById('input-sell-date').value
+            };
+
+            performanceItems.unshift(newItem);
+            localStorage.setItem('spac_performance_items_v3', JSON.stringify(performanceItems));
+            
+            document.getElementById('input-name').value = '';
+            document.getElementById('input-buy-amount').value = '';
+            document.getElementById('input-buy-date').value = '';
+            document.getElementById('input-sell-amount').value = '';
+            document.getElementById('input-sell-date').value = '';
+
+            renderPerformance();
+            alert('성과 내역이 추가되었습니다.');
+        }
+
+        function deletePerformanceItem(index) {
+            if (confirm('해당 성과 내역을 삭제하시겠습니까?')) {
+                performanceItems.splice(index, 1);
+                localStorage.setItem('spac_performance_items_v3', JSON.stringify(performanceItems));
+                renderPerformance();
             }
         }
 
@@ -794,6 +1101,9 @@
             document.getElementById('perf-avg-annual').innerText = overallAnnual.toFixed(2) + ' %';
         }
 
+        // =========================================================
+        // 종목 분석 로직
+        // =========================================================
         function updateSummaryStats(items) {
             const depositRate = items.length > 0 && items[0].deposit_rate ? items[0].deposit_rate : 3.2;
             const accountType = document.getElementById('filter-account').value;
