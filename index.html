@@ -298,7 +298,7 @@
                     </div>
                 </div>
 
-                <!-- 2. 보유 종목 추가 폼 (계좌 구분 남편/아내 추가) -->
+                <!-- 2. 보유 종목 추가 폼 -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
                     <div class="flex items-center justify-between mb-4">
                         <div>
@@ -340,7 +340,7 @@
                     </form>
                 </div>
 
-                <!-- 3. 보유 종목 필터 바 (계좌 필터 추가) -->
+                <!-- 3. 보유 종목 필터 바 -->
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-center">
                     <div>
                         <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">계좌 구분</label>
@@ -382,7 +382,7 @@
                     </div>
                 </div>
 
-                <!-- 4. 보유 종목 테이블 (계좌 열 추가) -->
+                <!-- 4. 보유 종목 테이블 -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
@@ -1145,11 +1145,13 @@
         }
 
         // =========================================================
-        // 데이터 로드 및 초기화
+        // 데이터 로드 및 초기화 (캐시 방지 ?t= 타임스탬프 적용)
         // =========================================================
         async function loadSpacData() {
+            const cacheBuster = '?t=' + new Date().getTime();
+
             try {
-                const rateResp = await fetch('data/deposit_rates.json');
+                const rateResp = await fetch('data/deposit_rates.json' + cacheBuster);
                 if (rateResp.ok) {
                     const rateData = await rateResp.json();
                     if (rateData && rateData.rates) bokDepositRates = { ...bokDepositRates, ...rateData.rates };
@@ -1157,7 +1159,7 @@
             } catch (e) {}
 
             try {
-                const response = await fetch('data/spacs.json');
+                const response = await fetch('data/spacs.json' + cacheBuster);
                 const data = await response.json();
                 document.getElementById('update-time').innerText = `최종 갱신: ${data.updated_at}`;
                 allItems = data.items.map(item => ({
