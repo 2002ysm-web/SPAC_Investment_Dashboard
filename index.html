@@ -298,7 +298,7 @@
                     </div>
                 </div>
 
-                <!-- 2. 보유 종목 추가 폼 -->
+                <!-- 2. 보유 종목 추가 폼 (계좌 구분 남편/아내 추가) -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
                     <div class="flex items-center justify-between mb-4">
                         <div>
@@ -308,7 +308,14 @@
                         <button onclick="lockPrivateTabs()" class="text-xs text-rose-500 hover:underline font-semibold">🔒 잠금</button>
                     </div>
                     <form onsubmit="addHoldingItem(event)" class="space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">계좌 구분</label>
+                                <select id="hold-input-account" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                                    <option value="남편" selected>남편</option>
+                                    <option value="아내">아내</option>
+                                </select>
+                            </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">종목명</label>
                                 <input type="text" id="hold-input-name" list="spac-name-list" placeholder="종목명 입력 또는 선택" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
@@ -333,8 +340,16 @@
                     </form>
                 </div>
 
-                <!-- 3. 보유 종목 필터 바 -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-center">
+                <!-- 3. 보유 종목 필터 바 (계좌 필터 추가) -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-center">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">계좌 구분</label>
+                        <select id="hold-filter-account" onchange="renderHoldings()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                            <option value="all" selected>전체</option>
+                            <option value="남편">남편</option>
+                            <option value="아내">아내</option>
+                        </select>
+                    </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">청산 연도</label>
                         <select id="hold-filter-delisting-year" onchange="renderHoldings()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
@@ -367,12 +382,13 @@
                     </div>
                 </div>
 
-                <!-- 4. 보유 종목 테이블 (거래 상태 열 추가) -->
+                <!-- 4. 보유 종목 테이블 (계좌 열 추가) -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200 select-none">
+                                    <th onclick="sortHoldingData('account')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-center">계좌 <span id="hold-sort-icon-account" class="text-slate-400">↕</span></th>
                                     <th onclick="sortHoldingData('name')" class="py-4 px-5 font-bold cursor-pointer hover:bg-slate-200 transition-colors">종목명 <span id="hold-sort-icon-name" class="text-slate-400">↕</span></th>
                                     <th onclick="sortHoldingData('buy_date')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors">매수일 <span id="hold-sort-icon-buy_date" class="text-slate-400">↕</span></th>
                                     <th onclick="sortHoldingData('buy_amount')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors">매수금 <span id="hold-sort-icon-buy_amount" class="text-slate-400">↕</span></th>
@@ -725,6 +741,7 @@
         function addHoldingItem(event) {
             event.preventDefault();
             const newItem = {
+                account: document.getElementById('hold-input-account').value,
                 name: document.getElementById('hold-input-name').value.trim(),
                 buy_amount: Number(document.getElementById('hold-input-amount').value),
                 quantity: Number(document.getElementById('hold-input-quantity').value),
@@ -754,7 +771,7 @@
         function openSellModal(index, estimatedEval) {
             const item = holdingItems[index];
             document.getElementById('sell-modal-index').value = index;
-            document.getElementById('sell-modal-subtitle').innerText = `[${item.name}] 매수금 ${item.buy_amount.toLocaleString()}원 (${item.buy_date})`;
+            document.getElementById('sell-modal-subtitle').innerText = `[${item.account || '남편'} - ${item.name}] 매수금 ${item.buy_amount.toLocaleString()}원 (${item.buy_date})`;
             document.getElementById('sell-modal-amount').value = estimatedEval > 0 ? Math.round(estimatedEval) : item.buy_amount;
             document.getElementById('sell-modal-date').value = getTodayStr();
             document.getElementById('sell-modal').classList.remove('hidden');
@@ -796,13 +813,13 @@
                 holdingSortDirection = holdingSortDirection === 'asc' ? 'desc' : 'asc';
             } else {
                 holdingSortColumn = column;
-                holdingSortDirection = (column === 'name' || column === 'buy_date' || column === 'spacStatus') ? 'asc' : 'desc';
+                holdingSortDirection = (column === 'account' || column === 'name' || column === 'buy_date' || column === 'spacStatus') ? 'asc' : 'desc';
             }
             renderHoldings();
         }
 
         function updateHoldingSortIcons() {
-            const columns = ['name', 'buy_date', 'buy_amount', 'eval_amount', 'annualYield', 'spacStatus'];
+            const columns = ['account', 'name', 'buy_date', 'buy_amount', 'eval_amount', 'annualYield', 'spacStatus'];
             columns.forEach(col => {
                 const iconEl = document.getElementById(`hold-sort-icon-${col}`);
                 if (iconEl) {
@@ -823,6 +840,7 @@
             const tbody = document.getElementById('holdings-table-body');
             tbody.innerHTML = '';
 
+            const filterAccount = document.getElementById('hold-filter-account').value;
             const filterDelYear = document.getElementById('hold-filter-delisting-year').value;
             const filterBenchmark = document.getElementById('hold-filter-benchmark').value;
             const filterStatus = document.getElementById('hold-filter-status').value;
@@ -835,7 +853,7 @@
             let totalCashFlows = [];
 
             if (holdingItems.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="py-12 text-center text-slate-400 font-normal">등록된 보유 종목이 없습니다. 위 폼에서 보유 중인 스팩을 추가해보세요.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="py-12 text-center text-slate-400 font-normal">등록된 보유 종목이 없습니다. 위 폼에서 보유 중인 스팩을 추가해보세요.</td></tr>`;
                 document.getElementById('hold-total-buy').innerText = '0 원';
                 document.getElementById('hold-total-eval').innerText = '0 원';
                 document.getElementById('hold-total-simple').innerText = '0.00 %';
@@ -849,6 +867,7 @@
                 const delistingDate = matchedSpac ? matchedSpac.delisting_date : '';
                 const delistingYear = delistingDate ? delistingDate.substring(0, 4) : '';
                 const spacStatus = matchedSpac ? matchedSpac.status : '일반';
+                const accountOwner = item.account || '남편';
                 
                 let estimatedEval = item.buy_amount;
                 if (item.quantity && item.quantity > 0 && currentPrice > 0) {
@@ -864,10 +883,11 @@
                 const bokRate = getBokRateForDate(item.buy_date);
                 const isBeat = currentAnnual >= bokRate;
 
-                return { ...item, origIndex: idx, estimatedEval, evalDiff, simpleYield, currentAnnual, bokRate, isBeat, delistingYear, spacStatus };
+                return { ...item, account: accountOwner, origIndex: idx, estimatedEval, evalDiff, simpleYield, currentAnnual, bokRate, isBeat, delistingYear, spacStatus };
             });
 
             const filteredHoldings = enrichedHoldings.filter(item => {
+                if (filterAccount !== 'all' && item.account !== filterAccount) return false;
                 if (filterDelYear !== 'all' && item.delistingYear !== filterDelYear) return false;
                 if (filterBenchmark === 'beat' && !item.isBeat) return false;
                 if (filterBenchmark === 'miss' && item.isBeat) return false;
@@ -899,7 +919,7 @@
             updateHoldingSortIcons();
 
             if (filteredHoldings.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="py-12 text-center text-slate-400 font-normal">조건에 일치하는 보유 종목이 없습니다.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="py-12 text-center text-slate-400 font-normal">조건에 일치하는 보유 종목이 없습니다.</td></tr>`;
             }
 
             filteredHoldings.forEach(item => {
@@ -921,9 +941,14 @@
                     ? `<span class="text-slate-700 font-normal">일반</span>`
                     : `<span class="bg-rose-50 text-rose-600 text-xs px-2 py-0.5 rounded font-bold">${item.spacStatus}</span>`;
 
+                const accountBadge = item.account === '아내'
+                    ? `<span class="bg-pink-50 text-pink-700 text-xs px-2 py-0.5 rounded font-semibold">아내</span>`
+                    : `<span class="bg-sky-50 text-sky-700 text-xs px-2 py-0.5 rounded font-semibold">남편</span>`;
+
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80 transition-colors";
                 tr.innerHTML = `
+                    <td class="py-4 px-4 text-center">${accountBadge}</td>
                     <td class="py-4 px-5 font-bold text-slate-900">${item.name}</td>
                     <td class="py-4 px-4 text-slate-600">${item.buy_date}</td>
                     <td class="py-4 px-4 text-slate-700 font-semibold">${item.buy_amount.toLocaleString()}원</td>
