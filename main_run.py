@@ -283,15 +283,49 @@ def get_recent_dart_disclosures(corp_code: str, days: int = 365) -> list[dict]:
     return []
 
 
-def extract_unit_price(text: str) -> int | None:
+def clean_html_text(text: str) -> str:
     if not text:
+        return ""
+    clean = re.sub(r"<[^>]+>", " ", text)
+    clean = re.sub(r"&nbsp;|&#160;", " ", clean)
+    return re.sub(r"\s+", " ", clean).strip()
+
+
+def fetch_document_text(rcept_no: str) -> str:
+    if not DART_API_KEY or not rcept_no:
+        return ""
+    try:
+        res = requests.get(
+            "https://opendart.fss.or.kr/api/document.xml",
+            params={"crtfc_key": DART_API_KEY, "rcept_no": rcept_no},
+            headers=HEADERS,
+            timeout=10,
+        )
+        res.raise_for_status()
+        if not res.content.startswith(b"PK"):
+            return ""
+        chunks: list[str] = []
+        with zipfile.ZipFile(io.BytesIO(res.content)) as zf:
+            for member in zf.namelist()[:4]:
+                if member.lower().endswith((".xml", ".html", ".htm")):
+                    raw = zf.read(member)
+                    decoded = raw.decode("utf-8", errors="ignore") or raw.decode("euc-kr", errors="ignore")
+                    chunks.append(clean_html_text(decoded))
+        return " ".join(chunks)
+    except Exception:
+        return ""
+
+
+def extract_unit_price(text: str) -> int | None:
+    clean_text = clean_html_text(text)
+    if not clean_text:
         return None
     patterns = [
         r"(?:청산가|청산\s*분배금|해산\s*분배금|1주당\s*청산\w*|주당\s*분배금|예치금\s*반환\w*)[^0-9]{0,25}([1-9][0-9,]{2,4})\s*원",
         r"(?:공모가|발행가|기준가|예치\s*단가)[^0-9]{0,25}([1-9][0-9,]{2,4})\s*원",
     ]
     for pat in patterns:
-        for m in re.finditer(pat, text):
+        for m in re.finditer(pat, clean_text):
             digits = m.group(1).replace(",", "")
             if digits.isdigit():
                 val = int(digits)
@@ -301,13 +335,14 @@ def extract_unit_price(text: str) -> int | None:
 
 
 def extract_pay_date(text: str, fallback_rcept_dt: str = "") -> str:
-    if text:
+    clean_text = clean_html_text(text)
+    if clean_text:
         patterns = [
             r"(?:지급\s*예정일|지급일|분배금\s*지급일|청산\s*지급일|반환\s*예정일|반환일)[^0-9]{0,20}(20[2-9][0-9])[년.\-/]?\s*([01]?[0-9])[월.\-/]?\s*([0-3]?[0-9])\s*일?",
             r"(20[2-9][0-9])[년.\-/]\s*([01]?[0-9])[월.\-/]\s*([0-3]?[0-9])\s*일?\s*(?:지급|예정|반환)",
         ]
         for pat in patterns:
-            m = re.search(pat, text)
+            m = re.search(pat, clean_text)
             if m:
                 y, mo, d = m.group(1), m.group(2).zfill(2), m.group(3).zfill(2)
                 try:
@@ -331,6 +366,17 @@ def resolve_liquidation_price(spac: dict, disclosures: list[dict], ipo_prices: d
         if price is not None:
             return price, f"공시제목:{title}"
 
+    liq_docs = [
+        d for d in disclosures
+        if d.get("rcept_no") and any(k in (d.get("report_nm") or "") for k in ("청산", "해산", "분배금", "예치"))
+    ][:1]
+
+    for d in liq_docs:
+        doc_text = fetch_document_text(d["rcept_no"])
+        price = extract_unit_price(doc_text)
+        if price is not None:
+            return price, f"공시본문:{d.get('report_nm', '')}"
+
     code = spac.get("code", "")
     norm_name = "name:" + re.sub(r"\s+", "", spac.get("name", "")).lower()
     ipo_price = ipo_prices.get(code) or ipo_prices.get(norm_name)
@@ -342,12 +388,21 @@ def resolve_liquidation_price(spac: dict, disclosures: list[dict], ipo_prices: d
 
 def extract_liquidation_record(spac: dict, disclosures: list[dict]) -> dict | None:
     keywords = ("청산", "해산", "분배금", "예치금 반환")
-    for d in disclosures:
+    candidates = [d for d in disclosures if any(k in (d.get("report_nm") or "") for k in keywords)][:1]
+
+    for d in candidates:
         title = d.get("report_nm", "")
-        if not any(k in title for k in keywords):
-            continue
+        rcept_no = d.get("rcept_no", "")
         unit_price = extract_unit_price(title)
         pay_date = extract_pay_date(title, d.get("rcept_dt", ""))
+
+        if (unit_price is None or not pay_date) and rcept_no:
+            doc_text = fetch_document_text(rcept_no)
+            if unit_price is None:
+                unit_price = extract_unit_price(doc_text)
+            if not pay_date:
+                pay_date = extract_pay_date(doc_text, d.get("rcept_dt", ""))
+
         if unit_price is not None and unit_price > 0 and pay_date:
             return {
                 "code": spac["code"],
@@ -355,7 +410,7 @@ def extract_liquidation_record(spac: dict, disclosures: list[dict]) -> dict | No
                 "unit_price": unit_price,
                 "pay_date": pay_date,
                 "report_nm": title,
-                "rcept_no": d.get("rcept_no", ""),
+                "rcept_no": rcept_no,
             }
     return None
 
