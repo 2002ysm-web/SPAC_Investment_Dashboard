@@ -1,0 +1,30 @@
+name: update-liquidations
+on:
+  schedule:
+    - cron: 0 1,7 * * 1-5   # 평일 10:00, 16:00 (KST)
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: spac-data-push
+  cancel-in-progress: false
+jobs:
+  liquidations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+      - name: install
+        run: pip install requests
+      - name: collect liquidations
+        run: python scripts/fetch_liquidations.py
+        env:
+          DART_API_KEY: ${{ secrets.DART_API_KEY }}
+      - name: save
+        run: |
+          git config user.name spac-bot
+          git config user.email bot@users.noreply.github.com
+          git add data/liquidations.json
+          git diff --cached --quiet || (git commit -m "liquidations-update" && git pull --rebase && git push)
