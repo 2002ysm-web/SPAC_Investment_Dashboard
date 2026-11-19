@@ -25,7 +25,7 @@ HEADERS = {
         "AppleWebKit/537.36 (KHTML, like Gecko) "
         "Chrome/124.0.0.0 Safari/537.36"
     ),
-    "Referer": "https://finance.naver.com/",
+    "Referer": "https://kind.krx.co.kr/",
 }
 
 GENERAL_TAX_RATE = 0.154
@@ -86,6 +86,83 @@ def get_dart_corp_codes() -> dict[str, str]:
     return mapping
 
 
+def get_krx_ipo_prices() -> dict[str, int]:
+    """KRX KIND 신규상장현황에서 스팩 종목별 공모가(stock_code -> ipo_price)를 조회합니다."""
+    ipo_prices: dict[str, int] = {}
+    now_kst = datetime.now(KST)
+    start_date = (now_kst - timedelta(days=1200)).strftime("%Y-%m-%d")
+    end_date = now_kst.strftime("%Y-%m-%d")
+
+    endpoints = [
+        (
+            "https://kind.krx.co.kr/listinvstg/pubprcinf.do",
+            {
+                "method": "searchPubprcInf",
+                "forward": "pubprcinf_list",
+                "searchType": "13",
+                "startDate": start_date,
+                "endDate": end_date,
+            },
+        ),
+        (
+            "https://kind.krx.co.kr/listinvstg/listingstatus.do",
+            {
+                "method": "searchListingStatus",
+                "forward": "listingstatus_list",
+                "searchType": "13",
+                "startDate": start_date,
+                "endDate": end_date,
+            },
+        ),
+    ]
+
+    for url, params in endpoints:
+        try:
+            res = requests.post(url, data=params, headers=HEADERS, timeout=20)
+            res.raise_for_status()
+            html = res.content.decode("euc-kr", errors="ignore")
+            if "<table" not in html.lower():
+                continue
+            dfs = pd.read_html(io.StringIO(html))
+            for df in dfs:
+                if df.empty:
+                    continue
+                cols = [str(c).strip() for c in df.columns]
+                name_col = next((c for c in cols if "종목명" in c or "회사명" in c), None)
+                price_col = next((c for c in cols if "공모가" in c or "발행가" in c or "확정공모가" in c), None)
+                code_col = next((c for c in cols if "종목코드" in c or "코드" in c), None)
+                if not name_col or not price_col:
+                    continue
+
+                for _, row in df.iterrows():
+                    name = str(row.get(name_col, "")).strip()
+                    if "스팩" not in name:
+                        continue
+                    raw_price = re.sub(r"[^0-9]", "", str(row.get(price_col, "")))
+                    if not raw_price.isdigit():
+                        continue
+                    price = int(raw_price)
+                    if not (1000 <= price <= 50000):
+                        continue
+
+                    code = ""
+                    if code_col:
+                        m_code = re.search(r"([0-9A-Za-z]{6})", str(row.get(code_col, "")).strip())
+                        if m_code:
+                            code = m_code.group(1).zfill(6)
+                    if code:
+                        ipo_prices[code] = price
+                    ipo_prices[f"name:{re.sub(r'\\s+', '', name).lower()}"] = price
+
+            if ipo_prices:
+                print(f"[INFO] KRX 신규상장 공모가 {len(ipo_prices)}건 조회 완료")
+                break
+        except Exception as exc:
+            print(f"[WARN] KRX 신규상장 공모가 조회 시도 실패 ({url}): {exc}")
+
+    return ipo_prices
+
+
 def get_krx_spac_list() -> list[dict]:
     spacs: list[dict] = []
     url = "https://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13"
@@ -130,7 +207,6 @@ def get_naver_quote(code: str) -> tuple[int, bool]:
     current_price = 0
     is_suspended = False
 
-    # 1차: 네이버 폴링 API
     try:
         url = f"https://polling.finance.naver.com/api/realtime?query=SERVICE_ITEM:{code}"
         res = requests.get(url, headers=HEADERS, timeout=8)
@@ -149,7 +225,6 @@ def get_naver_quote(code: str) -> tuple[int, bool]:
     except Exception:
         pass
 
-    # 2차 폴백: 네이버 금융 종목 페이지
     try:
         page_url = f"https://finance.naver.com/item/main.naver?code={code}"
         res = requests.get(page_url, headers=HEADERS, timeout=10)
@@ -227,7 +302,7 @@ def extract_unit_price_from_text(text: str) -> int | None:
             val_str = match.group(1).replace(",", "")
             if val_str.isdigit():
                 val = int(val_str)
-                if 1000 <= val <= 10000:
+                if 1000 <= val <= 50000:
                     return val
     return None
 
@@ -277,7 +352,9 @@ def fetch_document_text(rcept_no: str) -> str:
         return ""
 
 
-def resolve_liquidation_price(disclosures: list[dict]) -> tuple[int | None, str]:
+def resolve_liquidation_price(
+    spac: dict, disclosures: list[dict], ipo_prices: dict[str, int]
+) -> tuple[int | None, str]:
     for d in disclosures:
         title = d.get("report_nm", "")
         price = extract_unit_price_from_text(title)
@@ -294,6 +371,12 @@ def resolve_liquidation_price(disclosures: list[dict]) -> tuple[int | None, str]
         price = extract_unit_price_from_text(doc_text)
         if price is not None:
             return price, f"공시본문:{d.get('report_nm', '')}"
+
+    code = spac.get("code", "")
+    norm_name = re.sub(r"\s+", "", spac.get("name", "")).lower()
+    ipo_price = ipo_prices.get(code) or ipo_prices.get(f"name:{norm_name}")
+    if ipo_price is not None:
+        return ipo_price, f"KRX신규상장공모가({ipo_price:,}원)"
 
     return None, "미확인"
 
@@ -348,7 +431,9 @@ def infer_delisting_date(listing_date: str) -> str:
     return ""
 
 
-def build_spac_record(spac: dict, corp_codes: dict[str, str], deposit_rate: float) -> tuple[dict, dict | None]:
+def build_spac_record(
+    spac: dict, corp_codes: dict[str, str], deposit_rate: float, ipo_prices: dict[str, int]
+) -> tuple[dict, dict | None]:
     code = spac["code"]
     corp_code = corp_codes.get(code, "")
     current_price, is_suspended = get_naver_quote(code)
@@ -362,7 +447,7 @@ def build_spac_record(spac: dict, corp_codes: dict[str, str], deposit_rate: floa
 
     status = "정지" if is_suspended else ("합병" if has_merger_notice else "일반")
     invest_type = "합병" if has_merger_notice else "청산"
-    liquidation_price, liq_source = resolve_liquidation_price(disclosures)
+    liquidation_price, liq_source = resolve_liquidation_price(spac, disclosures, ipo_prices)
     liquidation_record = extract_liquidation_record(spac, disclosures)
 
     if liquidation_price is not None and current_price > 0:
@@ -417,6 +502,7 @@ def main() -> None:
 
     deposit_rate = get_base_deposit_rate()
     corp_codes = get_dart_corp_codes()
+    ipo_prices = get_krx_ipo_prices()
     spac_list = get_krx_spac_list()
 
     if not spac_list:
@@ -431,7 +517,7 @@ def main() -> None:
     liquidation_results: list[dict] = []
 
     for idx, spac in enumerate(spac_list, start=1):
-        spac_record, liq_record = build_spac_record(spac, corp_codes, deposit_rate)
+        spac_record, liq_record = build_spac_record(spac, corp_codes, deposit_rate, ipo_prices)
         spac_results.append(spac_record)
         if liq_record is not None:
             liquidation_results.append(liq_record)
