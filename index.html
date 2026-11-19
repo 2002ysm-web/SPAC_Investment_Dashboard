@@ -304,7 +304,14 @@
             <button onclick="lockPrivateTabs()" class="text-xs text-rose-500 hover:underline font-semibold">🔒 잠금</button>
           </div>
           <form onsubmit="addHoldingItem(event)" class="space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">명의</label>
+                <select id="hold-input-owner" class="w-full h-[36px] px-3 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                  <option value="남편" selected>남편</option>
+                  <option value="아내">아내</option>
+                </select>
+              </div>
               <div>
                 <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">계좌</label>
                 <select id="hold-input-acct" class="w-full h-[36px] px-3 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
@@ -336,8 +343,16 @@
           </form>
         </div>
 
-        <!-- 3. 보유 종목 필터 바 (계좌 구분: ISA / 일반) -->
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-center">
+        <!-- 3. 보유 종목 필터 바 (명의: 전체/남편/아내, 계좌 구분: 전체/ISA/일반) -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-center">
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">명의</label>
+            <select id="hold-filter-owner" onchange="renderHoldings()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+              <option value="all" selected>전체</option>
+              <option value="남편">남편</option>
+              <option value="아내">아내</option>
+            </select>
+          </div>
           <div>
             <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">계좌 구분</label>
             <select id="hold-filter-acct" onchange="renderHoldings()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
@@ -378,14 +393,16 @@
           </div>
         </div>
 
-        <!-- 4. 보유 종목 테이블 (매수일 컬럼 제외, 계좌(ISA / 일반) 표시) -->
+        <!-- 4. 보유 종목 테이블 (매수일 표시 포함, 계좌(ISA / 일반) 및 명의(남편 / 아내) 표시) -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
               <thead>
                 <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200 select-none">
-                  <th onclick="sortHoldingData('acct')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-center">계좌 <span id="hold-sort-icon-acct" class="text-slate-400">↕</span></th>
+                  <th onclick="sortHoldingData('account')" class="py-4 px-3 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-center">명의 <span id="hold-sort-icon-account" class="text-slate-400">↕</span></th>
+                  <th onclick="sortHoldingData('acct')" class="py-4 px-3 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-center">계좌 <span id="hold-sort-icon-acct" class="text-slate-400">↕</span></th>
                   <th onclick="sortHoldingData('name')" class="py-4 px-5 font-bold cursor-pointer hover:bg-slate-200 transition-colors">종목명 <span id="hold-sort-icon-name" class="text-slate-400">↕</span></th>
+                  <th onclick="sortHoldingData('buy_date')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors">매수일 <span id="hold-sort-icon-buy_date" class="text-slate-400">↕</span></th>
                   <th onclick="sortHoldingData('quantity')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors">매수량 <span id="hold-sort-icon-quantity" class="text-slate-400">↕</span></th>
                   <th onclick="sortHoldingData('buy_amount')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors">매수금 <span id="hold-sort-icon-buy_amount" class="text-slate-400">↕</span></th>
                   <th onclick="sortHoldingData('eval_amount')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors">평가금(손익) <span id="hold-sort-icon-eval_amount" class="text-slate-400">↕</span></th>
@@ -444,10 +461,17 @@
             <button onclick="lockPrivateTabs()" class="text-xs text-rose-500 hover:underline font-semibold">🔒 잠금</button>
           </div>
           <form onsubmit="addPerformanceItem(event)" class="space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-8 gap-4">
               <div>
                 <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">종목명</label>
                 <input type="text" id="input-name" placeholder="예: 엔에이치스팩31호" class="w-full h-[36px] px-3 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">명의</label>
+                <select id="input-owner" class="w-full h-[36px] px-3 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                  <option value="남편" selected>남편</option>
+                  <option value="아내">아내</option>
+                </select>
               </div>
               <div>
                 <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">계좌</label>
@@ -489,6 +513,14 @@
         <!-- 3. 성과 필터 바 -->
         <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4 items-center justify-between">
           <div class="flex gap-4 items-center flex-wrap">
+            <div>
+              <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">명의</label>
+              <select id="perf-filter-owner" onchange="renderPerformance()" class="h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                <option value="all" selected>전체</option>
+                <option value="남편">남편</option>
+                <option value="아내">아내</option>
+              </select>
+            </div>
             <div>
               <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">계좌 구분</label>
               <select id="perf-filter-acct" onchange="renderPerformance()" class="h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
@@ -536,7 +568,8 @@
               <thead>
                 <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200 select-none">
                   <th onclick="sortPerformanceData('name')" class="py-4 px-5 font-bold cursor-pointer hover:bg-slate-200 transition-colors">종목명 <span id="perf-sort-icon-name" class="text-slate-400">↕</span></th>
-                  <th onclick="sortPerformanceData('acct')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-center">계좌 <span id="perf-sort-icon-acct" class="text-slate-400">↕</span></th>
+                  <th onclick="sortPerformanceData('account')" class="py-4 px-3 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-center">명의 <span id="perf-sort-icon-account" class="text-slate-400">↕</span></th>
+                  <th onclick="sortPerformanceData('acct')" class="py-4 px-3 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-center">계좌 <span id="perf-sort-icon-acct" class="text-slate-400">↕</span></th>
                   <th onclick="sortPerformanceData('type')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors">유형 <span id="perf-sort-icon-type" class="text-slate-400">↕</span></th>
                   <th onclick="sortPerformanceData('buy_amount')" class="py-4 px-5 font-bold cursor-pointer hover:bg-slate-200 transition-colors">매수금 <span id="perf-sort-icon-buy_amount" class="text-slate-400">↕</span></th>
                   <th onclick="sortPerformanceData('buy_date')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors">매수일 <span id="perf-sort-icon-buy_date" class="text-slate-400">↕</span></th>
@@ -686,7 +719,7 @@
     let holdingItems = [];
     let performanceItems = [];
     let isUnlocked = false;
-    let holdingSortColumn = 'acct';
+    let holdingSortColumn = 'account';
     let holdingSortDirection = 'asc';
     let perfSortColumn = 'sell_date';
     let perfSortDirection = 'desc';
@@ -843,8 +876,6 @@
 
     // =========================================================
     // 청산 공시 자동 이관 로직 (data/liquidations.json)
-    // 청산분배금 지급일(pay_date <= today) 도래 시 매도일로 반영하고
-    // 청산분배단가(unit_price)와 ISA/일반 계좌 세금 구분을 반영해 성과관리로 이관
     // =========================================================
     async function processLiquidationDisclosures() {
       let liqList = [];
@@ -875,6 +906,7 @@
           remainingHoldings.push(item);
           return;
         }
+        const accountOwner = item.account === '아내' ? '아내' : '남편';
         const acct = item.acct === 'ISA' ? 'ISA' : '일반';
         const grossAmount = Math.round(Number(item.quantity) * Number(liq.unit_price));
         const gain = grossAmount - Number(item.buy_amount);
@@ -883,6 +915,7 @@
 
         performanceItems.unshift({
           name: item.name,
+          account: accountOwner,
           acct,
           type: '청산',
           buy_amount: Number(item.buy_amount),
@@ -908,9 +941,10 @@
     // =========================================================
     function addHoldingItem(event) {
       event.preventDefault();
+      const accountOwner = document.getElementById('hold-input-owner').value;
       const acct = document.getElementById('hold-input-acct').value;
       const newItem = {
-        account: '남편',
+        account: accountOwner,
         acct,
         name: document.getElementById('hold-input-name').value.trim(),
         buy_amount: Number(document.getElementById('hold-input-amount').value),
@@ -937,9 +971,10 @@
 
     function openSellModal(index, estimatedEval) {
       const item = holdingItems[index];
+      const accountOwner = item.account === '아내' ? '아내' : '남편';
       const acct = item.acct === 'ISA' ? 'ISA' : '일반';
       document.getElementById('sell-modal-index').value = index;
-      document.getElementById('sell-modal-subtitle').innerText = `[${acct} - ${item.name}] 매수금 ${Number(item.buy_amount).toLocaleString()}원 (${item.quantity.toLocaleString()}주)`;
+      document.getElementById('sell-modal-subtitle').innerText = `[${accountOwner} · ${acct} - ${item.name}] 매수금 ${Number(item.buy_amount).toLocaleString()}원 (${item.quantity.toLocaleString()}주)`;
       document.getElementById('sell-modal-amount').value = estimatedEval > 0 ? Math.round(estimatedEval) : item.buy_amount;
       document.getElementById('sell-modal-date').value = getTodayStr();
       document.getElementById('sell-modal').classList.remove('hidden');
@@ -954,6 +989,7 @@
       const index = Number(document.getElementById('sell-modal-index').value);
       const item = holdingItems[index];
       if (!item) return;
+      const accountOwner = item.account === '아내' ? '아내' : '남편';
       const acct = item.acct === 'ISA' ? 'ISA' : '일반';
       const grossAmount = Number(document.getElementById('sell-modal-amount').value);
       const gain = grossAmount - Number(item.buy_amount);
@@ -961,6 +997,7 @@
 
       const perfRecord = {
         name: item.name,
+        account: accountOwner,
         acct,
         type: document.getElementById('sell-modal-type').value,
         buy_amount: Number(item.buy_amount),
@@ -984,13 +1021,13 @@
         holdingSortDirection = holdingSortDirection === 'asc' ? 'desc' : 'asc';
       } else {
         holdingSortColumn = column;
-        holdingSortDirection = (column === 'acct' || column === 'name' || column === 'spacStatus') ? 'asc' : 'desc';
+        holdingSortDirection = (column === 'account' || column === 'acct' || column === 'name' || column === 'buy_date' || column === 'spacStatus') ? 'asc' : 'desc';
       }
       renderHoldings();
     }
 
     function updateHoldingSortIcons() {
-      const columns = ['acct', 'name', 'quantity', 'buy_amount', 'eval_amount', 'annualYield', 'spacStatus'];
+      const columns = ['account', 'acct', 'name', 'buy_date', 'quantity', 'buy_amount', 'eval_amount', 'annualYield', 'spacStatus'];
       columns.forEach(col => {
         const iconEl = document.getElementById(`hold-sort-icon-${col}`);
         if (iconEl) {
@@ -1009,6 +1046,7 @@
       if (!isUnlocked) return;
       const tbody = document.getElementById('holdings-table-body');
       tbody.innerHTML = '';
+      const filterOwner = document.getElementById('hold-filter-owner').value;
       const filterAcct = document.getElementById('hold-filter-acct').value;
       const filterDelYear = document.getElementById('hold-filter-delisting-year').value;
       const filterBenchmark = document.getElementById('hold-filter-benchmark').value;
@@ -1022,7 +1060,7 @@
       let totalCashFlows = [];
 
       if (holdingItems.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="py-12 text-center text-slate-400 font-normal">등록된 보유 종목이 없습니다.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" class="py-12 text-center text-slate-400 font-normal">등록된 보유 종목이 없습니다.</td></tr>`;
         document.getElementById('hold-total-buy').innerText = '0 원';
         document.getElementById('hold-total-eval').innerText = '0 원';
         document.getElementById('hold-total-simple').innerText = '0.00 %';
@@ -1031,6 +1069,7 @@
       }
 
       const enrichedHoldings = holdingItems.map((item, idx) => {
+        const accountOwner = item.account === '아내' ? '아내' : '남편';
         const acct = item.acct === 'ISA' ? 'ISA' : '일반';
         const matchedSpac = allItems.find(s => normName(s.name) === normName(item.name));
         const currentPrice = matchedSpac ? Number(matchedSpac.current_price || 0) : 0;
@@ -1046,7 +1085,6 @@
           estimatedEval = grossEval - estTax;
         }
 
-        // 매수일(item.buy_date)은 화면 컬럼에는 노출하지 않고 연환산 수익률·XIRR 산식 계산에만 활용
         const buyDateObj = new Date(item.buy_date);
         const currentAnnual = calculateSingleAnnualYield(Number(item.buy_amount), estimatedEval, buyDateObj, todayDate);
         const evalDiff = estimatedEval - Number(item.buy_amount);
@@ -1056,6 +1094,7 @@
 
         return {
           ...item,
+          account: accountOwner,
           acct,
           origIndex: idx,
           estimatedEval,
@@ -1070,6 +1109,7 @@
       });
 
       const filteredHoldings = enrichedHoldings.filter(item => {
+        if (filterOwner !== 'all' && item.account !== filterOwner) return false;
         if (filterAcct !== 'all' && item.acct !== filterAcct) return false;
         if (filterDelYear !== 'all' && item.delistingYear !== filterDelYear) return false;
         if (filterBenchmark === 'beat' && !item.isBeat) return false;
@@ -1101,7 +1141,7 @@
       updateHoldingSortIcons();
 
       if (filteredHoldings.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="py-12 text-center text-slate-400 font-normal">조건에 일치하는 보유 종목이 없습니다.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" class="py-12 text-center text-slate-400 font-normal">조건에 일치하는 보유 종목이 없습니다.</td></tr>`;
       }
 
       filteredHoldings.forEach(item => {
@@ -1120,6 +1160,9 @@
         const statusBadge = item.spacStatus === '일반'
           ? `<span class="text-slate-700 font-normal">일반</span>`
           : `<span class="bg-rose-50 text-rose-600 text-xs px-2 py-0.5 rounded font-bold">${item.spacStatus}</span>`;
+        const ownerBadge = item.account === '아내'
+          ? `<span class="bg-pink-50 text-pink-700 text-xs px-2 py-0.5 rounded font-semibold">아내</span>`
+          : `<span class="bg-sky-50 text-sky-700 text-xs px-2 py-0.5 rounded font-semibold">남편</span>`;
         const acctBadge = item.acct === 'ISA'
           ? `<span class="bg-indigo-50 text-indigo-700 text-xs px-2 py-0.5 rounded font-semibold">ISA</span>`
           : `<span class="bg-slate-100 text-slate-700 text-xs px-2 py-0.5 rounded font-semibold">일반</span>`;
@@ -1127,8 +1170,10 @@
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50/80 transition-colors";
         tr.innerHTML = `
-          <td class="py-4 px-4 text-center">${acctBadge}</td>
+          <td class="py-4 px-3 text-center">${ownerBadge}</td>
+          <td class="py-4 px-3 text-center">${acctBadge}</td>
           <td class="py-4 px-5 font-bold text-slate-900">${item.name}</td>
+          <td class="py-4 px-4 text-slate-600 text-xs">${item.buy_date || '-'}</td>
           <td class="py-4 px-4 text-slate-600">${Number(item.quantity).toLocaleString()}주</td>
           <td class="py-4 px-4 text-slate-700 font-semibold">${Number(item.buy_amount).toLocaleString()}원</td>
           <td class="py-4 px-4 ${evalColor}">${item.estimatedEval.toLocaleString()}원<br><span class="text-xs font-normal">(${item.evalDiff >= 0 ? '+' : ''}${item.evalDiff.toLocaleString()}원)</span></td>
@@ -1159,6 +1204,7 @@
       event.preventDefault();
       const newItem = {
         name: document.getElementById('input-name').value.trim(),
+        account: document.getElementById('input-owner').value,
         acct: document.getElementById('input-acct').value,
         type: document.getElementById('input-type').value,
         buy_amount: Number(document.getElementById('input-buy-amount').value),
@@ -1190,13 +1236,13 @@
         perfSortDirection = perfSortDirection === 'asc' ? 'desc' : 'asc';
       } else {
         perfSortColumn = column;
-        perfSortDirection = (column === 'name' || column === 'acct' || column === 'type' || column === 'buy_date' || column === 'buy_amount') ? 'asc' : 'desc';
+        perfSortDirection = (column === 'name' || column === 'account' || column === 'acct' || column === 'type' || column === 'buy_date' || column === 'buy_amount') ? 'asc' : 'desc';
       }
       renderPerformance();
     }
 
     function updatePerfSortIcons() {
-      const columns = ['name', 'acct', 'type', 'buy_amount', 'buy_date', 'sell_amount', 'sell_date', 'pnl', 'annualYield'];
+      const columns = ['name', 'account', 'acct', 'type', 'buy_amount', 'buy_date', 'sell_amount', 'sell_date', 'pnl', 'annualYield'];
       columns.forEach(col => {
         const iconEl = document.getElementById(`perf-sort-icon-${col}`);
         if (iconEl) {
@@ -1215,6 +1261,7 @@
       if (!isUnlocked) return;
       const tbody = document.getElementById('perf-table-body');
       tbody.innerHTML = '';
+      const filterOwner = document.getElementById('perf-filter-owner').value;
       const filterAcct = document.getElementById('perf-filter-acct').value;
       const filterYear = document.getElementById('perf-filter-year').value;
       const filterType = document.getElementById('perf-filter-type').value;
@@ -1227,6 +1274,7 @@
       let perfCashFlows = [];
 
       const processedItems = performanceItems.map((item, idx) => {
+        const accountOwner = item.account === '아내' ? '아내' : '남편';
         const acct = item.acct || '일반';
         const pnl = item.sell_amount - item.buy_amount;
         const simpleYield = (pnl / item.buy_amount) * 100;
@@ -1236,10 +1284,11 @@
         const bokRate = getBokRateForDate(item.buy_date);
         const isBeat = annualYield >= bokRate;
         const sellYear = item.sell_date ? item.sell_date.substring(0, 4) : '';
-        return { ...item, acct, origIndex: idx, pnl, simpleYield, annualYield, bokRate, isBeat, sellYear };
+        return { ...item, account: accountOwner, acct, origIndex: idx, pnl, simpleYield, annualYield, bokRate, isBeat, sellYear };
       });
 
       const filteredItems = processedItems.filter(item => {
+        if (filterOwner !== 'all' && item.account !== filterOwner) return false;
         if (filterAcct !== 'all' && item.acct !== filterAcct) return false;
         if (filterYear !== 'all' && item.sellYear !== filterYear) return false;
         if (filterType !== 'all' && item.type !== filterType) return false;
@@ -1271,7 +1320,7 @@
       updatePerfSortIcons();
 
       if (filteredItems.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" class="py-12 text-center text-slate-400 font-normal">조건에 일치하는 성과 내역이 없습니다.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="11" class="py-12 text-center text-slate-400 font-normal">조건에 일치하는 성과 내역이 없습니다.</td></tr>`;
       }
 
       filteredItems.forEach(item => {
@@ -1291,6 +1340,9 @@
         const typeBadge = item.type === '청산'
           ? `<span class="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-md font-semibold">청산</span>`
           : `<span class="bg-purple-50 text-purple-700 text-xs px-2 py-0.5 rounded-md font-semibold">매매</span>`;
+        const ownerBadge = item.account === '아내'
+          ? `<span class="bg-pink-50 text-pink-700 text-xs px-2 py-0.5 rounded font-semibold">아내</span>`
+          : `<span class="bg-sky-50 text-sky-700 text-xs px-2 py-0.5 rounded font-semibold">남편</span>`;
         const acctBadge = item.acct === 'ISA'
           ? `<span class="bg-indigo-50 text-indigo-700 text-xs px-2 py-0.5 rounded font-semibold">ISA</span>`
           : `<span class="bg-slate-100 text-slate-700 text-xs px-2 py-0.5 rounded font-semibold">일반</span>`;
@@ -1299,7 +1351,8 @@
         tr.className = "hover:bg-slate-50/80 transition-colors";
         tr.innerHTML = `
           <td class="py-4 px-5 font-bold text-slate-900">${item.name}</td>
-          <td class="py-4 px-4 text-center">${acctBadge}</td>
+          <td class="py-4 px-3 text-center">${ownerBadge}</td>
+          <td class="py-4 px-3 text-center">${acctBadge}</td>
           <td class="py-4 px-4">${typeBadge}</td>
           <td class="py-4 px-5 text-slate-700 font-semibold">${Number(item.buy_amount).toLocaleString()}원</td>
           <td class="py-4 px-4 text-slate-600">${item.buy_date}</td>
@@ -1539,52 +1592,52 @@
         try { performanceItems = JSON.parse(savedPerf); } catch (e) { performanceItems = []; }
       } else {
         performanceItems = [
-          { name: "유진스팩7호", acct: "일반", type: "청산", buy_amount: 2001995, buy_date: "2024-05-22", sell_amount: 2060215, sell_date: "2024-10-15" },
-          { name: "하이제7호스팩", acct: "일반", type: "청산", buy_amount: 2002980, buy_date: "2024-05-07", sell_amount: 2053809, sell_date: "2024-10-16" },
-          { name: "하나스팩21호", acct: "일반", type: "매매", buy_amount: 2001995, buy_date: "2024-10-16", sell_amount: 1712612, sell_date: "2024-11-12" },
-          { name: "신영스팩9호", acct: "일반", type: "매매", buy_amount: 259690, buy_date: "2025-01-03", sell_amount: 265138, sell_date: "2025-03-10" },
-          { name: "케이비제21호스팩", acct: "일반", type: "청산", buy_amount: 2003910, buy_date: "2025-01-03", sell_amount: 2055251, sell_date: "2025-04-25" },
-          { name: "엔에이치스팩23호", acct: "일반", type: "청산", buy_amount: 2002540, buy_date: "2024-05-08", sell_amount: 2033815, sell_date: "2025-05-20" },
-          { name: "삼성스팩6호", acct: "일반", type: "청산", buy_amount: 2002410, buy_date: "2025-01-03", sell_amount: 2056815, sell_date: "2025-05-20" },
-          { name: "신영스팩8호", acct: "일반", type: "매매", buy_amount: 2003530, buy_date: "2025-01-03", sell_amount: 2158661, sell_date: "2025-05-22" },
-          { name: "유안타제9호스팩", acct: "일반", type: "청산", buy_amount: 2003295, buy_date: "2025-01-03", sell_amount: 2076519, sell_date: "2025-07-03" },
-          { name: "유안타제10호스팩", acct: "일반", type: "청산", buy_amount: 2002660, buy_date: "2024-10-16", sell_amount: 2096807, sell_date: "2025-09-02" },
-          { name: "에스케이증권제8호스팩", acct: "일반", type: "청산", buy_amount: 2003295, buy_date: "2025-01-03", sell_amount: 2080123, sell_date: "2025-09-02" },
-          { name: "엔에이치스팩25호", acct: "일반", type: "청산", buy_amount: 2002410, buy_date: "2025-01-03", sell_amount: 2089260, sell_date: "2025-09-03" },
-          { name: "엔에이치스팩24호", acct: "일반", type: "청산", buy_amount: 2001810, buy_date: "2025-01-03", sell_amount: 2087501, sell_date: "2025-09-05" },
-          { name: "IBKS제20호스팩", acct: "일반", type: "청산", buy_amount: 2002140, buy_date: "2025-05-23", sell_amount: 2036184, sell_date: "2025-09-12" },
-          { name: "유진스팩9호", acct: "일반", type: "청산", buy_amount: 2003405, buy_date: "2025-01-03", sell_amount: 2066011, sell_date: "2025-10-29" },
-          { name: "대신밸런스제14호스팩", acct: "일반", type: "청산", buy_amount: 2002540, buy_date: "2025-05-23", sell_amount: 2044697, sell_date: "2025-10-30" },
-          { name: "엔에이치스팩26호", acct: "일반", type: "청산", buy_amount: 2002660, buy_date: "2024-05-07", sell_amount: 2119749, sell_date: "2025-11-06" },
-          { name: "신한제11호스팩", acct: "일반", type: "매매", buy_amount: 1955790, buy_date: "2025-07-04", sell_amount: 1993520, sell_date: "2025-11-07" },
-          { name: "엔에이치스팩27호", acct: "일반", type: "청산", buy_amount: 2004970, buy_date: "2024-10-16", sell_amount: 2111317, sell_date: "2025-11-13" },
-          { name: "엔에이치스팩27호", acct: "일반", type: "청산", buy_amount: 62360, buy_date: "2024-10-24", sell_amount: 65910, sell_date: "2025-11-13" },
-          { name: "엔에이치스팩27호", acct: "일반", type: "청산", buy_amount: 240225, buy_date: "2024-11-12", sell_amount: 252655, sell_date: "2025-11-13" },
-          { name: "비엔케이제1호스팩", acct: "일반", type: "청산", buy_amount: 1472040, buy_date: "2024-11-12", sell_amount: 1540389, sell_date: "2025-11-14" },
-          { name: "비엔케이제1호스팩", acct: "일반", type: "청산", buy_amount: 2244990, buy_date: "2025-05-23", sell_amount: 2305106, sell_date: "2025-11-14" },
-          { name: "신영스팩9호", acct: "일반", type: "청산", buy_amount: 1715655, buy_date: "2025-01-03", sell_amount: 1762024, sell_date: "2025-11-20" },
-          { name: "유안타제13호스팩", acct: "일반", type: "청산", buy_amount: 218155, buy_date: "2024-04-23", sell_amount: 231291, sell_date: "2026-02-03" },
-          { name: "유안타제13호스팩", acct: "일반", type: "청산", buy_amount: 1781950, buy_date: "2024-04-25", sell_amount: 1889241, sell_date: "2026-02-03" },
-          { name: "하나스팩27호", acct: "일반", type: "청산", buy_amount: 1985280, buy_date: "2025-10-22", sell_amount: 2030708, sell_date: "2026-02-20" },
-          { name: "엔에이치스팩29호", acct: "일반", type: "매매", buy_amount: 2003730, buy_date: "2024-05-10", sell_amount: 2517466, sell_date: "2026-04-17" },
-          { name: "엔에이치스팩30호", acct: "일반", type: "매매", buy_amount: 2003730, buy_date: "2024-04-23", sell_amount: 3965536, sell_date: "2026-03-24" },
-          { name: "엔에이치스팩30호", acct: "일반", type: "매매", buy_amount: 270095, buy_date: "2025-04-03", sell_amount: 538038, sell_date: "2026-03-24" },
-          { name: "하나29호스팩", acct: "일반", type: "청산", buy_amount: 3001505, buy_date: "2026-01-07", sell_amount: 3081002, sell_date: "2026-05-15" },
-          { name: "하나29호스팩", acct: "일반", type: "청산", buy_amount: 1889360, buy_date: "2026-01-06", sell_amount: 1933431, sell_date: "2026-05-15" },
-          { name: "하나29호스팩", acct: "일반", type: "청산", buy_amount: 5007430, buy_date: "2026-01-05", sell_amount: 5124239, sell_date: "2026-05-15" },
-          { name: "교보14호스팩", acct: "일반", type: "청산", buy_amount: 3002360, buy_date: "2026-01-07", sell_amount: 3084152, sell_date: "2026-05-18" },
-          { name: "교보14호스팩", acct: "일반", type: "청산", buy_amount: 4007050, buy_date: "2026-01-06", sell_amount: 4103564, sell_date: "2026-05-18" },
-          { name: "교보14호스팩", acct: "일반", type: "청산", buy_amount: 1796780, buy_date: "2026-01-05", sell_amount: 1844444, sell_date: "2026-05-18" },
-          { name: "케이비제25호스팩", acct: "일반", type: "청산", buy_amount: 4170605, buy_date: "2026-01-05", sell_amount: 4282230, sell_date: "2026-05-29" },
-          { name: "케이비제25호스팩", acct: "일반", type: "청산", buy_amount: 3001505, buy_date: "2026-01-07", sell_amount: 3083981, sell_date: "2026-05-29" },
-          { name: "에스케이증권제9호스팩", acct: "일반", type: "청산", buy_amount: 1433745, buy_date: "2025-09-05", sell_amount: 1492326, sell_date: "2026-06-24" },
-          { name: "에스케이증권제9호스팩", acct: "일반", type: "청산", buy_amount: 2000430, buy_date: "2025-10-27", sell_amount: 2058677, sell_date: "2026-06-24" }
+          { name: "유진스팩7호", account: "남편", acct: "일반", type: "청산", buy_amount: 2001995, buy_date: "2024-05-22", sell_amount: 2060215, sell_date: "2024-10-15" },
+          { name: "하이제7호스팩", account: "남편", acct: "일반", type: "청산", buy_amount: 2002980, buy_date: "2024-05-07", sell_amount: 2053809, sell_date: "2024-10-16" },
+          { name: "하나스팩21호", account: "남편", acct: "일반", type: "매매", buy_amount: 2001995, buy_date: "2024-10-16", sell_amount: 1712612, sell_date: "2024-11-12" },
+          { name: "신영스팩9호", account: "남편", acct: "일반", type: "매매", buy_amount: 259690, buy_date: "2025-01-03", sell_amount: 265138, sell_date: "2025-03-10" },
+          { name: "케이비제21호스팩", account: "남편", acct: "일반", type: "청산", buy_amount: 2003910, buy_date: "2025-01-03", sell_amount: 2055251, sell_date: "2025-04-25" },
+          { name: "엔에이치스팩23호", account: "남편", acct: "일반", type: "청산", buy_amount: 2002540, buy_date: "2024-05-08", sell_amount: 2033815, sell_date: "2025-05-20" },
+          { name: "삼성스팩6호", account: "남편", acct: "일반", type: "청산", buy_amount: 2002410, buy_date: "2025-01-03", sell_amount: 2056815, sell_date: "2025-05-20" },
+          { name: "신영스팩8호", account: "남편", acct: "일반", type: "매매", buy_amount: 2003530, buy_date: "2025-01-03", sell_amount: 2158661, sell_date: "2025-05-22" },
+          { name: "유안타제9호스팩", account: "남편", acct: "일반", type: "청산", buy_amount: 2003295, buy_date: "2025-01-03", sell_amount: 2076519, sell_date: "2025-07-03" },
+          { name: "유안타제10호스팩", account: "남편", acct: "일반", type: "청산", buy_amount: 2002660, buy_date: "2024-10-16", sell_amount: 2096807, sell_date: "2025-09-02" },
+          { name: "에스케이증권제8호스팩", account: "남편", acct: "일반", type: "청산", buy_amount: 2003295, buy_date: "2025-01-03", sell_amount: 2080123, sell_date: "2025-09-02" },
+          { name: "엔에이치스팩25호", account: "남편", acct: "일반", type: "청산", buy_amount: 2002410, buy_date: "2025-01-03", sell_amount: 2089260, sell_date: "2025-09-03" },
+          { name: "엔에이치스팩24호", account: "남편", acct: "일반", type: "청산", buy_amount: 2001810, buy_date: "2025-01-03", sell_amount: 2087501, sell_date: "2025-09-05" },
+          { name: "IBKS제20호스팩", account: "남편", acct: "일반", type: "청산", buy_amount: 2002140, buy_date: "2025-05-23", sell_amount: 2036184, sell_date: "2025-09-12" },
+          { name: "유진스팩9호", account: "남편", acct: "일반", type: "청산", buy_amount: 2003405, buy_date: "2025-01-03", sell_amount: 2066011, sell_date: "2025-10-29" },
+          { name: "대신밸런스제14호스팩", account: "남편", acct: "일반", type: "청산", buy_amount: 2002540, buy_date: "2025-05-23", sell_amount: 2044697, sell_date: "2025-10-30" },
+          { name: "엔에이치스팩26호", account: "남편", acct: "일반", type: "청산", buy_amount: 2002660, buy_date: "2024-05-07", sell_amount: 2119749, sell_date: "2025-11-06" },
+          { name: "신한제11호스팩", account: "남편", acct: "일반", type: "매매", buy_amount: 1955790, buy_date: "2025-07-04", sell_amount: 1993520, sell_date: "2025-11-07" },
+          { name: "엔에이치스팩27호", account: "남편", acct: "일반", type: "청산", buy_amount: 2004970, buy_date: "2024-10-16", sell_amount: 2111317, sell_date: "2025-11-13" },
+          { name: "엔에이치스팩27호", account: "남편", acct: "일반", type: "청산", buy_amount: 62360, buy_date: "2024-10-24", sell_amount: 65910, sell_date: "2025-11-13" },
+          { name: "엔에이치스팩27호", account: "남편", acct: "일반", type: "청산", buy_amount: 240225, buy_date: "2024-11-12", sell_amount: 252655, sell_date: "2025-11-13" },
+          { name: "비엔케이제1호스팩", account: "남편", acct: "일반", type: "청산", buy_amount: 1472040, buy_date: "2024-11-12", sell_amount: 1540389, sell_date: "2025-11-14" },
+          { name: "비엔케이제1호스팩", account: "남편", acct: "일반", type: "청산", buy_amount: 2244990, buy_date: "2025-05-23", sell_amount: 2305106, sell_date: "2025-11-14" },
+          { name: "신영스팩9호", account: "남편", acct: "일반", type: "청산", buy_amount: 1715655, buy_date: "2025-01-03", sell_amount: 1762024, sell_date: "2025-11-20" },
+          { name: "유안타제13호스팩", account: "남편", acct: "일반", type: "청산", buy_amount: 218155, buy_date: "2024-04-23", sell_amount: 231291, sell_date: "2026-02-03" },
+          { name: "유안타제13호스팩", account: "남편", acct: "일반", type: "청산", buy_amount: 1781950, buy_date: "2024-04-25", sell_amount: 1889241, sell_date: "2026-02-03" },
+          { name: "하나스팩27호", account: "남편", acct: "일반", type: "청산", buy_amount: 1985280, buy_date: "2025-10-22", sell_amount: 2030708, sell_date: "2026-02-20" },
+          { name: "엔에이치스팩29호", account: "남편", acct: "일반", type: "매매", buy_amount: 2003730, buy_date: "2024-05-10", sell_amount: 2517466, sell_date: "2026-04-17" },
+          { name: "엔에이치스팩30호", account: "남편", acct: "일반", type: "매매", buy_amount: 2003730, buy_date: "2024-04-23", sell_amount: 3965536, sell_date: "2026-03-24" },
+          { name: "엔에이치스팩30호", account: "남편", acct: "일반", type: "매매", buy_amount: 270095, buy_date: "2025-04-03", sell_amount: 538038, sell_date: "2026-03-24" },
+          { name: "하나29호스팩", account: "남편", acct: "일반", type: "청산", buy_amount: 3001505, buy_date: "2026-01-07", sell_amount: 3081002, sell_date: "2026-05-15" },
+          { name: "하나29호스팩", account: "남편", acct: "일반", type: "청산", buy_amount: 1889360, buy_date: "2026-01-06", sell_amount: 1933431, sell_date: "2026-05-15" },
+          { name: "하나29호스팩", account: "남편", acct: "일반", type: "청산", buy_amount: 5007430, buy_date: "2026-01-05", sell_amount: 5124239, sell_date: "2026-05-15" },
+          { name: "교보14호스팩", account: "남편", acct: "일반", type: "청산", buy_amount: 3002360, buy_date: "2026-01-07", sell_amount: 3084152, sell_date: "2026-05-18" },
+          { name: "교보14호스팩", account: "남편", acct: "일반", type: "청산", buy_amount: 4007050, buy_date: "2026-01-06", sell_amount: 4103564, sell_date: "2026-05-18" },
+          { name: "교보14호스팩", account: "남편", acct: "일반", type: "청산", buy_amount: 1796780, buy_date: "2026-01-05", sell_amount: 1844444, sell_date: "2026-05-18" },
+          { name: "케이비제25호스팩", account: "남편", acct: "일반", type: "청산", buy_amount: 4170605, buy_date: "2026-01-05", sell_amount: 4282230, sell_date: "2026-05-29" },
+          { name: "케이비제25호스팩", account: "남편", acct: "일반", type: "청산", buy_amount: 3001505, buy_date: "2026-01-07", sell_amount: 3083981, sell_date: "2026-05-29" },
+          { name: "에스케이증권제9호스팩", account: "남편", acct: "일반", type: "청산", buy_amount: 1433745, buy_date: "2025-09-05", sell_amount: 1492326, sell_date: "2026-06-24" },
+          { name: "에스케이증권제9호스팩", account: "남편", acct: "일반", type: "청산", buy_amount: 2000430, buy_date: "2025-10-27", sell_amount: 2058677, sell_date: "2026-06-24" }
         ];
       }
 
       await processLiquidationDisclosures();
       if (isUnlocked) {
-        renderHoldings();ㅁㅈ
+        renderHoldings();
         renderPerformance();
       }
     }
@@ -1592,4 +1645,4 @@
     window.onload = loadSpacData;
   </script>
 </body>
-</html>ㅁ
+</html>
