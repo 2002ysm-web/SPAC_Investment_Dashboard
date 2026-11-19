@@ -1,6 +1,8 @@
 import io
 import json
 import os
+import re
+import sys
 import time
 import xml.etree.ElementTree as ET
 import zipfile
@@ -11,7 +13,9 @@ import pandas as pd
 import requests
 
 DART_API_KEY = os.environ.get("DART_API_KEY", "").strip()
+KRX_OPENAPI_KEY = os.environ.get("KRX_OPENAPI_KEY", "").strip()
 OUTPUT_PATH = Path(os.environ.get("SPACS_OUTPUT_PATH", "data/spacs.json"))
+DEPOSIT_RATE_PATH = Path(os.environ.get("DEPOSIT_RATE_PATH", "data/deposit_rates.json"))
 
 KST = timezone(timedelta(hours=9))
 HEADERS = {
@@ -22,6 +26,25 @@ HEADERS = {
     ),
     "Referer": "https://finance.naver.com/",
 }
+
+GENERAL_TAX_RATE = 0.154
+DEFAULT_LIQUIDATION_PRICE = 2000
+
+
+def get_base_deposit_rate() -> float:
+    """기준 예금금리를 반환합니다. (deposit_rates.json 최신 값 우선, 없으면 기본값)"""
+    fallback = 2.4
+    if DEPOSIT_RATE_PATH.exists():
+        try:
+            with DEPOSIT_RATE_PATH.open("r", encoding="utf-8") as f:
+                data = json.load(f)
+            rates = data.get("rates", {}) if isinstance(data, dict) else {}
+            if rates:
+                latest_ym = sorted(rates.keys())[-1]
+                return float(rates[latest_ym])
+        except Exception as exc:
+            print(f"[WARN] 기준 예금금리 파일 읽기 실패: {exc}")
+    return fallback
 
 
 def get_dart_corp_codes() -> dict[str, str]:
@@ -104,7 +127,6 @@ def get_naver_quote(code: str) -> tuple[int, bool]:
             raw_price = item.get("nv", 0)
             current_price = int(raw_price) if raw_price is not None else 0
 
-            # 응답 필드의 거래정지/정지 관련 값 확인
             stop_flag = str(item.get("stopReason", "") or item.get("isStop", "") or "").lower()
             if stop_flag in {"true", "1", "y", "yes"} or current_price == 0:
                 is_suspended = True
@@ -114,7 +136,7 @@ def get_naver_quote(code: str) -> tuple[int, bool]:
     return current_price, is_suspended
 
 
-def get_recent_dart_disclosures(corp_code: str, days: int = 7) -> list[dict]:
+def get_recent_dart_disclosures(corp_code: str, days: int = 30) -> list[dict]:
     """최근 N일간 DART 공시 목록을 조회합니다."""
     if not DART_API_KEY or not corp_code:
         return []
@@ -149,20 +171,72 @@ def get_recent_dart_disclosures(corp_code: str, days: int = 7) -> list[dict]:
     return []
 
 
-def build_spac_record(spac: dict, corp_codes: dict[str, str]) -> dict:
+def infer_delisting_date(listing_date: str) -> str:
+    """상장일 기준 통상 3년 만기 예상 청산일을 YYYY-MM-DD 형태로 추산합니다."""
+    digits = re.sub(r"[^0-9]", "", listing_date or "")
+    if len(digits) >= 8:
+        try:
+            dt_obj = datetime.strptime(digits[:8], "%Y%m%d")
+            return dt_obj.replace(year=dt_obj.year + 3).strftime("%Y-%m-%d")
+        except ValueError:
+            pass
+    return ""
+
+
+def build_spac_record(spac: dict, corp_codes: dict[str, str], deposit_rate: float) -> dict:
     code = spac["code"]
     corp_code = corp_codes.get(code, "")
     current_price, is_suspended = get_naver_quote(code)
-    disclosures = get_recent_dart_disclosures(corp_code, days=7)
+    disclosures = get_recent_dart_disclosures(corp_code, days=30)
 
-    status = "거래정지" if is_suspended else "정상"
+    has_merger_notice = any("합병" in (d.get("report_nm") or "") for d in disclosures)
+    has_liquidation_notice = any(
+        any(k in (d.get("report_nm") or "") for k in ("해산", "청산", "상장폐지"))
+        for d in disclosures
+    )
+
+    if is_suspended:
+        status = "정지"
+    elif has_merger_notice:
+        status = "합병"
+    else:
+        status = "일반"
+
+    invest_type = "합병" if has_merger_notice else "청산"
+    liquidation_price = DEFAULT_LIQUIDATION_PRICE
+
+    if current_price > 0:
+        gross_yield = ((liquidation_price - current_price) / current_price) * 100
+        net_gain = max(0.0, liquidation_price - current_price) * (1 - GENERAL_TAX_RATE)
+        gen_yield = (
+            ((liquidation_price - current_price) / current_price) * 100
+            if liquidation_price <= current_price
+            else (net_gain / current_price) * 100
+        )
+        yield_isa = round(gross_yield, 2)
+        yield_general = round(gen_yield, 2)
+    else:
+        yield_isa = 0.0
+        yield_general = 0.0
+
+    is_fair_buy = "O" if (current_price > 0 and current_price <= liquidation_price and not is_suspended) else "X"
+    delisting_date = infer_delisting_date(spac.get("listing_date", ""))
+
     return {
         "code": code,
         "name": spac["name"],
         "listing_date": spac["listing_date"],
+        "delisting_date": delisting_date,
         "corp_code": corp_code,
         "current_price": current_price,
+        "liquidation_price": liquidation_price,
+        "is_fair_buy": is_fair_buy,
+        "invest_type": invest_type,
+        "yield_isa": yield_isa,
+        "yield_general": yield_general,
+        "deposit_rate": deposit_rate,
         "is_suspended": is_suspended,
+        "has_liquidation_notice": has_liquidation_notice,
         "status": status,
         "recent_disclosures": disclosures,
     }
@@ -172,7 +246,7 @@ def save_spacs_json(items: list[dict], output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     now_kst = datetime.now(KST)
     payload = {
-        "updated_at": now_kst.isoformat(timespec="seconds"),
+        "updated_at": now_kst.strftime("%Y-%m-%d %H:%M:%S KST"),
         "count": len(items),
         "items": items,
     }
@@ -182,6 +256,7 @@ def save_spacs_json(items: list[dict], output_path: Path) -> None:
 
 
 def main() -> None:
+    deposit_rate = get_base_deposit_rate()
     corp_codes = get_dart_corp_codes()
     spac_list = get_krx_spac_list()
 
@@ -191,11 +266,11 @@ def main() -> None:
 
     results: list[dict] = []
     for idx, spac in enumerate(spac_list, start=1):
-        record = build_spac_record(spac, corp_codes)
+        record = build_spac_record(spac, corp_codes, deposit_rate)
         results.append(record)
         if idx % 20 == 0:
             print(f"[PROGRESS] {idx}/{len(spac_list)} 처리 중...")
-        time.sleep(0.15)  # 외부 API 과도한 연속 호출 방지
+        time.sleep(0.15)
 
     save_spacs_json(results, OUTPUT_PATH)
 
