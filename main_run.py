@@ -3,6 +3,7 @@ import json
 import os
 import re
 import time
+import traceback
 import xml.etree.ElementTree as ET
 import zipfile
 from datetime import datetime, timedelta, timezone
@@ -28,6 +29,20 @@ HEADERS = {
 }
 
 GENERAL_TAX_RATE = 0.154
+
+
+def parse_html_tables(html_text: str) -> list[pd.DataFrame]:
+    for flavor in ("lxml", "html5lib", "bs4"):
+        try:
+            dfs = pd.read_html(io.StringIO(html_text), flavor=flavor)
+            if dfs:
+                return dfs
+        except Exception:
+            continue
+    try:
+        return pd.read_html(io.StringIO(html_text))
+    except Exception:
+        return []
 
 
 def load_existing_items(path: Path) -> list[dict]:
@@ -122,7 +137,7 @@ def get_krx_ipo_prices() -> dict[str, int]:
             html = res.content.decode("euc-kr", errors="ignore")
             if "<table" not in html.lower():
                 continue
-            dfs = pd.read_html(io.StringIO(html))
+            dfs = parse_html_tables(html)
             for df in dfs:
                 if df.empty:
                     continue
@@ -180,7 +195,7 @@ def get_krx_spac_list() -> list[dict]:
             res2.raise_for_status()
             raw_html = res2.content.decode("euc-kr", errors="ignore")
 
-        dfs = pd.read_html(io.StringIO(raw_html))
+        dfs = parse_html_tables(raw_html)
         if not dfs:
             print("[WARN] KRX HTML 테이블 없음")
             return spacs
@@ -499,39 +514,48 @@ def save_json_payload(items: list[dict], output_path: Path, updated_at: str) -> 
 def main() -> None:
     existing_spacs = load_existing_items(OUTPUT_PATH)
     existing_liqs = load_existing_items(LIQUIDATIONS_PATH)
+    updated_at = datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S KST")
 
-    deposit_rate = get_base_deposit_rate()
-    corp_codes = get_dart_corp_codes()
-    ipo_prices = get_krx_ipo_prices()
-    spac_list = get_krx_spac_list()
+    try:
+        deposit_rate = get_base_deposit_rate()
+        corp_codes = get_dart_corp_codes()
+        ipo_prices = get_krx_ipo_prices()
+        spac_list = get_krx_spac_list()
 
-    if not spac_list:
-        print("[WARN] 스팩 목록이 비어 있어 기존 데이터를 유지합니다.")
-        updated_at = datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S KST")
+        if not spac_list:
+            print("[WARN] 스팩 목록이 비어 있어 기존 데이터를 유지하며 갱신시각만 반영합니다.")
+            save_json_payload(existing_spacs, OUTPUT_PATH, updated_at)
+            save_json_payload(existing_liqs, LIQUIDATIONS_PATH, updated_at)
+            return
+
+        spac_results: list[dict] = []
+        liquidation_results: list[dict] = []
+
+        for idx, spac in enumerate(spac_list, start=1):
+            try:
+                spac_record, liq_record = build_spac_record(spac, corp_codes, deposit_rate, ipo_prices)
+                spac_results.append(spac_record)
+                if liq_record is not None:
+                    liquidation_results.append(liq_record)
+            except Exception as exc:
+                print(f"[WARN] [{spac.get('code', '')}] 처리 중 개별 오류: {exc}")
+            if idx % 20 == 0:
+                print(f"[PROGRESS] {idx}/{len(spac_list)} 처리 중...")
+            time.sleep(0.05)
+
+        valid_price_count = sum(1 for r in spac_results if (r.get("current_price") or 0) > 0)
+        if valid_price_count == 0 and existing_spacs:
+            print("[WARN] 모든 종목 현재가가 0원입니다. 기존 spacs.json 데이터를 보존합니다.")
+            spac_results = existing_spacs
+
+        save_json_payload(spac_results, OUTPUT_PATH, updated_at)
+        save_json_payload(liquidation_results, LIQUIDATIONS_PATH, updated_at)
+
+    except Exception as exc:
+        print(f"[ERROR] 실행 중 예외 발생: {exc}")
+        traceback.print_exc()
         save_json_payload(existing_spacs, OUTPUT_PATH, updated_at)
         save_json_payload(existing_liqs, LIQUIDATIONS_PATH, updated_at)
-        return
-
-    spac_results: list[dict] = []
-    liquidation_results: list[dict] = []
-
-    for idx, spac in enumerate(spac_list, start=1):
-        spac_record, liq_record = build_spac_record(spac, corp_codes, deposit_rate, ipo_prices)
-        spac_results.append(spac_record)
-        if liq_record is not None:
-            liquidation_results.append(liq_record)
-        if idx % 20 == 0:
-            print(f"[PROGRESS] {idx}/{len(spac_list)} 처리 중...")
-        time.sleep(0.05)
-
-    valid_price_count = sum(1 for r in spac_results if (r.get("current_price") or 0) > 0)
-    if valid_price_count == 0 and existing_spacs:
-        print("[WARN] 모든 종목 현재가가 0원입니다. 기존 spacs.json 데이터를 보존합니다.")
-        spac_results = existing_spacs
-
-    updated_at = datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S KST")
-    save_json_payload(spac_results, OUTPUT_PATH, updated_at)
-    save_json_payload(liquidation_results, LIQUIDATIONS_PATH, updated_at)
 
 
 if __name__ == "__main__":
