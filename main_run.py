@@ -31,8 +31,22 @@ HEADERS = {
 GENERAL_TAX_RATE = 0.154
 
 
+def load_existing_items(path: Path) -> list[dict]:
+    if not path.exists():
+        return []
+    try:
+        with path.open("r", encoding="utf-8") as f:
+            data = json.load(f)
+        if isinstance(data, dict) and isinstance(data.get("items"), list):
+            return data["items"]
+        if isinstance(data, list):
+            return data
+    except Exception as exc:
+        print(f"[WARN] 기존 {path} 읽기 실패: {exc}")
+    return []
+
+
 def get_base_deposit_rate() -> float:
-    """기준 예금금리를 반환합니다. (deposit_rates.json 최신 값 우선, 없으면 기본값)"""
     fallback = 2.4
     if DEPOSIT_RATE_PATH.exists():
         try:
@@ -48,10 +62,9 @@ def get_base_deposit_rate() -> float:
 
 
 def get_dart_corp_codes() -> dict[str, str]:
-    """OpenDART 전체 고유번호 ZIP을 내려받아 stock_code -> corp_code 매핑을 반환합니다."""
     mapping: dict[str, str] = {}
     if not DART_API_KEY:
-        print("[INFO] DART_API_KEY가 설정되지 않아 고유번호 조회를 건너뜁니다.")
+        print("[INFO] DART_API_KEY 미설정 — 공시 조회 없이 진행합니다.")
         return mapping
 
     url = f"https://opendart.fss.or.kr/api/corpCode.xml?crtfc_key={DART_API_KEY}"
@@ -74,22 +87,30 @@ def get_dart_corp_codes() -> dict[str, str]:
 
 
 def get_krx_spac_list() -> list[dict]:
-    """KRX KIND 상장법인 목록에서 '스팩' 종목을 추출합니다."""
     spacs: list[dict] = []
     url = "https://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13"
     try:
-        res = requests.get(url, headers=HEADERS, timeout=20)
+        res = requests.get(url, headers=HEADERS, timeout=25)
         res.raise_for_status()
-        res.encoding = "euc-kr"
+        raw_html = res.content.decode("euc-kr", errors="ignore")
+        if "<table" not in raw_html.lower():
+            res2 = requests.post(
+                "https://kind.krx.co.kr/corpgeneral/corpList.do",
+                data={"method": "download", "searchType": "13"},
+                headers=HEADERS,
+                timeout=25,
+            )
+            res2.raise_for_status()
+            raw_html = res2.content.decode("euc-kr", errors="ignore")
 
-        dfs = pd.read_html(io.StringIO(res.text))
+        dfs = pd.read_html(io.StringIO(raw_html))
         if not dfs:
-            print("[WARN] KRX HTML 테이블을 찾지 못했습니다.")
+            print("[WARN] KRX HTML 테이블 없음")
             return spacs
 
         df = dfs[0]
         if "회사명" not in df.columns or "종목코드" not in df.columns:
-            print(f"[WARN] 예상치 못한 KRX 컬럼 구조: {list(df.columns)}")
+            print(f"[WARN] 예상치 못한 KRX 컬럼: {list(df.columns)}")
             return spacs
 
         spac_df = df[df["회사명"].astype(str).str.contains("스팩", na=False)].copy()
@@ -97,13 +118,8 @@ def get_krx_spac_list() -> list[dict]:
             code = str(row["종목코드"]).strip().replace(".0", "").zfill(6)
             name = str(row["회사명"]).strip()
             listing_date = str(row.get("상장일", "")).strip()
-            spacs.append(
-                {
-                    "code": code,
-                    "name": name,
-                    "listing_date": listing_date,
-                }
-            )
+            spacs.append({"code": code, "name": name, "listing_date": listing_date})
+
         print(f"[INFO] KRX 스팩 종목 {len(spacs)}개 조회 완료")
     except Exception as exc:
         print(f"[WARN] KRX 스팩 목록 조회 실패: {exc}")
@@ -111,33 +127,48 @@ def get_krx_spac_list() -> list[dict]:
 
 
 def get_naver_quote(code: str) -> tuple[int, bool]:
-    """네이버 폴링 API에서 현재가와 거래정지 여부를 가져옵니다."""
     current_price = 0
     is_suspended = False
 
-    url = f"https://polling.finance.naver.com/api/realtime?query=SERVICE_ITEM:{code}"
+    # 1차: 네이버 폴링 API
     try:
-        res = requests.get(url, headers=HEADERS, timeout=10)
+        url = f"https://polling.finance.naver.com/api/realtime?query=SERVICE_ITEM:{code}"
+        res = requests.get(url, headers=HEADERS, timeout=8)
         res.raise_for_status()
         payload = res.json()
-
         areas = payload.get("result", {}).get("areas", [])
         if areas and areas[0].get("datas"):
             item = areas[0]["datas"][0]
             raw_price = item.get("nv", 0)
             current_price = int(raw_price) if raw_price is not None else 0
-
             stop_flag = str(item.get("stopReason", "") or item.get("isStop", "") or "").lower()
             if stop_flag in {"true", "1", "y", "yes"} or current_price == 0:
                 is_suspended = True
+            if current_price > 0:
+                return current_price, is_suspended
+    except Exception:
+        pass
+
+    # 2차 폴백: 네이버 금융 종목 페이지
+    try:
+        page_url = f"https://finance.naver.com/item/main.naver?code={code}"
+        res = requests.get(page_url, headers=HEADERS, timeout=10)
+        res.raise_for_status()
+        html = res.text
+        m = re.search(r'id="_nowVal"[^>]*>([0-9,]+)<', html) or re.search(
+            r'class="no_today"[^>]*>.*?<span class="blind">([0-9,]+)</span>', html, re.S
+        )
+        if m:
+            current_price = int(m.group(1).replace(",", ""))
+        if "거래정지" in html or current_price == 0:
+            is_suspended = True
     except Exception as exc:
-        print(f"[WARN] [{code}] 시세 조회 오류: {exc}")
+        print(f"[WARN] [{code}] 시세 조회 실패: {exc}")
 
     return current_price, is_suspended
 
 
 def get_recent_dart_disclosures(corp_code: str, days: int = 365) -> list[dict]:
-    """최근 N일간 DART 공시 목록을 조회합니다."""
     if not DART_API_KEY or not corp_code:
         return []
 
@@ -145,16 +176,19 @@ def get_recent_dart_disclosures(corp_code: str, days: int = 365) -> list[dict]:
     bgn_de = (now_kst - timedelta(days=days)).strftime("%Y%m%d")
     end_de = now_kst.strftime("%Y%m%d")
 
-    url = "https://opendart.fss.or.kr/api/list.json"
-    params = {
-        "crtfc_key": DART_API_KEY,
-        "corp_code": corp_code,
-        "bgn_de": bgn_de,
-        "end_de": end_de,
-        "page_count": 50,
-    }
     try:
-        res = requests.get(url, params=params, headers=HEADERS, timeout=10)
+        res = requests.get(
+            "https://opendart.fss.or.kr/api/list.json",
+            params={
+                "crtfc_key": DART_API_KEY,
+                "corp_code": corp_code,
+                "bgn_de": bgn_de,
+                "end_de": end_de,
+                "page_count": 30,
+            },
+            headers=HEADERS,
+            timeout=10,
+        )
         res.raise_for_status()
         data = res.json()
         if data.get("status") == "000":
@@ -176,12 +210,10 @@ def clean_html_text(text: str) -> str:
         return ""
     clean = re.sub(r"<[^>]+>", " ", text)
     clean = re.sub(r"&nbsp;|&#160;", " ", clean)
-    clean = re.sub(r"\s+", " ", clean)
-    return clean.strip()
+    return re.sub(r"\s+", " ", clean).strip()
 
 
 def extract_unit_price_from_text(text: str) -> int | None:
-    """공시 제목/본문 텍스트에서 청산가·분배금·예치금·공모가/발행가 단가를 추출합니다."""
     clean_text = clean_html_text(text)
     if not clean_text:
         return None
@@ -197,20 +229,10 @@ def extract_unit_price_from_text(text: str) -> int | None:
                 val = int(val_str)
                 if 1000 <= val <= 10000:
                     return val
-
-    if any(k in clean_text for k in ("청산", "해산", "분배금", "예치")):
-        for match in re.finditer(r"\b([1-9][0-9,]{2,4})\s*원", clean_text):
-            val_str = match.group(1).replace(",", "")
-            if val_str.isdigit():
-                val = int(val_str)
-                if 1000 <= val <= 10000:
-                    return val
-
     return None
 
 
 def extract_pay_date_from_text(text: str) -> str:
-    """공시 텍스트에서 지급예정일·지급일·청산일(YYYY-MM-DD)을 추출합니다."""
     clean_text = clean_html_text(text)
     if not clean_text:
         return ""
@@ -224,78 +246,63 @@ def extract_pay_date_from_text(text: str) -> str:
         if match:
             y, m, d = match.group(1), match.group(2).zfill(2), match.group(3).zfill(2)
             try:
-                dt = datetime.strptime(f"{y}-{m}-{d}", "%Y-%m-%d")
-                return dt.strftime("%Y-%m-%d")
+                return datetime.strptime(f"{y}-{m}-{d}", "%Y-%m-%d").strftime("%Y-%m-%d")
             except ValueError:
                 continue
     return ""
 
 
 def fetch_document_text(rcept_no: str) -> str:
-    """OpenDART document.xml(ZIP)에서 공시 원문 텍스트를 추출합니다."""
     if not DART_API_KEY or not rcept_no:
         return ""
-
-    url = "https://opendart.fss.or.kr/api/document.xml"
-    params = {"crtfc_key": DART_API_KEY, "rcept_no": rcept_no}
     try:
-        res = requests.get(url, params=params, headers=HEADERS, timeout=15)
+        res = requests.get(
+            "https://opendart.fss.or.kr/api/document.xml",
+            params={"crtfc_key": DART_API_KEY, "rcept_no": rcept_no},
+            headers=HEADERS,
+            timeout=12,
+        )
         res.raise_for_status()
         if not res.content.startswith(b"PK"):
             return ""
         chunks: list[str] = []
         with zipfile.ZipFile(io.BytesIO(res.content)) as zf:
-            for member in zf.namelist():
+            for member in zf.namelist()[:6]:
                 if member.lower().endswith((".xml", ".html", ".htm")):
                     raw_bytes = zf.read(member)
-                    decoded = raw_bytes.decode("utf-8", errors="ignore")
-                    if not decoded.strip():
-                        decoded = raw_bytes.decode("euc-kr", errors="ignore")
+                    decoded = raw_bytes.decode("utf-8", errors="ignore") or raw_bytes.decode("euc-kr", errors="ignore")
                     chunks.append(decoded)
         return "\n".join(chunks)
-    except Exception as exc:
-        print(f"[WARN] [{rcept_no}] DART 공시 본문 조회 오류: {exc}")
+    except Exception:
         return ""
 
 
 def resolve_liquidation_price(disclosures: list[dict]) -> tuple[int | None, str]:
-    """공시에서 청산가를 조회합니다. 찾지 못하면 임의 값 없이 (None, '미확인')을 반환합니다."""
-    keywords = ("청산", "해산", "분배금", "예치", "공모가", "발행가", "합병", "상장폐지")
-
     for d in disclosures:
         title = d.get("report_nm", "")
         price = extract_unit_price_from_text(title)
         if price is not None:
             return price, f"공시제목:{title}"
 
-    candidate_docs = [
+    liq_title_docs = [
         d for d in disclosures
-        if d.get("rcept_no") and any(k in (d.get("report_nm") or "") for k in keywords)
-    ][:5]
+        if d.get("rcept_no") and any(k in (d.get("report_nm") or "") for k in ("청산", "해산", "분배금", "예치"))
+    ][:2]
 
-    for d in candidate_docs:
-        rcept_no = d["rcept_no"]
-        title = d.get("report_nm", "")
-        doc_text = fetch_document_text(rcept_no)
+    for d in liq_title_docs:
+        doc_text = fetch_document_text(d["rcept_no"])
         price = extract_unit_price_from_text(doc_text)
         if price is not None:
-            return price, f"공시본문:{title}({rcept_no})"
-        time.sleep(0.1)
+            return price, f"공시본문:{d.get('report_nm', '')}"
 
     return None, "미확인"
 
 
 def extract_liquidation_record(spac: dict, disclosures: list[dict]) -> dict | None:
-    """청산/해산 공시에서 지급 단가(unit_price)와 지급일(pay_date)이 확인된 건만 반환합니다."""
     liq_keywords = ("청산", "해산", "분배금", "예치금 반환")
-    candidates = [
-        d for d in disclosures
-        if any(k in (d.get("report_nm") or "") for k in liq_keywords)
-    ]
-    if not candidates:
-        return None
+    candidates = [d for d in disclosures if any(k in (d.get("report_nm") or "") for k in liq_keywords)][:2]
 
-    for d in candidates[:5]:
+    for d in candidates:
         title = d.get("report_nm", "")
         rcept_no = d.get("rcept_no", "")
         rcept_dt = d.get("rcept_dt", "")
@@ -303,14 +310,12 @@ def extract_liquidation_record(spac: dict, disclosures: list[dict]) -> dict | No
         unit_price = extract_unit_price_from_text(title)
         pay_date = extract_pay_date_from_text(title)
 
-        doc_text = ""
         if (unit_price is None or not pay_date) and rcept_no:
             doc_text = fetch_document_text(rcept_no)
             if unit_price is None:
                 unit_price = extract_unit_price_from_text(doc_text)
             if not pay_date:
                 pay_date = extract_pay_date_from_text(doc_text)
-            time.sleep(0.1)
 
         if not pay_date and len(re.sub(r"[^0-9]", "", rcept_dt)) >= 8:
             digits = re.sub(r"[^0-9]", "", rcept_dt)[:8]
@@ -319,7 +324,6 @@ def extract_liquidation_record(spac: dict, disclosures: list[dict]) -> dict | No
             except ValueError:
                 pay_date = ""
 
-        # 단가가 확인되지 않으면 임의 값 없이 제외
         if unit_price is not None and unit_price > 0 and pay_date:
             return {
                 "code": spac["code"],
@@ -334,7 +338,6 @@ def extract_liquidation_record(spac: dict, disclosures: list[dict]) -> dict | No
 
 
 def infer_delisting_date(listing_date: str) -> str:
-    """상장일 기준 통상 3년 만기 예상 청산일을 YYYY-MM-DD 형태로 추산합니다."""
     digits = re.sub(r"[^0-9]", "", listing_date or "")
     if len(digits) >= 8:
         try:
@@ -357,13 +360,7 @@ def build_spac_record(spac: dict, corp_codes: dict[str, str], deposit_rate: floa
         for d in disclosures[:15]
     )
 
-    if is_suspended:
-        status = "정지"
-    elif has_merger_notice:
-        status = "합병"
-    else:
-        status = "일반"
-
+    status = "정지" if is_suspended else ("합병" if has_merger_notice else "일반")
     invest_type = "합병" if has_merger_notice else "청산"
     liquidation_price, liq_source = resolve_liquidation_price(disclosures)
     liquidation_record = extract_liquidation_record(spac, disclosures)
@@ -384,13 +381,11 @@ def build_spac_record(spac: dict, corp_codes: dict[str, str], deposit_rate: floa
         yield_general = None
         is_fair_buy = "미확인"
 
-    delisting_date = infer_delisting_date(spac.get("listing_date", ""))
-
     spac_record = {
         "code": code,
         "name": spac["name"],
         "listing_date": spac["listing_date"],
-        "delisting_date": delisting_date,
+        "delisting_date": infer_delisting_date(spac.get("listing_date", "")),
         "corp_code": corp_code,
         "current_price": current_price,
         "liquidation_price": liquidation_price,
@@ -403,42 +398,33 @@ def build_spac_record(spac: dict, corp_codes: dict[str, str], deposit_rate: floa
         "is_suspended": is_suspended,
         "has_liquidation_notice": has_liquidation_notice,
         "status": status,
-        "recent_disclosures": disclosures[:20],
+        "recent_disclosures": disclosures[:15],
     }
     return spac_record, liquidation_record
 
 
-def save_spacs_json(items: list[dict], output_path: Path, updated_at: str) -> None:
+def save_json_payload(items: list[dict], output_path: Path, updated_at: str) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    payload = {
-        "updated_at": updated_at,
-        "count": len(items),
-        "items": items,
-    }
-    with output_path.open("w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=2)
-    print(f"[INFO] {output_path} 저장 완료 (updated_at={updated_at}, count={len(items)})")
-
-
-def save_liquidations_json(items: list[dict], output_path: Path, updated_at: str) -> None:
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    payload = {
-        "updated_at": updated_at,
-        "count": len(items),
-        "items": items,
-    }
+    payload = {"updated_at": updated_at, "count": len(items), "items": items}
     with output_path.open("w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
     print(f"[INFO] {output_path} 저장 완료 (updated_at={updated_at}, count={len(items)})")
 
 
 def main() -> None:
+    existing_spacs = load_existing_items(OUTPUT_PATH)
+    existing_liqs = load_existing_items(LIQUIDATIONS_PATH)
+
     deposit_rate = get_base_deposit_rate()
     corp_codes = get_dart_corp_codes()
     spac_list = get_krx_spac_list()
 
     if not spac_list:
-        print("[ERROR] 스팩 목록이 비어 있어 기존 파일을 덮어쓰지 않고 종료합니다.")
+        print("[ERROR] 스팩 목록이 비어 있어 기존 파일을 유지합니다.")
+        if existing_spacs:
+            updated_at = datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S KST")
+            save_json_payload(existing_spacs, OUTPUT_PATH, updated_at)
+            save_json_payload(existing_liqs, LIQUIDATIONS_PATH, updated_at)
         sys.exit(1)
 
     spac_results: list[dict] = []
@@ -451,11 +437,16 @@ def main() -> None:
             liquidation_results.append(liq_record)
         if idx % 20 == 0:
             print(f"[PROGRESS] {idx}/{len(spac_list)} 처리 중...")
-        time.sleep(0.15)
+        time.sleep(0.05)
+
+    valid_price_count = sum(1 for r in spac_results if (r.get("current_price") or 0) > 0)
+    if valid_price_count == 0 and existing_spacs:
+        print("[WARN] 모든 종목 현재가가 0원입니다. 기존 spacs.json 데이터를 보존합니다.")
+        spac_results = existing_spacs
 
     updated_at = datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S KST")
-    save_spacs_json(spac_results, OUTPUT_PATH, updated_at)
-    save_liquidations_json(liquidation_results, LIQUIDATIONS_PATH, updated_at)
+    save_json_payload(spac_results, OUTPUT_PATH, updated_at)
+    save_json_payload(liquidation_results, LIQUIDATIONS_PATH, updated_at)
 
 
 if __name__ == "__main__":
