@@ -100,11 +100,19 @@ def get_dart_corp_codes() -> dict[str, str]:
 
 
 def get_krx_new_listing_prices() -> dict[str, int]:
-    """KRX KIND 신규상장현황에서 스팩 공모가(종목코드/종목명 기준)를 수집합니다."""
+    """세션을 유지하며 KRX KIND 신규상장/공모가 현황에서 스팩 공모가를 조회합니다."""
     prices: dict[str, int] = {}
     now_kst = datetime.now(KST)
-    start_date = (now_kst - timedelta(days=1200)).strftime("%Y-%m-%d")
+    start_date = (now_kst - timedelta(days=1460)).strftime("%Y-%m-%d")
     end_date = now_kst.strftime("%Y-%m-%d")
+
+    session = requests.Session()
+    session.headers.update(HEADERS)
+
+    try:
+        session.get("https://kind.krx.co.kr/listinvstg/pubprcinf.do?method=searchPubprcInfMain", timeout=12)
+    except Exception:
+        pass
 
     candidates = [
         (
@@ -115,6 +123,8 @@ def get_krx_new_listing_prices() -> dict[str, int]:
                 "searchType": "13",
                 "startDate": start_date,
                 "endDate": end_date,
+                "currentPageSize": "500",
+                "pageIndex": "1",
             },
         ),
         (
@@ -125,13 +135,15 @@ def get_krx_new_listing_prices() -> dict[str, int]:
                 "searchType": "13",
                 "startDate": start_date,
                 "endDate": end_date,
+                "currentPageSize": "500",
+                "pageIndex": "1",
             },
         ),
     ]
 
     for url, payload in candidates:
         try:
-            res = requests.post(url, data=payload, headers=HEADERS, timeout=15)
+            res = session.post(url, data=payload, timeout=15)
             res.raise_for_status()
             html = res.content.decode("euc-kr", errors="ignore")
             if "<table" not in html.lower():
@@ -141,7 +153,10 @@ def get_krx_new_listing_prices() -> dict[str, int]:
                     continue
                 cols = [str(c).strip() for c in df.columns]
                 name_col = next((c for c in cols if "종목명" in c or "회사명" in c), None)
-                price_col = next((c for c in cols if "공모가" in c or "발행가" in c or "확정공모가" in c), None)
+                price_col = next(
+                    (c for c in cols if any(k in c for k in ("공모가", "발행가", "확정공모가", "액면가"))),
+                    None,
+                )
                 code_col = next((c for c in cols if "종목코드" in c or "코드" in c), None)
                 if not name_col or not price_col:
                     continue
@@ -164,10 +179,10 @@ def get_krx_new_listing_prices() -> dict[str, int]:
                     prices["name:" + re.sub(r"\s+", "", name).lower()] = val
 
             if prices:
-                print(f"[INFO] KRX 신규상장 공모가 {len(prices)}건 확보")
+                print(f"[INFO] KRX 신규상장 기준가 {len(prices)}건 확보 ({url})")
                 return prices
         except Exception as exc:
-            print(f"[WARN] KRX 신규상장 공모가 조회 실패 ({url}): {exc}")
+            print(f"[WARN] KRX 신규상장 조회 실패 ({url}): {exc}")
 
     return prices
 
@@ -359,7 +374,9 @@ def extract_pay_date(text: str, fallback_rcept_dt: str = "") -> str:
     return ""
 
 
-def resolve_liquidation_price(spac: dict, disclosures: list[dict], ipo_prices: dict[str, int]) -> tuple[int | None, str]:
+def resolve_liquidation_price(
+    spac: dict, disclosures: list[dict], ipo_prices: dict[str, int], existing_item: dict | None = None
+) -> tuple[int | None, str]:
     for d in disclosures:
         title = d.get("report_nm", "")
         price = extract_unit_price(title)
@@ -382,6 +399,11 @@ def resolve_liquidation_price(spac: dict, disclosures: list[dict], ipo_prices: d
     ipo_price = ipo_prices.get(code) or ipo_prices.get(norm_name)
     if ipo_price is not None:
         return ipo_price, f"KRX신규상장공모가({ipo_price:,}원)"
+
+    if existing_item and isinstance(existing_item.get("liquidation_price"), (int, float)):
+        prev_price = int(existing_item["liquidation_price"])
+        if prev_price > 0:
+            return prev_price, existing_item.get("liquidation_price_source") or "기존저장기준가"
 
     return None, "미확인"
 
@@ -427,11 +449,18 @@ def infer_delisting_date(listing_date: str) -> str:
 
 
 def build_spac_record(
-    spac: dict, corp_codes: dict[str, str], deposit_rate: float, ipo_prices: dict[str, int]
+    spac: dict,
+    corp_codes: dict[str, str],
+    deposit_rate: float,
+    ipo_prices: dict[str, int],
+    existing_item: dict | None = None,
 ) -> tuple[dict, dict | None]:
     code = spac["code"]
     corp_code = corp_codes.get(code, "")
     current_price, is_suspended = get_naver_quote(code)
+    if current_price == 0 and existing_item and (existing_item.get("current_price") or 0) > 0:
+        current_price = int(existing_item["current_price"])
+
     disclosures = get_recent_dart_disclosures(corp_code, days=365)
 
     has_merger = any("합병" in (d.get("report_nm") or "") for d in disclosures[:15])
@@ -442,7 +471,7 @@ def build_spac_record(
 
     status = "정지" if is_suspended else ("합병" if has_merger else "일반")
     invest_type = "합병" if has_merger else "청산"
-    liq_price, liq_source = resolve_liquidation_price(spac, disclosures, ipo_prices)
+    liq_price, liq_source = resolve_liquidation_price(spac, disclosures, ipo_prices, existing_item)
     liq_record = extract_liquidation_record(spac, disclosures)
 
     if liq_price is not None and current_price > 0:
@@ -493,6 +522,7 @@ def save_json(items: list[dict], path: Path, updated_at: str) -> None:
 def main() -> None:
     existing_spacs = load_existing_items(OUTPUT_PATH)
     existing_liqs = load_existing_items(LIQUIDATIONS_PATH)
+    existing_by_code = {str(x.get("code", "")).zfill(6): x for x in existing_spacs if x.get("code")}
     updated_at = datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S KST")
 
     try:
@@ -511,13 +541,17 @@ def main() -> None:
         liq_results: list[dict] = []
 
         for idx, spac in enumerate(spac_list, start=1):
+            code = spac["code"]
+            prev_item = existing_by_code.get(code)
             try:
-                rec, liq = build_spac_record(spac, corp_codes, deposit_rate, ipo_prices)
+                rec, liq = build_spac_record(spac, corp_codes, deposit_rate, ipo_prices, prev_item)
                 spac_results.append(rec)
                 if liq is not None:
                     liq_results.append(liq)
             except Exception as exc:
-                print(f"[WARN] [{spac.get('code', '')}] 처리 오류: {exc}")
+                print(f"[WARN] [{code}] 처리 오류: {exc}")
+                if prev_item:
+                    spac_results.append(prev_item)
             if idx % 20 == 0:
                 print(f"[PROGRESS] {idx}/{len(spac_list)} 완료")
             time.sleep(0.03)
@@ -526,6 +560,9 @@ def main() -> None:
         if valid_prices == 0 and existing_spacs:
             print("[WARN] 현재가 유효 건수 0 — 기존 spacs.json 데이터 유지")
             spac_results = existing_spacs
+
+        if not liq_results and existing_liqs:
+            liq_results = existing_liqs
 
         save_json(spac_results, OUTPUT_PATH, updated_at)
         save_json(liq_results, LIQUIDATIONS_PATH, updated_at)
