@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-19 22:34:24 KST",
+  "updated_at": "2026-11-19 22:41:59 KST",
   "count": 69,
   "items": [
     {
@@ -564,11 +564,6 @@
           "report_nm": "[기재정정]증권신고서(지분증권)",
           "rcept_dt": "20260518",
           "rcept_no": "20260518000391"
-        },
-        {
-          "report_nm": "증권신고서(지분증권)",
-          "rcept_dt": "20260507",
-          "rcept_no": "20260507000501"
         }
       ]
     },
@@ -754,16 +749,6 @@
           "report_nm": "투자설명서",
           "rcept_dt": "20260414",
           "rcept_no": "20260414000025"
-        },
-        {
-          "report_nm": "[기재정정]증권신고서(지분증권)",
-          "rcept_dt": "20260331",
-          "rcept_no": "20260331004566"
-        },
-        {
-          "report_nm": "증권신고서(지분증권)",
-          "rcept_dt": "20260323",
-          "rcept_no": "20260323000649"
         }
       ]
     },
@@ -1034,31 +1019,6 @@
           "report_nm": "[기재정정]투자설명서",
           "rcept_dt": "20260318",
           "rcept_no": "20260318000201"
-        },
-        {
-          "report_nm": "[발행조건확정]증권신고서(지분증권)",
-          "rcept_dt": "20260318",
-          "rcept_no": "20260318000197"
-        },
-        {
-          "report_nm": "투자설명서",
-          "rcept_dt": "20260313",
-          "rcept_no": "20260313000010"
-        },
-        {
-          "report_nm": "[기재정정]증권신고서(지분증권)",
-          "rcept_dt": "20260310",
-          "rcept_no": "20260310002814"
-        },
-        {
-          "report_nm": "감사보고서 (2025.12)",
-          "rcept_dt": "20260223",
-          "rcept_no": "20260223000566"
-        },
-        {
-          "report_nm": "증권신고서(지분증권)",
-          "rcept_dt": "20260213",
-          "rcept_no": "20260213001450"
         }
       ]
     },
@@ -1249,31 +1209,6 @@
           "report_nm": "주식등의대량보유상황보고서(일반)",
           "rcept_dt": "20260126",
           "rcept_no": "20260126000525"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(일반)",
-          "rcept_dt": "20260126",
-          "rcept_no": "20260126000091"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(약식)",
-          "rcept_dt": "20260123",
-          "rcept_no": "20260123000211"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(약식)",
-          "rcept_dt": "20260122",
-          "rcept_no": "20260122000466"
-        },
-        {
-          "report_nm": "증권발행실적보고서",
-          "rcept_dt": "20260115",
-          "rcept_no": "20260115000045"
-        },
-        {
-          "report_nm": "[기재정정]투자설명서",
-          "rcept_dt": "20260109",
-          "rcept_no": "20260109000087"
         }
       ]
     },
@@ -1369,31 +1304,6 @@
           "report_nm": "주식등의대량보유상황보고서(약식)",
           "rcept_dt": "20260109",
           "rcept_no": "20260109000684"
-        },
-        {
-          "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
-          "rcept_dt": "20251230",
-          "rcept_no": "20251230000843"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(일반)",
-          "rcept_dt": "20251230",
-          "rcept_no": "20251230000766"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(일반)",
-          "rcept_dt": "20251226",
-          "rcept_no": "20251226000474"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(약식)",
-          "rcept_dt": "20251226",
-          "rcept_no": "20251226000239"
-        },
-        {
-          "report_nm": "증권발행실적보고서",
-          "rcept_dt": "20251217",
-          "rcept_no": "20251217000193"
         }
       ]
     },
@@ -1489,31 +1399,6 @@
           "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
           "rcept_dt": "20251224",
           "rcept_no": "20251224000564"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(일반)",
-          "rcept_dt": "20251224",
-          "rcept_no": "20251224000515"
-        },
-        {
-          "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
-          "rcept_dt": "20251222",
-          "rcept_no": "20251222000329"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(일반)",
-          "rcept_dt": "20251222",
-          "rcept_no": "20251222000301"
-        },
-        {
-          "report_nm": "증권발행실적보고서",
-          "rcept_dt": "20251215",
-          "rcept_no": "20251215000063"
-        },
-        {
-          "report_nm": "[기재정정]투자설명서",
-          "rcept_dt": "20251209",
-          "rcept_no": "20251209000372"
         }
       ]
     },
@@ -1609,31 +1494,6 @@
           "report_nm": "기업인수목적회사의임원선임결정              ",
           "rcept_dt": "20260226",
           "rcept_no": "20260226901345"
-        },
-        {
-          "report_nm": "주주총회소집결의              ",
-          "rcept_dt": "20260226",
-          "rcept_no": "20260226901167"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(약식)",
-          "rcept_dt": "20260116",
-          "rcept_no": "20260116000145"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(일반)",
-          "rcept_dt": "20251224",
-          "rcept_no": "20251224000462"
-        },
-        {
-          "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
-          "rcept_dt": "20251223",
-          "rcept_no": "20251223000748"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(일반)",
-          "rcept_dt": "20251223",
-          "rcept_no": "20251223000716"
         }
       ]
     },
@@ -1644,12 +1504,12 @@
       "delisting_date": "2028-12-19",
       "corp_code": "01949584",
       "current_price": 1762,
-      "liquidation_price": 4336,
-      "liquidation_price_source": "공시본문:[기재정정]주요사항보고서(회사합병결정)(20261021000442)",
-      "is_fair_buy": "O",
+      "liquidation_price": null,
+      "liquidation_price_source": "미확인",
+      "is_fair_buy": "미확인",
       "invest_type": "합병",
-      "yield_isa": 146.08,
-      "yield_general": 123.59,
+      "yield_isa": null,
+      "yield_general": null,
       "deposit_rate": 2.4,
       "is_suspended": false,
       "has_liquidation_notice": false,
@@ -1729,31 +1589,6 @@
           "report_nm": "[첨부정정]주요사항보고서(회사합병결정)",
           "rcept_dt": "20260929",
           "rcept_no": "20260929000639"
-        },
-        {
-          "report_nm": "[첨부정정]주요사항보고서(회사합병결정)",
-          "rcept_dt": "20260929",
-          "rcept_no": "20260929000411"
-        },
-        {
-          "report_nm": "[첨부정정]주요사항보고서(회사합병결정)",
-          "rcept_dt": "20260929",
-          "rcept_no": "20260929000230"
-        },
-        {
-          "report_nm": "주주명부폐쇄기간또는기준일설정              ",
-          "rcept_dt": "20260929",
-          "rcept_no": "20260929900322"
-        },
-        {
-          "report_nm": "주주총회소집결의              (임시주주총회)",
-          "rcept_dt": "20260929",
-          "rcept_no": "20260929900301"
-        },
-        {
-          "report_nm": "[기재정정]주요사항보고서(회사합병결정)",
-          "rcept_dt": "20260929",
-          "rcept_no": "20260929000142"
         }
       ]
     },
@@ -1849,31 +1684,6 @@
           "report_nm": "주주총회소집결의              ",
           "rcept_dt": "20260227",
           "rcept_no": "20260227902008"
-        },
-        {
-          "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
-          "rcept_dt": "20251222",
-          "rcept_no": "20251222000482"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(일반)",
-          "rcept_dt": "20251222",
-          "rcept_no": "20251222000480"
-        },
-        {
-          "report_nm": "주주명부폐쇄기간또는기준일설정              ",
-          "rcept_dt": "20251216",
-          "rcept_no": "20251216901753"
-        },
-        {
-          "report_nm": "증권발행실적보고서",
-          "rcept_dt": "20251209",
-          "rcept_no": "20251209000313"
-        },
-        {
-          "report_nm": "[기재정정]투자설명서",
-          "rcept_dt": "20251202",
-          "rcept_no": "20251202000413"
         }
       ]
     },
@@ -1969,31 +1779,6 @@
           "report_nm": "주주총회소집결의              ",
           "rcept_dt": "20260210",
           "rcept_no": "20260210901091"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(약식)",
-          "rcept_dt": "20260109",
-          "rcept_no": "20260109000104"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(약식)",
-          "rcept_dt": "20251219",
-          "rcept_no": "20251219000390"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(약식)",
-          "rcept_dt": "20251217",
-          "rcept_no": "20251217000183"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(일반)",
-          "rcept_dt": "20251215",
-          "rcept_no": "20251215000361"
-        },
-        {
-          "report_nm": "주주명부폐쇄기간또는기준일설정              ",
-          "rcept_dt": "20251215",
-          "rcept_no": "20251215901199"
         }
       ]
     },
@@ -2089,31 +1874,6 @@
           "report_nm": "기업인수목적회사의임원선임결정              ",
           "rcept_dt": "20260213",
           "rcept_no": "20260213901573"
-        },
-        {
-          "report_nm": "주주총회소집결의              ",
-          "rcept_dt": "20260213",
-          "rcept_no": "20260213901422"
-        },
-        {
-          "report_nm": "독립이사의선임ㆍ해임또는중도퇴임에관한신고",
-          "rcept_dt": "20260210",
-          "rcept_no": "20260210000181"
-        },
-        {
-          "report_nm": "기업인수목적회사의임원사임              ",
-          "rcept_dt": "20260210",
-          "rcept_no": "20260210900201"
-        },
-        {
-          "report_nm": "기업인수목적회사의임원사임              ",
-          "rcept_dt": "20260210",
-          "rcept_no": "20260210900196"
-        },
-        {
-          "report_nm": "매출액또는손익구조30%(대규모법인은15%)이상변동              ",
-          "rcept_dt": "20260130",
-          "rcept_no": "20260130901406"
         }
       ]
     },
@@ -2209,31 +1969,6 @@
           "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
           "rcept_dt": "20251217",
           "rcept_no": "20251217000553"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(일반)",
-          "rcept_dt": "20251217",
-          "rcept_no": "20251217000546"
-        },
-        {
-          "report_nm": "주주명부폐쇄기간또는기준일설정              ",
-          "rcept_dt": "20251216",
-          "rcept_no": "20251216901257"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(일반)",
-          "rcept_dt": "20251216",
-          "rcept_no": "20251216000217"
-        },
-        {
-          "report_nm": "[기재정정]증권발행실적보고서",
-          "rcept_dt": "20251205",
-          "rcept_no": "20251205000526"
-        },
-        {
-          "report_nm": "증권발행실적보고서",
-          "rcept_dt": "20251205",
-          "rcept_no": "20251205000076"
         }
       ]
     },
@@ -2329,16 +2064,6 @@
           "report_nm": "증권발행실적보고서",
           "rcept_dt": "20251127",
           "rcept_no": "20251127000779"
-        },
-        {
-          "report_nm": "[기재정정]투자설명서",
-          "rcept_dt": "20251121",
-          "rcept_no": "20251121000115"
-        },
-        {
-          "report_nm": "[발행조건확정]증권신고서(지분증권)",
-          "rcept_dt": "20251121",
-          "rcept_no": "20251121000112"
         }
       ]
     },
@@ -2434,16 +2159,6 @@
           "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
           "rcept_dt": "20251201",
           "rcept_no": "20251201000324"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(일반)",
-          "rcept_dt": "20251201",
-          "rcept_no": "20251201000313"
-        },
-        {
-          "report_nm": "증권발행실적보고서",
-          "rcept_dt": "20251124",
-          "rcept_no": "20251124000143"
         }
       ]
     },
@@ -2539,31 +2254,6 @@
           "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
           "rcept_dt": "20251203",
           "rcept_no": "20251203000262"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(일반)",
-          "rcept_dt": "20251203",
-          "rcept_no": "20251203000238"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(일반)",
-          "rcept_dt": "20251203",
-          "rcept_no": "20251203000022"
-        },
-        {
-          "report_nm": "[기재정정]주식등의대량보유상황보고서(약식)",
-          "rcept_dt": "20251202",
-          "rcept_no": "20251202000298"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(약식)",
-          "rcept_dt": "20251202",
-          "rcept_no": "20251202000109"
-        },
-        {
-          "report_nm": "증권발행실적보고서",
-          "rcept_dt": "20251124",
-          "rcept_no": "20251124000364"
         }
       ]
     },
@@ -2659,11 +2349,6 @@
           "report_nm": "[기재정정]증권발행실적보고서",
           "rcept_dt": "20251121",
           "rcept_no": "20251121000062"
-        },
-        {
-          "report_nm": "증권발행실적보고서",
-          "rcept_dt": "20251120",
-          "rcept_no": "20251120000146"
         }
       ]
     },
@@ -2914,11 +2599,6 @@
           "report_nm": "주주총회소집공고",
           "rcept_dt": "20260304",
           "rcept_no": "20260304001563"
-        },
-        {
-          "report_nm": "주주총회소집결의              ",
-          "rcept_dt": "20260211",
-          "rcept_no": "20260211901097"
         }
       ]
     },
@@ -3274,11 +2954,6 @@
           "report_nm": "주주총회소집결의              ",
           "rcept_dt": "20260226",
           "rcept_no": "20260226900363"
-        },
-        {
-          "report_nm": "주주명부폐쇄기간또는기준일설정              ",
-          "rcept_dt": "20251211",
-          "rcept_no": "20251211900431"
         }
       ]
     },
@@ -3619,31 +3294,6 @@
           "report_nm": "감사보고서제출              ",
           "rcept_dt": "20260311",
           "rcept_no": "20260311901910"
-        },
-        {
-          "report_nm": "주주총회소집공고",
-          "rcept_dt": "20260304",
-          "rcept_no": "20260304000798"
-        },
-        {
-          "report_nm": "[기재정정]주주총회소집결의              ",
-          "rcept_dt": "20260225",
-          "rcept_no": "20260225900810"
-        },
-        {
-          "report_nm": "주주총회소집결의              ",
-          "rcept_dt": "20260212",
-          "rcept_no": "20260212901144"
-        },
-        {
-          "report_nm": "[기재정정]주주명부폐쇄기간또는기준일설정              ",
-          "rcept_dt": "20251216",
-          "rcept_no": "20251216900932"
-        },
-        {
-          "report_nm": "주주명부폐쇄기간또는기준일설정              ",
-          "rcept_dt": "20251216",
-          "rcept_no": "20251216900719"
         }
       ]
     },
@@ -3654,12 +3304,12 @@
       "delisting_date": "2028-03-20",
       "corp_code": "01881800",
       "current_price": 2050,
-      "liquidation_price": 3172,
-      "liquidation_price_source": "공시본문:[기재정정]주요사항보고서(회사합병결정)(20261030000346)",
-      "is_fair_buy": "O",
+      "liquidation_price": null,
+      "liquidation_price_source": "미확인",
+      "is_fair_buy": "미확인",
       "invest_type": "합병",
-      "yield_isa": 54.73,
-      "yield_general": 46.3,
+      "yield_isa": null,
+      "yield_general": null,
       "deposit_rate": 2.4,
       "is_suspended": false,
       "has_liquidation_notice": false,
@@ -3739,31 +3389,6 @@
           "report_nm": "[기재정정]분기보고서 (2026.03)",
           "rcept_dt": "20260928",
           "rcept_no": "20260928000065"
-        },
-        {
-          "report_nm": "[기재정정]사업보고서 (2025.12)",
-          "rcept_dt": "20260928",
-          "rcept_no": "20260928000058"
-        },
-        {
-          "report_nm": "반기보고서 (2026.06)",
-          "rcept_dt": "20260814",
-          "rcept_no": "20260814001877"
-        },
-        {
-          "report_nm": "주요사항보고서(회사합병결정)",
-          "rcept_dt": "20260727",
-          "rcept_no": "20260727000299"
-        },
-        {
-          "report_nm": "주권매매거래정지              (SPAC 합병(예비심사청구대상))",
-          "rcept_dt": "20260727",
-          "rcept_no": "20260727900597"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(약식)",
-          "rcept_dt": "20260519",
-          "rcept_no": "20260519000003"
         }
       ]
     },
@@ -3944,31 +3569,6 @@
           "report_nm": "주주총회소집공고",
           "rcept_dt": "20260102",
           "rcept_no": "20260102000096"
-        },
-        {
-          "report_nm": "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
-          "rcept_dt": "20251218",
-          "rcept_no": "20251218900249"
-        },
-        {
-          "report_nm": "주주명부폐쇄기간또는기준일설정              ",
-          "rcept_dt": "20251216",
-          "rcept_no": "20251216901395"
-        },
-        {
-          "report_nm": "[첨부정정]주주명부폐쇄기간또는기준일설정              ",
-          "rcept_dt": "20251203",
-          "rcept_no": "20251203900282"
-        },
-        {
-          "report_nm": "[기재정정]기업인수목적회사의임원선임결정              ",
-          "rcept_dt": "20251203",
-          "rcept_no": "20251203900283"
-        },
-        {
-          "report_nm": "[기재정정]주주총회소집결의              (임시주주총회)",
-          "rcept_dt": "20251203",
-          "rcept_no": "20251203900284"
         }
       ]
     },
@@ -3979,12 +3579,12 @@
       "delisting_date": "2027-12-20",
       "corp_code": "01877126",
       "current_price": 2195,
-      "liquidation_price": 9518,
-      "liquidation_price_source": "공시본문:[기재정정]주요사항보고서(회사합병결정)(20261103000313)",
-      "is_fair_buy": "O",
+      "liquidation_price": null,
+      "liquidation_price_source": "미확인",
+      "is_fair_buy": "미확인",
       "invest_type": "합병",
-      "yield_isa": 333.62,
-      "yield_general": 282.24,
+      "yield_isa": null,
+      "yield_general": null,
       "deposit_rate": 2.4,
       "is_suspended": false,
       "has_liquidation_notice": false,
@@ -4064,11 +3664,6 @@
           "report_nm": "매출액또는손익구조30%(대규모법인은15%)이상변동              ",
           "rcept_dt": "20260209",
           "rcept_no": "20260209900842"
-        },
-        {
-          "report_nm": "주주명부폐쇄기간또는기준일설정              ",
-          "rcept_dt": "20251215",
-          "rcept_no": "20251215900157"
         }
       ]
     },
@@ -4154,12 +3749,12 @@
       "delisting_date": "2027-12-11",
       "corp_code": "01873272",
       "current_price": 2200,
-      "liquidation_price": 6120,
-      "liquidation_price_source": "공시본문:주요사항보고서(회사합병결정)(20260910000331)",
-      "is_fair_buy": "O",
+      "liquidation_price": null,
+      "liquidation_price_source": "미확인",
+      "is_fair_buy": "미확인",
       "invest_type": "합병",
-      "yield_isa": 178.18,
-      "yield_general": 150.74,
+      "yield_isa": null,
+      "yield_general": null,
       "deposit_rate": 2.4,
       "is_suspended": false,
       "has_liquidation_notice": false,
@@ -4239,16 +3834,6 @@
           "report_nm": "매출액또는손익구조30%(대규모법인은15%)이상변동              ",
           "rcept_dt": "20260209",
           "rcept_no": "20260209901501"
-        },
-        {
-          "report_nm": "주주명부폐쇄기간또는기준일설정              ",
-          "rcept_dt": "20251215",
-          "rcept_no": "20251215900282"
-        },
-        {
-          "report_nm": "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
-          "rcept_dt": "20251208",
-          "rcept_no": "20251208900525"
         }
       ]
     },
@@ -4344,11 +3929,6 @@
           "report_nm": "주주명부폐쇄기간또는기준일설정              ",
           "rcept_dt": "20251212",
           "rcept_no": "20251212900775"
-        },
-        {
-          "report_nm": "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
-          "rcept_dt": "20251124",
-          "rcept_no": "20251124900682"
         }
       ]
     },
@@ -4604,31 +4184,6 @@
           "report_nm": "주주총회소집공고",
           "rcept_dt": "20260305",
           "rcept_no": "20260305001643"
-        },
-        {
-          "report_nm": "의결권대리행사권유참고서류",
-          "rcept_dt": "20260305",
-          "rcept_no": "20260305001636"
-        },
-        {
-          "report_nm": "사업보고서 (2025.12)",
-          "rcept_dt": "20260305",
-          "rcept_no": "20260305001627"
-        },
-        {
-          "report_nm": "감사보고서제출              ",
-          "rcept_dt": "20260305",
-          "rcept_no": "20260305901752"
-        },
-        {
-          "report_nm": "주주총회소집결의              ",
-          "rcept_dt": "20260226",
-          "rcept_no": "20260226901239"
-        },
-        {
-          "report_nm": "매출액또는손익구조30%(대규모법인은15%)이상변동              ",
-          "rcept_dt": "20260205",
-          "rcept_no": "20260205901005"
         }
       ]
     },
@@ -4724,26 +4279,6 @@
           "report_nm": "감사보고서제출              ",
           "rcept_dt": "20260311",
           "rcept_no": "20260311901084"
-        },
-        {
-          "report_nm": "주주총회소집공고",
-          "rcept_dt": "20260304",
-          "rcept_no": "20260304000802"
-        },
-        {
-          "report_nm": "주주총회소집결의              ",
-          "rcept_dt": "20260212",
-          "rcept_no": "20260212901300"
-        },
-        {
-          "report_nm": "[기재정정]주주명부폐쇄기간또는기준일설정              ",
-          "rcept_dt": "20251216",
-          "rcept_no": "20251216901237"
-        },
-        {
-          "report_nm": "주주명부폐쇄기간또는기준일설정              ",
-          "rcept_dt": "20251216",
-          "rcept_no": "20251216900847"
         }
       ]
     },
@@ -4924,12 +4459,12 @@
       "delisting_date": "2027-09-11",
       "corp_code": "01841635",
       "current_price": 2055,
-      "liquidation_price": 7969,
-      "liquidation_price_source": "공시본문:[기재정정]주요사항보고서(회사합병결정)(20260930000489)",
-      "is_fair_buy": "O",
+      "liquidation_price": null,
+      "liquidation_price_source": "미확인",
+      "is_fair_buy": "미확인",
       "invest_type": "합병",
-      "yield_isa": 287.79,
-      "yield_general": 243.47,
+      "yield_isa": null,
+      "yield_general": null,
       "deposit_rate": 2.4,
       "is_suspended": false,
       "has_liquidation_notice": false,
@@ -5009,11 +4544,6 @@
           "report_nm": "[기재정정]매출액또는손익구조30%(대규모법인은15%)이상변동              ",
           "rcept_dt": "20260205",
           "rcept_no": "20260205900371"
-        },
-        {
-          "report_nm": "매출액또는손익구조30%(대규모법인은15%)이상변동              ",
-          "rcept_dt": "20260205",
-          "rcept_no": "20260205900301"
         }
       ]
     },
@@ -5024,12 +4554,12 @@
       "delisting_date": "2027-08-13",
       "corp_code": "01845701",
       "current_price": 2065,
-      "liquidation_price": 7217,
-      "liquidation_price_source": "공시본문:주요사항보고서(회사합병결정)(20260918000373)",
-      "is_fair_buy": "O",
+      "liquidation_price": null,
+      "liquidation_price_source": "미확인",
+      "is_fair_buy": "미확인",
       "invest_type": "합병",
-      "yield_isa": 249.49,
-      "yield_general": 211.07,
+      "yield_isa": null,
+      "yield_general": null,
       "deposit_rate": 2.4,
       "is_suspended": false,
       "has_liquidation_notice": false,
@@ -5109,31 +4639,6 @@
           "report_nm": "[기재정정]주요사항보고서(회사합병결정)",
           "rcept_dt": "20260511",
           "rcept_no": "20260511000351"
-        },
-        {
-          "report_nm": "[기재정정]주요사항보고서(회사합병결정)",
-          "rcept_dt": "20260422",
-          "rcept_no": "20260422000676"
-        },
-        {
-          "report_nm": "주권매매거래정지해제              (합병결정 철회)",
-          "rcept_dt": "20260422",
-          "rcept_no": "20260422900663"
-        },
-        {
-          "report_nm": "기업인수목적회사관련합병취소ㆍ부인사실발생              ",
-          "rcept_dt": "20260422",
-          "rcept_no": "20260422900708"
-        },
-        {
-          "report_nm": "정기주주총회결과              ",
-          "rcept_dt": "20260319",
-          "rcept_no": "20260319901246"
-        },
-        {
-          "report_nm": "의결권대리행사권유참고서류",
-          "rcept_dt": "20260304",
-          "rcept_no": "20260304001124"
         }
       ]
     },
@@ -5754,16 +5259,6 @@
           "report_nm": "주주총회소집결의              ",
           "rcept_dt": "20260213",
           "rcept_no": "20260213900493"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(일반)",
-          "rcept_dt": "20260206",
-          "rcept_no": "20260206001048"
-        },
-        {
-          "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
-          "rcept_dt": "20260202",
-          "rcept_no": "20260202000835"
         }
       ]
     },
@@ -5859,12 +5354,12 @@
       "delisting_date": "2027-06-18",
       "corp_code": "01814589",
       "current_price": 2070,
-      "liquidation_price": 2000,
-      "liquidation_price_source": "공시본문:[기재정정]주요사항보고서(회사합병결정)(20260526000375)",
-      "is_fair_buy": "X",
+      "liquidation_price": null,
+      "liquidation_price_source": "미확인",
+      "is_fair_buy": "미확인",
       "invest_type": "합병",
-      "yield_isa": -3.38,
-      "yield_general": -3.38,
+      "yield_isa": null,
+      "yield_general": null,
       "deposit_rate": 2.4,
       "is_suspended": false,
       "has_liquidation_notice": false,
@@ -5944,31 +5439,6 @@
           "report_nm": "주주총회소집공고",
           "rcept_dt": "20260311",
           "rcept_no": "20260311003496"
-        },
-        {
-          "report_nm": "주주총회소집결의              ",
-          "rcept_dt": "20260219",
-          "rcept_no": "20260219900269"
-        },
-        {
-          "report_nm": "[첨부정정]주요사항보고서(회사합병결정)",
-          "rcept_dt": "20260213",
-          "rcept_no": "20260213001582"
-        },
-        {
-          "report_nm": "[첨부정정]주요사항보고서(회사합병결정)",
-          "rcept_dt": "20260212",
-          "rcept_no": "20260212001736"
-        },
-        {
-          "report_nm": "주요사항보고서(회사합병결정)",
-          "rcept_dt": "20260212",
-          "rcept_no": "20260212001579"
-        },
-        {
-          "report_nm": "주권매매거래정지              (SPAC 합병(예비심사청구대상))",
-          "rcept_dt": "20260212",
-          "rcept_no": "20260212901316"
         }
       ]
     },
@@ -6154,11 +5624,6 @@
           "report_nm": "매출액또는손익구조30%(대규모법인은15%)이상변동              ",
           "rcept_dt": "20260209",
           "rcept_no": "20260209900817"
-        },
-        {
-          "report_nm": "주주명부폐쇄기간또는기준일설정              ",
-          "rcept_dt": "20251215",
-          "rcept_no": "20251215900250"
         }
       ]
     },
@@ -6339,16 +5804,6 @@
           "report_nm": "주주총회소집결의              ",
           "rcept_dt": "20260226",
           "rcept_no": "20260226900948"
-        },
-        {
-          "report_nm": "매출액또는손익구조30%(대규모법인은15%)이상변동              ",
-          "rcept_dt": "20260203",
-          "rcept_no": "20260203900646"
-        },
-        {
-          "report_nm": "주주명부폐쇄기간또는기준일설정              ",
-          "rcept_dt": "20251212",
-          "rcept_no": "20251212900280"
         }
       ]
     },
@@ -6444,21 +5899,6 @@
           "report_nm": "감사보고서제출              ",
           "rcept_dt": "20260311",
           "rcept_no": "20260311901185"
-        },
-        {
-          "report_nm": "주주총회소집공고",
-          "rcept_dt": "20260304",
-          "rcept_no": "20260304000759"
-        },
-        {
-          "report_nm": "주주총회소집결의              ",
-          "rcept_dt": "20260212",
-          "rcept_no": "20260212901325"
-        },
-        {
-          "report_nm": "주주명부폐쇄기간또는기준일설정              ",
-          "rcept_dt": "20251216",
-          "rcept_no": "20251216901288"
         }
       ]
     },
@@ -6469,12 +5909,12 @@
       "delisting_date": "",
       "corp_code": "01787072",
       "current_price": 2080,
-      "liquidation_price": 9198,
-      "liquidation_price_source": "공시본문:[기재정정]주요사항보고서(회사합병결정)(20260702000277)",
-      "is_fair_buy": "O",
+      "liquidation_price": null,
+      "liquidation_price_source": "미확인",
+      "is_fair_buy": "미확인",
       "invest_type": "합병",
-      "yield_isa": 342.21,
-      "yield_general": 289.51,
+      "yield_isa": null,
+      "yield_general": null,
       "deposit_rate": 2.4,
       "is_suspended": false,
       "has_liquidation_notice": false,
@@ -6554,11 +5994,6 @@
           "report_nm": "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
           "rcept_dt": "20260223",
           "rcept_no": "20260223900383"
-        },
-        {
-          "report_nm": "주주명부폐쇄기간또는기준일설정              ",
-          "rcept_dt": "20251215",
-          "rcept_no": "20251215900659"
         }
       ]
     },
@@ -6569,12 +6004,12 @@
       "delisting_date": "2027-02-01",
       "corp_code": "01792791",
       "current_price": 2815,
-      "liquidation_price": 7739,
-      "liquidation_price_source": "공시본문:[기재정정]주요사항보고서(회사합병결정)(20261026000203)",
-      "is_fair_buy": "O",
+      "liquidation_price": null,
+      "liquidation_price_source": "미확인",
+      "is_fair_buy": "미확인",
       "invest_type": "합병",
-      "yield_isa": 174.92,
-      "yield_general": 147.98,
+      "yield_isa": null,
+      "yield_general": null,
       "deposit_rate": 2.4,
       "is_suspended": false,
       "has_liquidation_notice": false,
@@ -6654,31 +6089,6 @@
           "report_nm": "반기보고서 (2026.06)",
           "rcept_dt": "20260807",
           "rcept_no": "20260807000018"
-        },
-        {
-          "report_nm": "주요사항보고서(회사합병결정)",
-          "rcept_dt": "20260619",
-          "rcept_no": "20260619000664"
-        },
-        {
-          "report_nm": "주권매매거래정지              (SPAC 합병(예비심사청구대상))",
-          "rcept_dt": "20260619",
-          "rcept_no": "20260619901008"
-        },
-        {
-          "report_nm": "분기보고서 (2026.03)",
-          "rcept_dt": "20260514",
-          "rcept_no": "20260514000210"
-        },
-        {
-          "report_nm": "정기주주총회결과              ",
-          "rcept_dt": "20260323",
-          "rcept_no": "20260323900661"
-        },
-        {
-          "report_nm": "사업보고서 (2025.12)",
-          "rcept_dt": "20260310",
-          "rcept_no": "20260310002005"
         }
       ]
     },
@@ -6774,31 +6184,6 @@
           "report_nm": "독립이사의선임ㆍ해임또는중도퇴임에관한신고",
           "rcept_dt": "20260930",
           "rcept_no": "20260930000777"
-        },
-        {
-          "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
-          "rcept_dt": "20260930",
-          "rcept_no": "20260930000747"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(일반)",
-          "rcept_dt": "20260930",
-          "rcept_no": "20260930000744"
-        },
-        {
-          "report_nm": "[기재정정]주요사항보고서(감자결정)",
-          "rcept_dt": "20260929",
-          "rcept_no": "20260929000557"
-        },
-        {
-          "report_nm": "상호변경안내              ",
-          "rcept_dt": "20260929",
-          "rcept_no": "20260929900835"
-        },
-        {
-          "report_nm": "대표이사변경              ",
-          "rcept_dt": "20260929",
-          "rcept_no": "20260929900813"
         }
       ]
     }
