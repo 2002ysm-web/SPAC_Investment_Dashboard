@@ -22,19 +22,19 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install pandas requests lxml
+        run: pip install --upgrade pip && pip install pandas requests lxml html5lib beautifulsoup4
 
       - name: Run SPAC updater script
         env:
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
           KRX_OPENAPI_KEY: ${{ secrets.KRX_OPENAPI_KEY }}
-        run: python main_run.py
+        run: python -u main_run.py
 
       - name: Commit and push updated data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/spacs.json data/liquidations.json
+          git add -f data/spacs.json data/liquidations.json || true
           if git diff --staged --quiet; then
             echo "변경된 데이터가 없습니다."
           else
