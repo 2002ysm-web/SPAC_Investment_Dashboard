@@ -686,10 +686,18 @@
             if (!el) return;
             el.innerText = msg;
             el.classList.remove('hidden');
-            setTimeout(() => el.classList.add('hidden'), 6000);
+            clearTimeout(window.__toastTimer);
+            window.__toastTimer = setTimeout(() => el.classList.add('hidden'), 6000);
         }
 
-        // 청산 공시(data/liquidations.json) 단가 확인된 건만 자동 이관 (미확인 시 임의 값 없이 보유 유지)
+        function hasConfirmedLiquidationNotice(liqItem) {
+            if (!liqItem || typeof liqItem !== 'object') return false;
+            const reportNm = String(liqItem.report_nm || '').trim();
+            if (!reportNm) return false;
+            return ['청산', '해산', '분배금', '예치금 반환'].some(k => reportNm.includes(k));
+        }
+
+        // 청산 공시에 해당 내용이 확인되고 단가·지급일이 확정된 건만 자동 이관
         async function processLiquidations() {
             let list = [];
             try {
@@ -703,10 +711,14 @@
             const today = getTodayStr();
             const liqMap = {};
             list.forEach(l => {
+                if (!hasConfirmedLiquidationNotice(l)) return;
                 const unitPrice = Number(l && l.unit_price);
                 const payDate = l && typeof l.pay_date === 'string' ? l.pay_date.trim() : '';
                 if (l && l.name && payDate && Number.isFinite(unitPrice) && unitPrice > 0) {
-                    liqMap[normName(l.name)] = { ...l, unit_price: unitPrice, pay_date: payDate };
+                    const key = normName(l.name);
+                    if (!liqMap[key]) {
+                        liqMap[key] = { ...l, unit_price: unitPrice, pay_date: payDate };
+                    }
                 }
             });
 
@@ -721,7 +733,7 @@
                 const tax = acct === '일반' ? Math.floor(Math.max(0, gain) * GENERAL_TAX_RATE) : 0;
                 const rec = {
                     name: item.name, type: '청산', buy_amount: item.buy_amount, buy_date: item.buy_date,
-                    sell_amount: gross - tax, sell_date: l.pay_date, acct, auto: true
+                    sell_amount: gross - tax, sell_date: l.pay_date, acct, report_nm: l.report_nm, auto: true
                 };
                 if (tax > 0) rec.tax = tax;
                 performanceItems.unshift(rec);
@@ -731,7 +743,7 @@
                 holdingItems = remain;
                 saveHoldings();
                 savePerformance();
-                showToast(`청산 완료 ${moved}건이 성과 관리로 자동 이관되었습니다.`);
+                showToast(`청산 공시 확인 ${moved}건이 성과 관리로 자동 이관되었습니다.`);
                 renderHoldings();
                 renderPerformance();
             }
