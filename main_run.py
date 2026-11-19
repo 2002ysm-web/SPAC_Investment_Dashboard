@@ -15,6 +15,7 @@ import requests
 DART_API_KEY = os.environ.get("DART_API_KEY", "").strip()
 KRX_OPENAPI_KEY = os.environ.get("KRX_OPENAPI_KEY", "").strip()
 OUTPUT_PATH = Path(os.environ.get("SPACS_OUTPUT_PATH", "data/spacs.json"))
+LIQUIDATIONS_PATH = Path(os.environ.get("LIQUIDATIONS_OUTPUT_PATH", "data/liquidations.json"))
 DEPOSIT_RATE_PATH = Path(os.environ.get("DEPOSIT_RATE_PATH", "data/deposit_rates.json"))
 
 KST = timezone(timedelta(hours=9))
@@ -170,14 +171,20 @@ def get_recent_dart_disclosures(corp_code: str, days: int = 365) -> list[dict]:
     return []
 
 
+def clean_html_text(text: str) -> str:
+    if not text:
+        return ""
+    clean = re.sub(r"<[^>]+>", " ", text)
+    clean = re.sub(r"&nbsp;|&#160;", " ", clean)
+    clean = re.sub(r"\s+", " ", clean)
+    return clean.strip()
+
+
 def extract_unit_price_from_text(text: str) -> int | None:
     """공시 제목/본문 텍스트에서 청산가·분배금·예치금·공모가/발행가 단가를 추출합니다."""
-    if not text:
+    clean_text = clean_html_text(text)
+    if not clean_text:
         return None
-
-    clean_text = re.sub(r"<[^>]+>", " ", text)
-    clean_text = re.sub(r"&nbsp;|&#160;", " ", clean_text)
-    clean_text = re.sub(r"\s+", " ", clean_text)
 
     priority_patterns = [
         r"(?:청산가|청산\s*분배금|해산\s*분배금|1주당\s*청산\w*|주당\s*분배금|예치금\s*반환\w*)[^0-9]{0,25}([1-9][0-9,]{2,4})\s*원",
@@ -200,6 +207,28 @@ def extract_unit_price_from_text(text: str) -> int | None:
                     return val
 
     return None
+
+
+def extract_pay_date_from_text(text: str) -> str:
+    """공시 텍스트에서 지급예정일·지급일·청산일(YYYY-MM-DD)을 추출합니다."""
+    clean_text = clean_html_text(text)
+    if not clean_text:
+        return ""
+
+    date_patterns = [
+        r"(?:지급\s*예정일|지급일|분배금\s*지급일|청산\s*지급일|반환\s*예정일|반환일)[^0-9]{0,20}(20[2-9][0-9])[년.\-/]?\s*([01]?[0-9])[월.\-/]?\s*([0-3]?[0-9])\s*일?",
+        r"(20[2-9][0-9])[년.\-/]\s*([01]?[0-9])[월.\-/]\s*([0-3]?[0-9])\s*일?\s*(?:지급|예정|반환)",
+    ]
+    for pattern in date_patterns:
+        match = re.search(pattern, clean_text)
+        if match:
+            y, m, d = match.group(1), match.group(2).zfill(2), match.group(3).zfill(2)
+            try:
+                dt = datetime.strptime(f"{y}-{m}-{d}", "%Y-%m-%d")
+                return dt.strftime("%Y-%m-%d")
+            except ValueError:
+                continue
+    return ""
 
 
 def fetch_document_text(rcept_no: str) -> str:
@@ -256,6 +285,54 @@ def resolve_liquidation_price(disclosures: list[dict]) -> tuple[int | None, str]
     return None, "미확인"
 
 
+def extract_liquidation_record(spac: dict, disclosures: list[dict]) -> dict | None:
+    """청산/해산 공시에서 지급 단가(unit_price)와 지급일(pay_date)이 확인된 건만 반환합니다."""
+    liq_keywords = ("청산", "해산", "분배금", "예치금 반환")
+    candidates = [
+        d for d in disclosures
+        if any(k in (d.get("report_nm") or "") for k in liq_keywords)
+    ]
+    if not candidates:
+        return None
+
+    for d in candidates[:5]:
+        title = d.get("report_nm", "")
+        rcept_no = d.get("rcept_no", "")
+        rcept_dt = d.get("rcept_dt", "")
+
+        unit_price = extract_unit_price_from_text(title)
+        pay_date = extract_pay_date_from_text(title)
+
+        doc_text = ""
+        if (unit_price is None or not pay_date) and rcept_no:
+            doc_text = fetch_document_text(rcept_no)
+            if unit_price is None:
+                unit_price = extract_unit_price_from_text(doc_text)
+            if not pay_date:
+                pay_date = extract_pay_date_from_text(doc_text)
+            time.sleep(0.1)
+
+        if not pay_date and len(re.sub(r"[^0-9]", "", rcept_dt)) >= 8:
+            digits = re.sub(r"[^0-9]", "", rcept_dt)[:8]
+            try:
+                pay_date = datetime.strptime(digits, "%Y%m%d").strftime("%Y-%m-%d")
+            except ValueError:
+                pay_date = ""
+
+        # 단가가 확인되지 않으면 임의 값 없이 제외
+        if unit_price is not None and unit_price > 0 and pay_date:
+            return {
+                "code": spac["code"],
+                "name": spac["name"],
+                "unit_price": unit_price,
+                "pay_date": pay_date,
+                "report_nm": title,
+                "rcept_no": rcept_no,
+            }
+
+    return None
+
+
 def infer_delisting_date(listing_date: str) -> str:
     """상장일 기준 통상 3년 만기 예상 청산일을 YYYY-MM-DD 형태로 추산합니다."""
     digits = re.sub(r"[^0-9]", "", listing_date or "")
@@ -268,7 +345,7 @@ def infer_delisting_date(listing_date: str) -> str:
     return ""
 
 
-def build_spac_record(spac: dict, corp_codes: dict[str, str], deposit_rate: float) -> dict:
+def build_spac_record(spac: dict, corp_codes: dict[str, str], deposit_rate: float) -> tuple[dict, dict | None]:
     code = spac["code"]
     corp_code = corp_codes.get(code, "")
     current_price, is_suspended = get_naver_quote(code)
@@ -289,6 +366,7 @@ def build_spac_record(spac: dict, corp_codes: dict[str, str], deposit_rate: floa
 
     invest_type = "합병" if has_merger_notice else "청산"
     liquidation_price, liq_source = resolve_liquidation_price(disclosures)
+    liquidation_record = extract_liquidation_record(spac, disclosures)
 
     if liquidation_price is not None and current_price > 0:
         gross_yield = ((liquidation_price - current_price) / current_price) * 100
@@ -308,7 +386,7 @@ def build_spac_record(spac: dict, corp_codes: dict[str, str], deposit_rate: floa
 
     delisting_date = infer_delisting_date(spac.get("listing_date", ""))
 
-    return {
+    spac_record = {
         "code": code,
         "name": spac["name"],
         "listing_date": spac["listing_date"],
@@ -327,19 +405,31 @@ def build_spac_record(spac: dict, corp_codes: dict[str, str], deposit_rate: floa
         "status": status,
         "recent_disclosures": disclosures[:20],
     }
+    return spac_record, liquidation_record
 
 
-def save_spacs_json(items: list[dict], output_path: Path) -> None:
+def save_spacs_json(items: list[dict], output_path: Path, updated_at: str) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    now_kst = datetime.now(KST)
     payload = {
-        "updated_at": now_kst.strftime("%Y-%m-%d %H:%M:%S KST"),
+        "updated_at": updated_at,
         "count": len(items),
         "items": items,
     }
     with output_path.open("w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
-    print(f"[INFO] {output_path} 저장 완료 (updated_at={payload['updated_at']}, count={len(items)})")
+    print(f"[INFO] {output_path} 저장 완료 (updated_at={updated_at}, count={len(items)})")
+
+
+def save_liquidations_json(items: list[dict], output_path: Path, updated_at: str) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "updated_at": updated_at,
+        "count": len(items),
+        "items": items,
+    }
+    with output_path.open("w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
+    print(f"[INFO] {output_path} 저장 완료 (updated_at={updated_at}, count={len(items)})")
 
 
 def main() -> None:
@@ -351,15 +441,21 @@ def main() -> None:
         print("[ERROR] 스팩 목록이 비어 있어 기존 파일을 덮어쓰지 않고 종료합니다.")
         sys.exit(1)
 
-    results: list[dict] = []
+    spac_results: list[dict] = []
+    liquidation_results: list[dict] = []
+
     for idx, spac in enumerate(spac_list, start=1):
-        record = build_spac_record(spac, corp_codes, deposit_rate)
-        results.append(record)
+        spac_record, liq_record = build_spac_record(spac, corp_codes, deposit_rate)
+        spac_results.append(spac_record)
+        if liq_record is not None:
+            liquidation_results.append(liq_record)
         if idx % 20 == 0:
             print(f"[PROGRESS] {idx}/{len(spac_list)} 처리 중...")
         time.sleep(0.15)
 
-    save_spacs_json(results, OUTPUT_PATH)
+    updated_at = datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S KST")
+    save_spacs_json(spac_results, OUTPUT_PATH, updated_at)
+    save_liquidations_json(liquidation_results, LIQUIDATIONS_PATH, updated_at)
 
 
 if __name__ == "__main__":
