@@ -28,7 +28,7 @@ jobs:
         env:
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
           KRX_OPENAPI_KEY: ${{ secrets.KRX_OPENAPI_KEY }}
-        run: python update_data.py
+        run: python main_run.py
 
       - name: Commit and push updated data
         run: |
