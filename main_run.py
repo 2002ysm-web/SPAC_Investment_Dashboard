@@ -28,6 +28,8 @@ HEADERS = {
     "Referer": "https://kind.krx.co.kr/",
 }
 GENERAL_TAX_RATE = 0.154
+FINAL_YEAR_TAX_FACTOR = 0.845
+FINAL_YEAR_MONTH_RATIO = 6.0 / 12.0
 
 
 def parse_html_tables(html_text: str) -> list[pd.DataFrame]:
@@ -99,119 +101,6 @@ def get_dart_corp_codes() -> dict[str, str]:
     return mapping
 
 
-def _extract_prices_from_dfs(dfs: list[pd.DataFrame], prices: dict[str, int]) -> None:
-    for df in dfs:
-        if df is None or df.empty:
-            continue
-        flat_cols = []
-        for c in df.columns:
-            if isinstance(c, tuple):
-                flat_cols.append(" ".join(str(x).strip() for x in c if str(x).strip()))
-            else:
-                flat_cols.append(str(c).strip())
-        df = df.copy()
-        df.columns = flat_cols
-
-        name_col = next((c for c in flat_cols if any(k in c for k in ("종목명", "회사명", "기업명"))), None)
-        price_col = next(
-            (c for c in flat_cols if any(k in c for k in ("공모가", "발행가", "확정공모가", "액면가", "기준가"))),
-            None,
-        )
-        code_col = next((c for c in flat_cols if any(k in c for k in ("종목코드", "코드"))), None)
-        if not name_col or not price_col:
-            continue
-
-        for _, row in df.iterrows():
-            name = str(row.get(name_col, "")).strip()
-            if "스팩" not in name:
-                continue
-            digits = re.sub(r"[^0-9]", "", str(row.get(price_col, "")))
-            if not digits.isdigit():
-                continue
-            val = int(digits)
-            if not (1000 <= val <= 50000):
-                continue
-
-            if code_col:
-                m = re.search(r"([0-9A-Za-z]{6})", str(row.get(code_col, "")).strip())
-                if m:
-                    prices[m.group(1).zfill(6)] = val
-            prices["name:" + re.sub(r"\s+", "", name).lower()] = val
-
-
-def get_krx_new_listing_prices() -> dict[str, int]:
-    """KRX KIND 신규상장/공모가 현황에서 스팩 종목별 공모가/기준가를 조회합니다."""
-    prices: dict[str, int] = {}
-    now_kst = datetime.now(KST)
-    start_date = (now_kst - timedelta(days=1460)).strftime("%Y-%m-%d")
-    end_date = now_kst.strftime("%Y-%m-%d")
-
-    session = requests.Session()
-    session.headers.update(HEADERS)
-
-    try:
-        session.get("https://kind.krx.co.kr/listinvstg/pubprcinf.do?method=searchPubprcInfMain", timeout=12)
-        session.get("https://kind.krx.co.kr/listinvstg/listingstatus.do?method=searchListingStatusMain", timeout=12)
-    except Exception:
-        pass
-
-    request_specs = [
-        (
-            "https://kind.krx.co.kr/listinvstg/pubprcinf.do",
-            {
-                "method": "searchPubprcInf",
-                "forward": "pubprcinf_list",
-                "searchType": "13",
-                "startDate": start_date,
-                "endDate": end_date,
-                "currentPageSize": "500",
-                "pageIndex": "1",
-            },
-        ),
-        (
-            "https://kind.krx.co.kr/listinvstg/pubprcinf.do",
-            {
-                "method": "searchPubprcInf",
-                "searchType": "08",
-                "startDate": start_date,
-                "endDate": end_date,
-                "currentPageSize": "500",
-                "pageIndex": "1",
-            },
-        ),
-        (
-            "https://kind.krx.co.kr/listinvstg/listingstatus.do",
-            {
-                "method": "searchListingStatus",
-                "forward": "listingstatus_list",
-                "searchType": "13",
-                "startDate": start_date,
-                "endDate": end_date,
-                "currentPageSize": "500",
-                "pageIndex": "1",
-            },
-        ),
-    ]
-
-    for url, payload in request_specs:
-        try:
-            res = session.post(url, data=payload, timeout=15)
-            res.raise_for_status()
-            html = res.content.decode("euc-kr", errors="ignore")
-            if "<table" not in html.lower():
-                continue
-            dfs = parse_html_tables(html)
-            _extract_prices_from_dfs(dfs, prices)
-            if prices:
-                print(f"[INFO] KRX 신규상장 기준가 {len(prices)}건 확보 ({url})")
-                return prices
-        except Exception as exc:
-            print(f"[WARN] KRX 신규상장 조회 실패 ({url}): {exc}")
-
-    print("[WARN] KRX 신규상장 기준가 0건 — DART 공시 및 기존 저장 기준가를 활용합니다.")
-    return prices
-
-
 def get_krx_spac_list() -> list[dict]:
     spacs: list[dict] = []
     url = "https://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13"
@@ -248,9 +137,10 @@ def get_krx_spac_list() -> list[dict]:
     return spacs
 
 
-def get_naver_quote(code: str) -> tuple[int, bool]:
+def get_naver_quote_and_base(code: str) -> tuple[int, bool, int | None]:
     current_price = 0
     is_suspended = False
+    par_base_price: int | None = None
 
     try:
         url = f"https://polling.finance.naver.com/api/realtime?query=SERVICE_ITEM:{code}"
@@ -265,8 +155,6 @@ def get_naver_quote(code: str) -> tuple[int, bool]:
             stop_flag = str(item.get("stopReason", "") or item.get("isStop", "") or "").lower()
             if stop_flag in {"true", "1", "y", "yes"} or current_price == 0:
                 is_suspended = True
-            if current_price > 0:
-                return current_price, is_suspended
     except Exception:
         pass
 
@@ -275,17 +163,28 @@ def get_naver_quote(code: str) -> tuple[int, bool]:
         res = requests.get(page_url, headers=HEADERS, timeout=8)
         res.raise_for_status()
         html = res.text
-        m = re.search(r'id="_nowVal"[^>]*>([0-9,]+)<', html) or re.search(
-            r'class="no_today"[^>]*>.*?<span class="blind">([0-9,]+)</span>', html, re.S
-        )
-        if m:
-            current_price = int(m.group(1).replace(",", ""))
+        if current_price == 0:
+            m = re.search(r'id="_nowVal"[^>]*>([0-9,]+)<', html) or re.search(
+                r'class="no_today"[^>]*>.*?<span class="blind">([0-9,]+)</span>', html, re.S
+            )
+            if m:
+                current_price = int(m.group(1).replace(",", ""))
         if "거래정지" in html or current_price == 0:
             is_suspended = True
-    except Exception as exc:
-        print(f"[WARN] [{code}] 시세 조회 실패: {exc}")
 
-    return current_price, is_suspended
+        m_par = re.search(r"액면가.*?([0-9,]+)\s*원", html, re.S)
+        if m_par:
+            raw_par = int(m_par.group(1).replace(",", ""))
+            if raw_par == 100:
+                par_base_price = 2000
+            elif raw_par == 500:
+                par_base_price = 10000
+            elif raw_par in (2000, 10000):
+                par_base_price = raw_par
+    except Exception as exc:
+        print(f"[WARN] [{code}] 시세/액면가 조회 실패: {exc}")
+
+    return current_price, is_suspended, par_base_price
 
 
 def get_recent_dart_disclosures(corp_code: str, days: int = 365) -> list[dict]:
@@ -399,38 +298,85 @@ def extract_pay_date(text: str, fallback_rcept_dt: str = "") -> str:
     return ""
 
 
+def parse_date_yyyymmdd(date_str: str) -> datetime | None:
+    digits = re.sub(r"[^0-9]", "", date_str or "")
+    if len(digits) >= 8:
+        try:
+            return datetime.strptime(digits[:8], "%Y%m%d")
+        except ValueError:
+            return None
+    return None
+
+
+def calc_sheet_liquidation_unit_price(
+    base_price: int,
+    r1: float,
+    r2: float | None,
+    r3: float | None,
+) -> float:
+    """
+    시트 산식 반영:
+    1~2년차 연 이율 적용 후 마지막 해는 보수적으로 6개월만 반영:
+    IF(O3="", IF(N3="", K3*(1+M3*84.5%*6/12), K3*(1+N3*84.5%*6/12)), K3*(1+O3*84.5%*6/12))
+    """
+    rate_1 = max(0.0, float(r1)) / 100.0
+    y1 = base_price * (1.0 + rate_1)
+
+    if r2 is None:
+        final_rate = rate_1
+        prev_amount = y1
+    else:
+        rate_2 = max(0.0, float(r2)) / 100.0
+        y2 = y1 * (1.0 + rate_2)
+        if r3 is None:
+            final_rate = rate_2
+            prev_amount = y2
+        else:
+            final_rate = max(0.0, float(r3)) / 100.0
+            prev_amount = y2
+
+    final_amount = prev_amount * (1.0 + final_rate * FINAL_YEAR_TAX_FACTOR * FINAL_YEAR_MONTH_RATIO)
+    return round(final_amount, 2)
+
+
 def resolve_liquidation_price(
-    spac: dict, disclosures: list[dict], ipo_prices: dict[str, int], existing_item: dict | None = None
-) -> tuple[int | None, str]:
+    spac: dict,
+    disclosures: list[dict],
+    current_price: int,
+    par_base_price: int | None,
+    deposit_rate: float,
+) -> tuple[float, int, str]:
+    """(청산단가 S3, 공모가 C3, 산출근거)를 반환합니다."""
+    base_price = par_base_price if par_base_price is not None else (10000 if current_price >= 5000 else 2000)
+
     for d in disclosures:
         title = d.get("report_nm", "")
         price = extract_unit_price(title)
         if price is not None:
-            return price, f"공시제목:{title}"
+            return float(price), base_price, f"공시제목:{title}"
 
     liq_docs = [
         d for d in disclosures
         if d.get("rcept_no") and any(k in (d.get("report_nm") or "") for k in ("청산", "해산", "분배금", "예치"))
     ][:1]
-
     for d in liq_docs:
         doc_text = fetch_document_text(d["rcept_no"])
         price = extract_unit_price(doc_text)
         if price is not None:
-            return price, f"공시본문:{d.get('report_nm', '')}"
+            return float(price), base_price, f"공시본문:{d.get('report_nm', '')}"
 
-    code = spac.get("code", "")
-    norm_name = "name:" + re.sub(r"\s+", "", spac.get("name", "")).lower()
-    ipo_price = ipo_prices.get(code) or ipo_prices.get(norm_name)
-    if ipo_price is not None:
-        return ipo_price, f"KRX신규상장공모가({ipo_price:,}원)"
-
-    if existing_item and isinstance(existing_item.get("liquidation_price"), (int, float)):
-        prev_price = int(existing_item["liquidation_price"])
-        if prev_price > 0:
-            return prev_price, existing_item.get("liquidation_price_source") or "기존저장기준가"
-
-    return None, "미확인"
+    liq_unit = calc_sheet_liquidation_unit_price(
+        base_price=base_price,
+        r1=deposit_rate,
+        r2=deposit_rate,
+        r3=deposit_rate,
+    )
+    source = (
+        f"공모가({base_price:,}원)+복리+최종6개월산식"
+        if par_base_price is not None
+        else f"추정공모가({base_price:,}원)+복리+최종6개월산식"
+    )
+    return liq_unit, base_price, source
 
 
 def extract_liquidation_record(spac: dict, disclosures: list[dict]) -> dict | None:
@@ -463,26 +409,92 @@ def extract_liquidation_record(spac: dict, disclosures: list[dict]) -> dict | No
 
 
 def infer_delisting_date(listing_date: str) -> str:
-    digits = re.sub(r"[^0-9]", "", listing_date or "")
-    if len(digits) >= 8:
+    dt = parse_date_yyyymmdd(listing_date)
+    if dt:
         try:
-            dt = datetime.strptime(digits[:8], "%Y%m%d")
             return dt.replace(year=dt.year + 3).strftime("%Y-%m-%d")
         except ValueError:
             pass
     return ""
 
 
+def calc_annualized_yields(
+    s_liq_price: float,
+    d_current_price: int,
+    listing_date_str: str,
+    delisting_date_str: str,
+    ref_dt: datetime,
+) -> tuple[float | None, float | None, int | None]:
+    """
+    시트 ISA 예상수익률 산식 반영:
+    (S3 - D3) / D3 / (F3 + 30 - $Y$3) * 365  (*100 백분율 환산)
+    일반 계좌는 수익(S3 > D3) 발생 시 차익에 세후 비율(1 - 0.154) 적용.
+    """
+    if d_current_price <= 0 or s_liq_price <= 0:
+        return None, None, None
+
+    dt_delist = parse_date_yyyymmdd(delisting_date_str)
+    dt_list = parse_date_yyyymmdd(listing_date_str)
+    if not dt_delist and dt_list:
+        try:
+            dt_delist = dt_list.replace(year=dt_list.year + 3)
+        except ValueError:
+            dt_delist = None
+
+    if not dt_delist:
+        return None, None, None
+
+    f_rem_days = (dt_delist - ref_dt).days
+    denom_days = f_rem_days + 30
+    if denom_days <= 0:
+        return None, None, f_rem_days
+
+    isa_ratio = ((s_liq_price - d_current_price) / d_current_price) / denom_days * 365.0
+    if s_liq_price <= d_current_price:
+        gen_ratio = isa_ratio
+    else:
+        net_liq = d_current_price + (s_liq_price - d_current_price) * (1.0 - GENERAL_TAX_RATE)
+        gen_ratio = ((net_liq - d_current_price) / d_current_price) / denom_days * 365.0
+
+    return round(isa_ratio * 100.0, 2), round(gen_ratio * 100.0, 2), f_rem_days
+
+
+def calc_fair_buy_status(
+    c_base_price: int,
+    s_liq_price: float,
+    d_current_price: int,
+    e_listing_date_str: str,
+    ref_dt: datetime,
+    is_suspended: bool,
+) -> tuple[str, float | None]:
+    """
+    시트 매수적정여부 산식 반영:
+    if(C3 + (S3 - C3) / 1095 * ($Y$3 - E3) >= D3, "O", "X")
+    """
+    if is_suspended or d_current_price <= 0:
+        return "X", None
+
+    dt_list = parse_date_yyyymmdd(e_listing_date_str)
+    if not dt_list:
+        fair_price = float(s_liq_price)
+        return ("O" if fair_price >= d_current_price else "X"), round(fair_price, 2)
+
+    elapsed_days = (ref_dt - dt_list).days
+    fair_price = c_base_price + ((s_liq_price - c_base_price) / 1095.0) * elapsed_days
+    status_yn = "O" if fair_price >= d_current_price else "X"
+    return status_yn, round(fair_price, 2)
+
+
 def build_spac_record(
     spac: dict,
     corp_codes: dict[str, str],
     deposit_rate: float,
-    ipo_prices: dict[str, int],
+    ref_dt: datetime,
     existing_item: dict | None = None,
 ) -> tuple[dict, dict | None]:
     code = spac["code"]
     corp_code = corp_codes.get(code, "")
-    current_price, is_suspended = get_naver_quote(code)
+    current_price, is_suspended, par_base_price = get_naver_quote_and_base(code)
     if current_price == 0 and existing_item and (existing_item.get("current_price") or 0) > 0:
         current_price = int(existing_item["current_price"])
 
@@ -496,33 +508,43 @@ def build_spac_record(
 
     status = "정지" if is_suspended else ("합병" if has_merger else "일반")
     invest_type = "합병" if has_merger else "청산"
-    liq_price, liq_source = resolve_liquidation_price(spac, disclosures, ipo_prices, existing_item)
+
+    delisting_date = infer_delisting_date(spac.get("listing_date", ""))
+    s_liq_price, c_base_price, liq_source = resolve_liquidation_price(
+        spac, disclosures, current_price, par_base_price, deposit_rate
+    )
     liq_record = extract_liquidation_record(spac, disclosures)
 
-    if liq_price is not None and current_price > 0:
-        gross_yield = ((liq_price - current_price) / current_price) * 100
-        if liq_price <= current_price:
-            gen_yield = gross_yield
-        else:
-            net_gain = (liq_price - current_price) * (1 - GENERAL_TAX_RATE)
-            gen_yield = (net_gain / current_price) * 100
-        yield_isa = round(gross_yield, 2)
-        yield_general = round(gen_yield, 2)
-        is_fair_buy = "O" if (current_price <= liq_price and not is_suspended) else "X"
-    else:
-        yield_isa = None
-        yield_general = None
-        is_fair_buy = "미확인"
+    yield_isa, yield_general, rem_days = calc_annualized_yields(
+        s_liq_price=s_liq_price,
+        d_current_price=current_price,
+        listing_date_str=spac.get("listing_date", ""),
+        delisting_date_str=delisting_date,
+        ref_dt=ref_dt,
+    )
+    is_fair_buy, fair_buy_price = calc_fair_buy_status(
+        c_base_price=c_base_price,
+        s_liq_price=s_liq_price,
+        d_current_price=current_price,
+        e_listing_date_str=spac.get("listing_date", ""),
+        ref_dt=ref_dt,
+        is_suspended=is_suspended,
+    )
+
+    liq_display = int(round(s_liq_price)) if s_liq_price.is_integer() else s_liq_price
 
     record = {
         "code": code,
         "name": spac["name"],
         "listing_date": spac["listing_date"],
-        "delisting_date": infer_delisting_date(spac.get("listing_date", "")),
+        "delisting_date": delisting_date,
+        "remaining_days": rem_days,
         "corp_code": corp_code,
+        "base_price": c_base_price,
         "current_price": current_price,
-        "liquidation_price": liq_price,
+        "liquidation_price": liq_display,
         "liquidation_price_source": liq_source,
+        "fair_buy_price": fair_buy_price,
         "is_fair_buy": is_fair_buy,
         "invest_type": invest_type,
         "yield_isa": yield_isa,
@@ -548,12 +570,14 @@ def main() -> None:
     existing_spacs = load_existing_items(OUTPUT_PATH)
     existing_liqs = load_existing_items(LIQUIDATIONS_PATH)
     existing_by_code = {str(x.get("code", "")).zfill(6): x for x in existing_spacs if x.get("code")}
-    updated_at = datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S KST")
+
+    now_kst = datetime.now(KST)
+    ref_dt = datetime(now_kst.year, now_kst.month, now_kst.day)
+    updated_at = now_kst.strftime("%Y-%m-%d %H:%M:%S KST")
 
     try:
         deposit_rate = get_base_deposit_rate()
         corp_codes = get_dart_corp_codes()
-        ipo_prices = get_krx_new_listing_prices()
         spac_list = get_krx_spac_list()
 
         if not spac_list:
@@ -569,7 +593,7 @@ def main() -> None:
             code = spac["code"]
             prev_item = existing_by_code.get(code)
             try:
-                rec, liq = build_spac_record(spac, corp_codes, deposit_rate, ipo_prices, prev_item)
+                rec, liq = build_spac_record(spac, corp_codes, deposit_rate, ref_dt, prev_item)
                 spac_results.append(rec)
                 if liq is not None:
                     liq_results.append(liq)
