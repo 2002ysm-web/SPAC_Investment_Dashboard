@@ -99,8 +99,48 @@ def get_dart_corp_codes() -> dict[str, str]:
     return mapping
 
 
+def _extract_prices_from_dfs(dfs: list[pd.DataFrame], prices: dict[str, int]) -> None:
+    for df in dfs:
+        if df is None or df.empty:
+            continue
+        flat_cols = []
+        for c in df.columns:
+            if isinstance(c, tuple):
+                flat_cols.append(" ".join(str(x).strip() for x in c if str(x).strip()))
+            else:
+                flat_cols.append(str(c).strip())
+        df = df.copy()
+        df.columns = flat_cols
+
+        name_col = next((c for c in flat_cols if any(k in c for k in ("종목명", "회사명", "기업명"))), None)
+        price_col = next(
+            (c for c in flat_cols if any(k in c for k in ("공모가", "발행가", "확정공모가", "액면가", "기준가"))),
+            None,
+        )
+        code_col = next((c for c in flat_cols if any(k in c for k in ("종목코드", "코드"))), None)
+        if not name_col or not price_col:
+            continue
+
+        for _, row in df.iterrows():
+            name = str(row.get(name_col, "")).strip()
+            if "스팩" not in name:
+                continue
+            digits = re.sub(r"[^0-9]", "", str(row.get(price_col, "")))
+            if not digits.isdigit():
+                continue
+            val = int(digits)
+            if not (1000 <= val <= 50000):
+                continue
+
+            if code_col:
+                m = re.search(r"([0-9A-Za-z]{6})", str(row.get(code_col, "")).strip())
+                if m:
+                    prices[m.group(1).zfill(6)] = val
+            prices["name:" + re.sub(r"\s+", "", name).lower()] = val
+
+
 def get_krx_new_listing_prices() -> dict[str, int]:
-    """세션을 유지하며 KRX KIND 신규상장/공모가 현황에서 스팩 공모가를 조회합니다."""
+    """KRX KIND 신규상장/공모가 현황에서 스팩 종목별 공모가/기준가를 조회합니다."""
     prices: dict[str, int] = {}
     now_kst = datetime.now(KST)
     start_date = (now_kst - timedelta(days=1460)).strftime("%Y-%m-%d")
@@ -111,16 +151,28 @@ def get_krx_new_listing_prices() -> dict[str, int]:
 
     try:
         session.get("https://kind.krx.co.kr/listinvstg/pubprcinf.do?method=searchPubprcInfMain", timeout=12)
+        session.get("https://kind.krx.co.kr/listinvstg/listingstatus.do?method=searchListingStatusMain", timeout=12)
     except Exception:
         pass
 
-    candidates = [
+    request_specs = [
         (
             "https://kind.krx.co.kr/listinvstg/pubprcinf.do",
             {
                 "method": "searchPubprcInf",
                 "forward": "pubprcinf_list",
                 "searchType": "13",
+                "startDate": start_date,
+                "endDate": end_date,
+                "currentPageSize": "500",
+                "pageIndex": "1",
+            },
+        ),
+        (
+            "https://kind.krx.co.kr/listinvstg/pubprcinf.do",
+            {
+                "method": "searchPubprcInf",
+                "searchType": "08",
                 "startDate": start_date,
                 "endDate": end_date,
                 "currentPageSize": "500",
@@ -141,49 +193,22 @@ def get_krx_new_listing_prices() -> dict[str, int]:
         ),
     ]
 
-    for url, payload in candidates:
+    for url, payload in request_specs:
         try:
             res = session.post(url, data=payload, timeout=15)
             res.raise_for_status()
             html = res.content.decode("euc-kr", errors="ignore")
             if "<table" not in html.lower():
                 continue
-            for df in parse_html_tables(html):
-                if df.empty:
-                    continue
-                cols = [str(c).strip() for c in df.columns]
-                name_col = next((c for c in cols if "종목명" in c or "회사명" in c), None)
-                price_col = next(
-                    (c for c in cols if any(k in c for k in ("공모가", "발행가", "확정공모가", "액면가"))),
-                    None,
-                )
-                code_col = next((c for c in cols if "종목코드" in c or "코드" in c), None)
-                if not name_col or not price_col:
-                    continue
-
-                for _, row in df.iterrows():
-                    name = str(row.get(name_col, "")).strip()
-                    if "스팩" not in name:
-                        continue
-                    digits = re.sub(r"[^0-9]", "", str(row.get(price_col, "")))
-                    if not digits.isdigit():
-                        continue
-                    val = int(digits)
-                    if not (1000 <= val <= 50000):
-                        continue
-
-                    if code_col:
-                        m = re.search(r"([0-9A-Za-z]{6})", str(row.get(code_col, "")).strip())
-                        if m:
-                            prices[m.group(1).zfill(6)] = val
-                    prices["name:" + re.sub(r"\s+", "", name).lower()] = val
-
+            dfs = parse_html_tables(html)
+            _extract_prices_from_dfs(dfs, prices)
             if prices:
                 print(f"[INFO] KRX 신규상장 기준가 {len(prices)}건 확보 ({url})")
                 return prices
         except Exception as exc:
             print(f"[WARN] KRX 신규상장 조회 실패 ({url}): {exc}")
 
+    print("[WARN] KRX 신규상장 기준가 0건 — DART 공시 및 기존 저장 기준가를 활용합니다.")
     return prices
 
 
@@ -563,6 +588,13 @@ def main() -> None:
 
         if not liq_results and existing_liqs:
             liq_results = existing_liqs
+
+        resolved_liq_cnt = sum(1 for r in spac_results if r.get("liquidation_price") is not None)
+        fair_o_cnt = sum(1 for r in spac_results if r.get("is_fair_buy") == "O")
+        print(
+            f"[SUMMARY] 전체={len(spac_results)}개, 현재가유효={valid_prices}개, "
+            f"청산가확보={resolved_liq_cnt}개, 매수적정(O)={fair_o_cnt}개, 청산내역={len(liq_results)}건"
+        )
 
         save_json(spac_results, OUTPUT_PATH, updated_at)
         save_json(liq_results, LIQUIDATIONS_PATH, updated_at)
