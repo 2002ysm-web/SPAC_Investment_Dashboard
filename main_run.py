@@ -2,7 +2,6 @@ import io
 import json
 import os
 import re
-import sys
 import time
 import xml.etree.ElementTree as ET
 import zipfile
@@ -87,7 +86,7 @@ def get_dart_corp_codes() -> dict[str, str]:
 
 
 def get_krx_ipo_prices() -> dict[str, int]:
-    """KRX KIND 신규상장현황에서 스팩 종목별 공모가(stock_code -> ipo_price)를 조회합니다."""
+    """KRX KIND 신규상장현황에서 스팩 종목별 공모가를 조회합니다."""
     ipo_prices: dict[str, int] = {}
     now_kst = datetime.now(KST)
     start_date = (now_kst - timedelta(days=1200)).strftime("%Y-%m-%d")
@@ -152,7 +151,8 @@ def get_krx_ipo_prices() -> dict[str, int]:
                             code = m_code.group(1).zfill(6)
                     if code:
                         ipo_prices[code] = price
-                    ipo_prices[f"name:{re.sub(r'\\s+', '', name).lower()}"] = price
+                    norm_key = "name:" + re.sub(r"\s+", "", name).lower()
+                    ipo_prices[norm_key] = price
 
             if ipo_prices:
                 print(f"[INFO] KRX 신규상장 공모가 {len(ipo_prices)}건 조회 완료")
@@ -373,8 +373,8 @@ def resolve_liquidation_price(
             return price, f"공시본문:{d.get('report_nm', '')}"
 
     code = spac.get("code", "")
-    norm_name = re.sub(r"\s+", "", spac.get("name", "")).lower()
-    ipo_price = ipo_prices.get(code) or ipo_prices.get(f"name:{norm_name}")
+    norm_name = "name:" + re.sub(r"\s+", "", spac.get("name", "")).lower()
+    ipo_price = ipo_prices.get(code) or ipo_prices.get(norm_name)
     if ipo_price is not None:
         return ipo_price, f"KRX신규상장공모가({ipo_price:,}원)"
 
@@ -506,12 +506,11 @@ def main() -> None:
     spac_list = get_krx_spac_list()
 
     if not spac_list:
-        print("[ERROR] 스팩 목록이 비어 있어 기존 파일을 유지합니다.")
-        if existing_spacs:
-            updated_at = datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S KST")
-            save_json_payload(existing_spacs, OUTPUT_PATH, updated_at)
-            save_json_payload(existing_liqs, LIQUIDATIONS_PATH, updated_at)
-        sys.exit(1)
+        print("[WARN] 스팩 목록이 비어 있어 기존 데이터를 유지합니다.")
+        updated_at = datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S KST")
+        save_json_payload(existing_spacs, OUTPUT_PATH, updated_at)
+        save_json_payload(existing_liqs, LIQUIDATIONS_PATH, updated_at)
+        return
 
     spac_results: list[dict] = []
     liquidation_results: list[dict] = []
