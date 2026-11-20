@@ -29,9 +29,10 @@ HEADERS = {
     "Origin": "https://data.krx.co.kr",
 }
 GENERAL_TAX_RATE = 0.154
+DEPOSIT_INTEREST_TAX_RATE = 0.154
+DEPOSIT_AFTER_TAX_FACTOR = 1.0 - DEPOSIT_INTEREST_TAX_RATE
 FINAL_YEAR_TAX_FACTOR = 0.845
 FINAL_YEAR_MONTH_RATIO = 6.0 / 12.0
-MAX_SPAC_AGE_DAYS = 1460
 
 
 def load_existing_items(path: Path) -> list[dict]:
@@ -49,8 +50,14 @@ def load_existing_items(path: Path) -> list[dict]:
     return []
 
 
-def get_base_deposit_rate() -> float:
-    fallback = 2.35
+def to_after_tax_rate(gross_rate: float) -> float:
+    return round(float(gross_rate) * DEPOSIT_AFTER_TAX_FACTOR, 4)
+
+
+def get_base_deposit_rate() -> tuple[float, float]:
+    """(세후 기준 예금금리, 세전 기준 예금금리) 반환"""
+    fallback_gross = 3.21
+    gross_rate = fallback_gross
     if DEPOSIT_RATE_PATH.exists():
         try:
             with DEPOSIT_RATE_PATH.open("r", encoding="utf-8") as f:
@@ -58,10 +65,13 @@ def get_base_deposit_rate() -> float:
             rates = data.get("rates", {}) if isinstance(data, dict) else {}
             if rates:
                 latest_ym = sorted(rates.keys())[-1]
-                return float(rates[latest_ym])
+                parsed = parse_krw_float(rates[latest_ym])
+                if parsed is not None and parsed > 0:
+                    gross_rate = parsed
         except Exception as exc:
             print(f"[WARN] 기준 예금금리 읽기 실패: {exc}")
-    return fallback
+    after_tax_rate = to_after_tax_rate(gross_rate)
+    return after_tax_rate, round(gross_rate, 4)
 
 
 def get_dart_corp_codes() -> dict[str, str]:
@@ -93,7 +103,7 @@ def normalize_code(val: Any) -> str:
     raw = str(val or "").strip()
     if raw.endswith(".0"):
         raw = raw[:-2]
-    digits = re.sub(r"[^0-9]", "", raw)
+    digits = re.sub(r"[^0-9A-Za-z]", "", raw)
     if len(digits) > 6:
         digits = digits[-6:]
     return digits.zfill(6) if digits else ""
@@ -148,6 +158,17 @@ def is_spac_name(name_val: Any) -> bool:
     return bool(re.search(r"(스팩|SPAC|기업인수목적)", name, flags=re.IGNORECASE))
 
 
+def _extract_rows(payload: Any) -> list[dict[str, Any]]:
+    if isinstance(payload, list):
+        return [r for r in payload if isinstance(r, dict)]
+    if isinstance(payload, dict):
+        for key in ("OutBlock_1", "outBlock_1", "output", "data", "items"):
+            rows = payload.get(key)
+            if isinstance(rows, list):
+                return [r for r in rows if isinstance(r, dict)]
+    return []
+
+
 def _fetch_krx_openapi_rows(endpoint: str, bas_dd: str) -> list[dict[str, Any]]:
     if not KRX_OPENAPI_KEY:
         return []
@@ -170,21 +191,19 @@ def _fetch_krx_openapi_rows(endpoint: str, bas_dd: str) -> list[dict[str, Any]]:
                     res = requests.post(url, json={"basDd": bas_dd}, headers=api_headers, timeout=12)
                 if res.status_code != 200:
                     continue
-                payload = res.json()
-                if isinstance(payload, list):
-                    return payload
-                if isinstance(payload, dict):
-                    for key in ("OutBlock_1", "outBlock_1", "output", "data", "items"):
-                        rows = payload.get(key)
-                        if isinstance(rows, list) and rows:
-                            return rows
+                rows = _extract_rows(res.json())
+                if rows:
+                    return rows
             except Exception:
                 continue
     return []
 
 
 def _fetch_krx_web_market_quotes(session: requests.Session, bas_dd: str, mkt_id: str = "KSQ") -> list[dict[str, Any]]:
-    url = "https://data.krx.co.kr/contents/MDC/MDI/outerLoader/index.cmd"
+    endpoints = (
+        "https://data.krx.co.kr/contents/MDC/MDI/outerLoader/index.cmd",
+        "https://data.krx.co.kr/comm/bldAttendant/getJsonData.cmd",
+    )
     payload = {
         "bld": "dbms/MDC/STAT/standard/MDCSTAT01501",
         "locale": "ko_KR",
@@ -194,16 +213,16 @@ def _fetch_krx_web_market_quotes(session: requests.Session, bas_dd: str, mkt_id:
         "money": "1",
         "csvxls_isNo": "false",
     }
-    try:
-        res = session.post(url, data=payload, headers=HEADERS, timeout=15)
-        if res.status_code != 200:
-            return []
-        data = res.json()
-        rows = data.get("OutBlock_1") or data.get("output") or []
-        if isinstance(rows, list):
-            return rows
-    except Exception:
-        pass
+    for url in endpoints:
+        try:
+            res = session.post(url, data=payload, headers=HEADERS, timeout=15)
+            if res.status_code != 200:
+                continue
+            rows = _extract_rows(res.json())
+            if rows:
+                return rows
+        except Exception:
+            continue
     return []
 
 
@@ -218,7 +237,7 @@ def _merge_quote_rows(
         code = normalize_code(
             r.get("ISU_SRT_CD") or r.get("종목코드") or r.get("ISU_CD") or r.get("code")
         )
-        if not re.fullmatch(r"\d{6}", code):
+        if not re.fullmatch(r"[0-9A-Za-z]{6}", code):
             continue
         if not overwrite and code in quote_by_code:
             continue
@@ -276,7 +295,7 @@ def _merge_quote_rows(
 def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, dict[str, Any]], str]:
     candidate_dates = [
         (ref_dt - timedelta(days=offset)).strftime("%Y%m%d")
-        for offset in range(0, 10)
+        for offset in range(0, 12)
     ]
 
     info_rows: list[dict[str, Any]] = []
@@ -312,7 +331,7 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
     ]
     for d_str in target_web_dates:
         ksq_rows = _fetch_krx_web_market_quotes(session, d_str, "KSQ")
-        stk_rows = _fetch_krx_web_market_quotes(session, d_str, "STK") if ksq_rows else []
+        stk_rows = _fetch_krx_web_market_quotes(session, d_str, "STK")
         merged_web = ksq_rows + stk_rows
         if merged_web:
             web_rows = merged_web
@@ -322,8 +341,8 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
 
     info_by_code: dict[str, dict[str, Any]] = {}
     for r in info_rows:
-        code = normalize_code(r.get("ISU_SRT_CD") or r.get("종목코드") or r.get("code"))
-        if re.fullmatch(r"\d{6}", code):
+        code = normalize_code(r.get("ISU_SRT_CD") or r.get("종목코드") or r.get("ISU_CD") or r.get("code"))
+        if re.fullmatch(r"[0-9A-Za-z]{6}", code):
             info_by_code[code] = r
 
     quote_by_code: dict[str, dict[str, Any]] = {}
@@ -337,7 +356,7 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
             c = normalize_code(
                 r.get("ISU_SRT_CD") or r.get("종목코드") or r.get("ISU_CD") or r.get("code")
             )
-            if re.fullmatch(r"\d{6}", c) and c not in seen_all_codes:
+            if re.fullmatch(r"[0-9A-Za-z]{6}", c) and c not in seen_all_codes:
                 seen_all_codes.add(c)
                 all_codes.append(c)
 
@@ -379,9 +398,6 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
         listing_date = str(
             info.get("LIST_DD") or q_info.get("listing_date") or ""
         ).strip()
-        dt_list = parse_date_yyyymmdd(listing_date)
-        if dt_list and (ref_dt - dt_list).days > MAX_SPAC_AGE_DAYS:
-            continue
 
         seen_codes.add(code)
         if matched_by_dept:
@@ -589,7 +605,7 @@ def resolve_liquidation_price(
     disclosures: list[dict],
     current_price: int,
     par_base_price: int | None,
-    deposit_rate: float,
+    deposit_rate_after_tax: float,
 ) -> tuple[float, int, str]:
     base_price = par_base_price if par_base_price is not None else (10000 if current_price >= 5000 else 2000)
 
@@ -611,9 +627,9 @@ def resolve_liquidation_price(
 
     liq_unit = calc_sheet_liquidation_unit_price(
         base_price=base_price,
-        r1=deposit_rate,
-        r2=deposit_rate,
-        r3=deposit_rate,
+        r1=deposit_rate_after_tax,
+        r2=deposit_rate_after_tax,
+        r3=deposit_rate_after_tax,
     )
     source = (
         f"공모가({base_price:,}원)+복리+최종6개월산식"
@@ -724,7 +740,8 @@ def build_spac_record(
     spac: dict,
     corp_codes: dict[str, str],
     quote_by_code: dict[str, dict[str, Any]],
-    deposit_rate: float,
+    deposit_rate_after_tax: float,
+    deposit_rate_gross: float,
     ref_dt: datetime,
 ) -> tuple[dict, dict | None]:
     code = spac["code"]
@@ -744,7 +761,7 @@ def build_spac_record(
 
     delisting_date = infer_delisting_date(spac.get("listing_date", ""))
     s_liq_price, c_base_price, liq_source = resolve_liquidation_price(
-        spac, disclosures, current_price, par_base_price, deposit_rate
+        spac, disclosures, current_price, par_base_price, deposit_rate_after_tax
     )
     liq_record = extract_liquidation_record(spac, disclosures)
 
@@ -792,7 +809,9 @@ def build_spac_record(
         "invest_type": invest_type,
         "yield_isa": yield_isa,
         "yield_general": yield_general,
-        "deposit_rate": deposit_rate,
+        "deposit_rate": deposit_rate_after_tax,
+        "deposit_rate_after_tax": deposit_rate_after_tax,
+        "deposit_rate_gross": deposit_rate_gross,
         "is_suspended": is_suspended,
         "has_liquidation_notice": has_liq,
         "status": status,
@@ -818,7 +837,7 @@ def main() -> None:
     updated_at = now_kst.strftime("%Y-%m-%d %H:%M:%S KST")
 
     try:
-        deposit_rate = get_base_deposit_rate()
+        deposit_rate_after_tax, deposit_rate_gross = get_base_deposit_rate()
         corp_codes = get_dart_corp_codes()
         spac_list, quote_by_code, trade_date = get_krx_spac_market_data(ref_dt)
 
@@ -834,7 +853,14 @@ def main() -> None:
         for idx, spac in enumerate(spac_list, start=1):
             code = spac["code"]
             try:
-                rec, liq = build_spac_record(spac, corp_codes, quote_by_code, deposit_rate, ref_dt)
+                rec, liq = build_spac_record(
+                    spac,
+                    corp_codes,
+                    quote_by_code,
+                    deposit_rate_after_tax,
+                    deposit_rate_gross,
+                    ref_dt,
+                )
                 spac_results.append(rec)
                 if liq is not None:
                     liq_results.append(liq)
