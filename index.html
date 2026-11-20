@@ -6,22 +6,18 @@
     <title>SPAC Investment Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* 브라우저별 날짜 입력(date) 칸 높이 및 패딩 강제 통일 */
         input[type="date"] {
-            -webkit-appearance: none;
-            appearance: none;
             display: block;
             width: 100%;
             min-width: 0;
-            height: 42px !important;
-            min-height: 42px;
-            max-height: 42px;
+            max-width: 100%;
+            height: 42px;
             line-height: 42px;
-            padding: 0 14px !important;
-            margin: 0;
+            padding: 0 12px;
             box-sizing: border-box;
-            background-color: #fff;
             text-align: left;
+            -webkit-appearance: none;
+            appearance: none;
         }
         input[type="date"]::-webkit-date-and-time-value {
             text-align: left;
@@ -1427,6 +1423,9 @@
 
             try {
                 const response = await fetch('data/spacs.json' + cacheBuster);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
                 const data = await response.json();
                 document.getElementById('update-time').innerText = `최종 갱신: ${data.updated_at || '-'}`;
                 const rawItems = Array.isArray(data) ? data : (data.items || []);
@@ -1457,6 +1456,7 @@
                 updateSummaryStats(allItems);
                 applyFilters();
             } catch (error) {
+                console.error('SPAC 데이터 로드 실패:', error);
                 document.getElementById('update-time').innerText = '데이터 로드 실패';
             }
 
@@ -1668,7 +1668,10 @@
                 if (typeVal !== 'all' && item.invest_type !== typeVal) return false;
                 if (fairVal !== 'all' && item.is_fair_buy !== fairVal) return false;
                 if (statusVal !== 'all' && item.status !== statusVal) return false;
-                if (delYearVal !== 'all' && (!item.delisting_date || !String(item.delisting_date).startsWith(delYearVal))) return false;
+                if (delYearVal !== 'all') {
+                    const dStr = String(item.delisting_date || '').trim();
+                    if (!dStr || !dStr.startsWith(delYearVal)) return false;
+                }
 
                 const resolvedYield = resolveAccountYield(item, accountVal);
                 if (yieldRangeVal !== 'all' && resolvedYield === null) return false;
