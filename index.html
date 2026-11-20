@@ -822,8 +822,8 @@
             const b = toFiniteNumber(baseRate);
             if (y === null || b === null) return null;
             const diff = y - b;
-            const sign = diff >= 0 ? '+' : '';
-            return `${sign}${diff.toFixed(2)}%p`;
+            const sign = diff > 0.05 ? '+' : (diff < -0.05 ? '-' : '');
+            return `(${sign}${Math.abs(diff).toFixed(1)}%p)`;
         }
 
         // 청산 공시에 해당 내용이 확인되고 단가·지급일이 확정된 건만 자동 이관
@@ -1611,8 +1611,8 @@
             if (yieldEl) {
                 if (yVal !== null) {
                     const yColor = yVal >= baseRate ? 'text-emerald-400' : (yVal >= 0 ? 'text-amber-300' : 'text-rose-400');
-                    const ppColor = ppText && ppText.startsWith('+') ? 'text-emerald-300' : 'text-rose-300';
-                    yieldEl.innerHTML = `<div class="${yColor}">${yVal.toFixed(2)}%</div>${ppText ? `<div class="text-[10px] font-semibold ${ppColor}">예금 대비 ${ppText}</div>` : ''}`;
+                    const ppColor = ppText && ppText.startsWith('(+') ? 'text-emerald-300' : 'text-rose-300';
+                    yieldEl.innerHTML = `<div class="${yColor}">${yVal.toFixed(2)}%</div>${ppText ? `<div class="text-[10px] font-semibold ${ppColor}">${ppText}</div>` : ''}`;
                 } else {
                     yieldEl.innerHTML = '-';
                 }
@@ -1738,7 +1738,7 @@
                     : `<span class="bg-rose-50 text-rose-600 text-xs px-2 py-0.5 rounded font-bold">${item.status}</span>`;
 
                 const yieldColor = !hasYield ? 'text-slate-400' : (yVal >= 0 ? 'text-emerald-600 font-bold' : 'text-rose-500 font-bold');
-                const ppColor = !ppText ? 'text-slate-400' : (ppText.startsWith('+') ? 'text-emerald-700 font-semibold' : 'text-rose-600 font-semibold');
+                const ppColor = !ppText ? 'text-slate-400' : (ppText.startsWith('(+') ? 'text-emerald-700 font-semibold' : 'text-rose-600 font-semibold');
 
                 const curPrice = toFiniteNumber(item.current_price);
                 const liqPrice = toFiniteNumber(item.liquidation_price);
@@ -1754,7 +1754,7 @@
                     <td class="py-4 px-6">${typeBadge}</td>
                     <td class="py-4 px-6">
                         <div class="${yieldColor}">${hasYield ? yVal.toFixed(2) + '%' : '-'}</div>
-                        ${ppText ? `<div class="text-[11px] mt-0.5 ${ppColor}">예금 대비 ${ppText}</div>` : `<div class="text-[11px] mt-0.5 text-slate-400">예금 대비 -</div>`}
+                        ${ppText ? `<div class="text-[11px] mt-0.5 ${ppColor}">${ppText}</div>` : `<div class="text-[11px] mt-0.5 text-slate-400">-</div>`}
                     </td>
                     <td class="py-4 px-6 text-slate-500 text-xs">${item.delisting_date || '-'}</td>
                     <td class="py-4 px-6">${statusBadge}</td>
@@ -1767,3 +1767,4 @@
     </script>
 </body>
 </html>
+```[cite: 14]
