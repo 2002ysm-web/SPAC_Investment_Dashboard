@@ -123,7 +123,6 @@ def parse_krw_float(val: Any) -> float | None:
 
 
 def is_spac_affiliation(dept_val: Any) -> bool:
-    """KRX 종목 정보 소속(소속부 / SECT_TP_NM)이 SPAC 계열인지 판별합니다."""
     dept = str(dept_val or "").strip()
     if not dept:
         return False
@@ -132,15 +131,10 @@ def is_spac_affiliation(dept_val: Any) -> bool:
 
 
 def is_spac_name(name_val: Any) -> bool:
-    """종목명이 SPAC 계열인지 보조 판별합니다."""
     name = str(name_val or "").strip()
     if not name:
         return False
-    upper = name.upper()
-    return bool(
-        re.search(r"(스팩|SPAC|기업인수목적)", name, flags=re.IGNORECASE)
-        or "SPAC" in upper
-    )
+    return bool(re.search(r"(스팩|SPAC|기업인수목적)", name, flags=re.IGNORECASE))
 
 
 def _fetch_krx_openapi_rows(endpoint: str, bas_dd: str) -> list[dict[str, Any]]:
@@ -179,7 +173,6 @@ def _fetch_krx_openapi_rows(endpoint: str, bas_dd: str) -> list[dict[str, Any]]:
 
 
 def _fetch_krx_web_kosdaq_quotes(session: requests.Session, bas_dd: str) -> list[dict[str, Any]]:
-    """KRX 정보데이터시스템 전종목 시세(코스닥) 조회"""
     url = "https://data.krx.co.kr/contents/MDC/MDI/outerLoader/index.cmd"
     payload = {
         "bld": "dbms/MDC/STAT/standard/MDCSTAT01501",
@@ -203,63 +196,20 @@ def _fetch_krx_web_kosdaq_quotes(session: requests.Session, bas_dd: str) -> list
     return []
 
 
-def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, dict[str, Any]], str]:
-    """
-    KRX API(및 KRX 시세 데이터)에서 SPAC 종목 목록과 종가·시세 정보를 가져옵니다.
-    반환값: (spac_list, quote_by_code, trade_date_used)
-    """
-    candidate_dates = [
-        (ref_dt - timedelta(days=offset)).strftime("%Y%m%d")
-        for offset in range(0, 10)
-    ]
-
-    info_rows: list[dict[str, Any]] = []
-    trade_rows: list[dict[str, Any]] = []
-    used_date = ""
-
-    # 1순위: KRX Open API (코스닥 일별매매정보 + 코스닥 종목기본정보)
-    if KRX_OPENAPI_KEY:
-        for d_str in candidate_dates:
-            t_rows = _fetch_krx_openapi_rows("sto/ksq_bydd_trd", d_str)
-            if t_rows:
-                trade_rows = t_rows
-                used_date = d_str
-                for info_d in ([d_str] + [x for x in candidate_dates if x != d_str]):
-                    i_rows = _fetch_krx_openapi_rows("sto/ksq_isu_base_info", info_d)
-                    if i_rows:
-                        info_rows = i_rows
-                        break
-                break
-
-    # 2순위: KRX 정보데이터시스템 전종목 시세(코스닥)
-    if not trade_rows:
-        session = requests.Session()
-        try:
-            session.get(
-                "https://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201020101",
-                headers={"User-Agent": HEADERS["User-Agent"]},
-                timeout=12,
-            )
-        except Exception:
-            pass
-
-        for d_str in candidate_dates:
-            t_rows = _fetch_krx_web_kosdaq_quotes(session, d_str)
-            if t_rows:
-                trade_rows = t_rows
-                used_date = d_str
-                break
-
-    info_by_code: dict[str, dict[str, Any]] = {}
-    for r in info_rows:
-        code = normalize_code(r.get("ISU_SRT_CD") or r.get("종목코드") or r.get("code"))
-        if re.fullmatch(r"\d{6}", code):
-            info_by_code[code] = r
-
-    quote_by_code: dict[str, dict[str, Any]] = {}
-    for r in trade_rows:
-        code = normalize_code(r.get("ISU_SRT_CD") or r.get("종목코드") or r.get("ISU_CD") or r.get("code"))
+def _merge_quote_rows(
+    rows: list[dict[str, Any]],
+    info_by_code: dict[str, dict[str, Any]],
+    quote_by_code: dict[str, dict[str, Any]],
+    fallback_date: str,
+    overwrite: bool = False,
+) -> None:
+    for r in rows:
+        code = normalize_code(
+            r.get("ISU_SRT_CD") or r.get("종목코드") or r.get("ISU_CD") or r.get("code")
+        )
         if not re.fullmatch(r"\d{6}", code):
+            continue
+        if not overwrite and code in quote_by_code:
             continue
 
         info = info_by_code.get(code, {})
@@ -280,7 +230,6 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
             or info.get("종목명")
             or ""
         ).strip()
-
         close_price = parse_krw_int(
             r.get("TDD_CLSPRC") or r.get("종가") or r.get("CLSPRC") or r.get("close_price")
         )
@@ -309,22 +258,75 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
             "trading_value": trading_value,
             "market_cap": market_cap,
             "listing_date": list_dd,
-            "trade_date": used_date,
+            "trade_date": fallback_date,
         }
 
-    # info_rows 와 trade_rows 의 모든 종목 코드를 통합 점검
+
+def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, dict[str, Any]], str]:
+    candidate_dates = [
+        (ref_dt - timedelta(days=offset)).strftime("%Y%m%d")
+        for offset in range(0, 10)
+    ]
+
+    info_rows: list[dict[str, Any]] = []
+    trade_rows: list[dict[str, Any]] = []
+    web_rows: list[dict[str, Any]] = []
+    used_date = ""
+
+    if KRX_OPENAPI_KEY:
+        for d_str in candidate_dates:
+            t_rows = _fetch_krx_openapi_rows("sto/ksq_bydd_trd", d_str)
+            if t_rows:
+                trade_rows = t_rows
+                used_date = d_str
+                for info_d in ([d_str] + [x for x in candidate_dates if x != d_str]):
+                    i_rows = _fetch_krx_openapi_rows("sto/ksq_isu_base_info", info_d)
+                    if i_rows:
+                        info_rows = i_rows
+                        break
+                break
+
+    session = requests.Session()
+    try:
+        session.get(
+            "https://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201020101",
+            headers={"User-Agent": HEADERS["User-Agent"]},
+            timeout=12,
+        )
+    except Exception:
+        pass
+
+    target_web_dates = ([used_date] if used_date else []) + [
+        d for d in candidate_dates if d != used_date
+    ]
+    for d_str in target_web_dates:
+        w_rows = _fetch_krx_web_kosdaq_quotes(session, d_str)
+        if w_rows:
+            web_rows = w_rows
+            if not used_date:
+                used_date = d_str
+            break
+
+    info_by_code: dict[str, dict[str, Any]] = {}
+    for r in info_rows:
+        code = normalize_code(r.get("ISU_SRT_CD") or r.get("종목코드") or r.get("code"))
+        if re.fullmatch(r"\d{6}", code):
+            info_by_code[code] = r
+
+    quote_by_code: dict[str, dict[str, Any]] = {}
+    _merge_quote_rows(trade_rows, info_by_code, quote_by_code, used_date, overwrite=True)
+    _merge_quote_rows(web_rows, info_by_code, quote_by_code, used_date, overwrite=False)
+
     all_codes: list[str] = []
     seen_all_codes: set[str] = set()
-    for r in info_rows:
-        c = normalize_code(r.get("ISU_SRT_CD") or r.get("종목코드") or r.get("code"))
-        if re.fullmatch(r"\d{6}", c) and c not in seen_all_codes:
-            seen_all_codes.add(c)
-            all_codes.append(c)
-    for r in trade_rows:
-        c = normalize_code(r.get("ISU_SRT_CD") or r.get("종목코드") or r.get("ISU_CD") or r.get("code"))
-        if re.fullmatch(r"\d{6}", c) and c not in seen_all_codes:
-            seen_all_codes.add(c)
-            all_codes.append(c)
+    for src in (info_rows, trade_rows, web_rows):
+        for r in src:
+            c = normalize_code(
+                r.get("ISU_SRT_CD") or r.get("종목코드") or r.get("ISU_CD") or r.get("code")
+            )
+            if re.fullmatch(r"\d{6}", c) and c not in seen_all_codes:
+                seen_all_codes.add(c)
+                all_codes.append(c)
 
     spacs: list[dict] = []
     seen_codes: set[str] = set()
@@ -361,15 +363,18 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
         if not (matched_by_dept or matched_by_name):
             continue
 
+        listing_date = str(
+            info.get("LIST_DD") or q_info.get("listing_date") or ""
+        ).strip()
+        dt_list = parse_date_yyyymmdd(listing_date)
+        if dt_list and (ref_dt - dt_list).days > 1460:
+            continue
+
         seen_codes.add(code)
         if matched_by_dept:
             dept_matched_cnt += 1
         else:
             name_fallback_cnt += 1
-
-        listing_date = str(
-            info.get("LIST_DD") or q_info.get("listing_date") or ""
-        ).strip()
 
         spacs.append({
             "code": code,
@@ -380,7 +385,7 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
 
     print(
         f"[INFO] KRX 기준일={used_date or '미확인'}, info={len(info_rows)}건, "
-        f"trade={len(trade_rows)}건, SPAC종목={len(spacs)}개 "
+        f"trade={len(trade_rows)}건, web={len(web_rows)}건, SPAC종목={len(spacs)}개 "
         f"(소속일치={dept_matched_cnt}, 명칭보완={name_fallback_cnt})"
     )
     return spacs, quote_by_code, used_date
@@ -390,10 +395,6 @@ def get_krx_quote_and_base(
     code: str,
     quote_by_code: dict[str, dict[str, Any]],
 ) -> tuple[int, bool, int | None, dict[str, Any]]:
-    """
-    KRX 시세 데이터에서 종가, 거래정지 여부, 공모 기준가 추정, 부가 시세를 반환합니다.
-    당일 거래량이 0이어도 종가가 존재하면 거래정지로 오인하지 않습니다.
-    """
     q = quote_by_code.get(code, {})
     current_price = parse_krw_int(q.get("close_price"))
     volume = parse_krw_int(q.get("volume"))
