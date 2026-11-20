@@ -4,20 +4,31 @@
   var NET = 0.845;      // 예치이자 세후계수 (배당소득세14%+지방소득세1.4%+수수료0.1% 제외)
   var TAX_GEN = 0.846;  // 일반계좌 매매차익 세후계수 (세금 15.4% 제외)
 
-  function utc(s) { var p = s.split('-'); return Date.UTC(+p[0], +p[1] - 1, +p[2]); }
+  function utc(s) {
+    if (!s || typeof s !== 'string') return NaN;
+    var p = s.trim().split('-');
+    if (p.length < 3) return NaN;
+    var y = +p[0], m = +p[1], d = +p[2];
+    if (!y || !m || !d) return NaN;
+    return Date.UTC(y, m - 1, d);
+  }
   function iso(ms) { return new Date(ms).toISOString().slice(0, 10); }
   function todayKST(now) { // 'YYYY-MM-DD' (한국 표준시)
     return new Date((now || Date.now()) + 9 * 3600 * 1000).toISOString().slice(0, 10);
   }
-  function has(x) { return x !== null && x !== undefined && x !== '' && !isNaN(x); }
+  function has(x) { return x !== null && x !== undefined && x !== '' && !isNaN(x) && isFinite(+x); }
 
   function compute(s, todayStr) {
     var out = { code: s.code, name: s.name };
-    var ok = has(s.price) && has(s.ipoPrice) && has(s.offerAmount) && has(s.shares) && s.shares > 0 &&
-             s.listDate && s.rates && has(s.rates[0]);
+    var ok = has(s.price) && +s.price > 0 && has(s.ipoPrice) && has(s.offerAmount) &&
+             has(s.shares) && +s.shares > 0 && s.listDate && s.rates && has(s.rates[0]);
     out.complete = !!ok;
     if (!s.listDate) return out;
-    var today = utc(todayStr), list = utc(s.listDate);
+
+    var list = utc(s.listDate);
+    var today = utc(todayStr || todayKST());
+    if (isNaN(list) || isNaN(today)) return out;
+
     var delist = list + 1095 * DAY;                         // 상장폐지일 = 상장일 + 365*3
     out.delistDate = iso(delist);
     out.daysLeft = Math.round((delist - today) / DAY);
@@ -28,22 +39,26 @@
     var r2 = has(s.rates[1]) ? +s.rates[1] : r1;
     var r3 = has(s.rates[2]) ? +s.rates[2] : r2;
     var ratio = has(s.depositRatio) ? +s.depositRatio : 1;
-    var y1 = s.offerAmount * ratio * (1 + r1 * NET);        // 1년차 말
+    var y1 = +s.offerAmount * ratio * (1 + r1 * NET);       // 1년차 말
     var y2 = y1 * (1 + r2 * NET);                           // 2년차 말
     var fin = y2 * (1 + r3 * NET * 6 / 12);                 // 3년차: 6개월 예치(보수적)
-    var liq = fin / s.shares;                               // 최종 청산단가
+    var liq = fin / +s.shares;                              // 최종 청산단가
     out.liq = liq;
 
-    var span = (delist + 30 * DAY - today) / DAY * 1;       // 상장폐지일+30-오늘
+    var price = +s.price;
+    var span = (delist + 30 * DAY - today) / DAY;           // 상장폐지일+30-오늘
     if (span > 0) {
-      var gain = (liq - s.price) / s.price;
+      var gain = (liq - price) / price;
       out.yieldISA = gain / span * 365;
-      out.yieldGen = (liq - s.price) * TAX_GEN / s.price / span * 365;
-    } else { out.yieldISA = null; out.yieldGen = null; }
+      out.yieldGen = (liq - price) * TAX_GEN / price / span * 365;
+    } else {
+      out.yieldISA = null;
+      out.yieldGen = null;
+    }
 
     var elapsed = (today - list) / DAY;
-    out.fairPrice = s.ipoPrice + (liq - s.ipoPrice) / 1095 * elapsed;   // 매수적정가
-    out.buyOK = out.fairPrice >= s.price;
+    out.fairPrice = +s.ipoPrice + (liq - +s.ipoPrice) / 1095 * elapsed; // 매수적정가
+    out.buyOK = out.fairPrice >= price;
 
     // 합병 승인 후 철회가 없거나 철회가 승인보다 앞서면 '합병 진행'
     var a = s.mergerApprovedAt, w = s.mergerWithdrawnAt;
