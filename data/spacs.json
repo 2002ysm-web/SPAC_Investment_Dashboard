@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-11-20 17:54:16 KST",
-  "count": 62,
+  "updated_at": "2026-11-20 18:34:56 KST",
+  "count": 61,
   "items": [
     {
       "code": "482520",
@@ -2505,114 +2505,6 @@
           "report_nm": "현금ㆍ현물배당결정              ",
           "rcept_dt": "20260305",
           "rcept_no": "20260305801005"
-        }
-      ]
-    },
-    {
-      "code": "206400",
-      "name": "아인스팩씨엔에스",
-      "krx_dept": "관리종목(소속부없음)",
-      "listing_date": "20141210",
-      "delisting_date": "2017-12-10",
-      "remaining_days": -3267,
-      "corp_code": "01043853",
-      "base_price": 2000,
-      "current_price": 1008,
-      "open_price": 1000,
-      "high_price": 1250,
-      "low_price": 950,
-      "prev_diff": 8,
-      "chg_rate": 0.8,
-      "volume": 54162,
-      "trading_value": 53877608,
-      "market_cap": 18905119632,
-      "trade_date": "20261119",
-      "liquidation_price": 2115.91,
-      "liquidation_price_source": "공모가(2,000원)+복리+최종6개월산식",
-      "fair_buy_price": 2461.84,
-      "is_fair_buy": "O",
-      "invest_type": "청산",
-      "yield_isa": null,
-      "yield_general": null,
-      "deposit_rate": 2.35,
-      "is_suspended": false,
-      "has_liquidation_notice": false,
-      "status": "일반",
-      "recent_disclosures": [
-        {
-          "report_nm": "분기보고서 (2026.09)",
-          "rcept_dt": "20261116",
-          "rcept_no": "20261116001488"
-        },
-        {
-          "report_nm": "주권매매거래정지해제              (액면병합 주권 변경상장)",
-          "rcept_dt": "20261113",
-          "rcept_no": "20261113901592"
-        },
-        {
-          "report_nm": "[기재정정]주식병합결정              ",
-          "rcept_dt": "20261102",
-          "rcept_no": "20261102900786"
-        },
-        {
-          "report_nm": "주주명부폐쇄기간또는기준일설정              ",
-          "rcept_dt": "20261029",
-          "rcept_no": "20261029900497"
-        },
-        {
-          "report_nm": "주주총회소집결의              (임시주주총회)",
-          "rcept_dt": "20261029",
-          "rcept_no": "20261029900500"
-        },
-        {
-          "report_nm": "단일판매ㆍ공급계약체결              ",
-          "rcept_dt": "20261026",
-          "rcept_no": "20261026900738"
-        },
-        {
-          "report_nm": "[기재정정]주식병합결정              ",
-          "rcept_dt": "20261026",
-          "rcept_no": "20261026900713"
-        },
-        {
-          "report_nm": "[기재정정]주요사항보고서(유상증자결정)",
-          "rcept_dt": "20261016",
-          "rcept_no": "20261016000414"
-        },
-        {
-          "report_nm": "주권매매거래정지              (주식의 병합, 분할 등 전자등록 변경, 말소)",
-          "rcept_dt": "20261008",
-          "rcept_no": "20261008900765"
-        },
-        {
-          "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
-          "rcept_dt": "20261007",
-          "rcept_no": "20261007000356"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(일반)",
-          "rcept_dt": "20261006",
-          "rcept_no": "20261006000458"
-        },
-        {
-          "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
-          "rcept_dt": "20261006",
-          "rcept_no": "20261006000443"
-        },
-        {
-          "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
-          "rcept_dt": "20261006",
-          "rcept_no": "20261006000442"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(일반)",
-          "rcept_dt": "20261006",
-          "rcept_no": "20261006000441"
-        },
-        {
-          "report_nm": "독립이사의선임ㆍ해임또는중도퇴임에관한신고",
-          "rcept_dt": "20260930",
-          "rcept_no": "20260930000777"
         }
       ]
     },
