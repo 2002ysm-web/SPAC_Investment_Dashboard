@@ -123,9 +123,24 @@ def parse_krw_float(val: Any) -> float | None:
 
 
 def is_spac_affiliation(dept_val: Any) -> bool:
-    """KRX 종목 정보 소속(소속부 / SECT_TP_NM)이 SPAC인지 판별합니다."""
-    dept = str(dept_val or "").strip().upper()
-    return dept == "SPAC" or "SPAC" in dept
+    """KRX 종목 정보 소속(소속부 / SECT_TP_NM)이 SPAC 계열인지 판별합니다."""
+    dept = str(dept_val or "").strip()
+    if not dept:
+        return False
+    upper = dept.upper()
+    return "SPAC" in upper or "스팩" in dept or "기업인수목적" in dept
+
+
+def is_spac_name(name_val: Any) -> bool:
+    """종목명이 SPAC 계열인지 보조 판별합니다."""
+    name = str(name_val or "").strip()
+    if not name:
+        return False
+    upper = name.upper()
+    return bool(
+        re.search(r"(스팩|SPAC|기업인수목적)", name, flags=re.IGNORECASE)
+        or "SPAC" in upper
+    )
 
 
 def _fetch_krx_openapi_rows(endpoint: str, bas_dd: str) -> list[dict[str, Any]]:
@@ -190,7 +205,7 @@ def _fetch_krx_web_kosdaq_quotes(session: requests.Session, bas_dd: str) -> list
 
 def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, dict[str, Any]], str]:
     """
-    KRX API(및 KRX 시세 데이터)에서 소속이 'SPAC'인 종목 목록과 종가·시세 정보를 가져옵니다.
+    KRX API(및 KRX 시세 데이터)에서 SPAC 종목 목록과 종가·시세 정보를 가져옵니다.
     반환값: (spac_list, quote_by_code, trade_date_used)
     """
     candidate_dates = [
@@ -209,7 +224,11 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
             if t_rows:
                 trade_rows = t_rows
                 used_date = d_str
-                info_rows = _fetch_krx_openapi_rows("sto/ksq_isu_base_info", d_str)
+                for info_d in ([d_str] + [x for x in candidate_dates if x != d_str]):
+                    i_rows = _fetch_krx_openapi_rows("sto/ksq_isu_base_info", info_d)
+                    if i_rows:
+                        info_rows = i_rows
+                        break
                 break
 
     # 2순위: KRX 정보데이터시스템 전종목 시세(코스닥)
@@ -251,6 +270,16 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
             or r.get("소속부")
             or ""
         ).strip()
+        name = str(
+            r.get("ISU_ABBRV")
+            or r.get("ISU_NM")
+            or r.get("종목명")
+            or r.get("회사명")
+            or info.get("ISU_ABBRV")
+            or info.get("ISU_NM")
+            or info.get("종목명")
+            or ""
+        ).strip()
 
         close_price = parse_krw_int(
             r.get("TDD_CLSPRC") or r.get("종가") or r.get("CLSPRC") or r.get("close_price")
@@ -268,6 +297,7 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
         ).strip()
 
         quote_by_code[code] = {
+            "name": name,
             "dept": dept,
             "close_price": close_price,
             "open_price": open_price,
@@ -282,52 +312,76 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
             "trade_date": used_date,
         }
 
-    # 소속이 SPAC인 종목만 추출
+    # info_rows 와 trade_rows 의 모든 종목 코드를 통합 점검
+    all_codes: list[str] = []
+    seen_all_codes: set[str] = set()
+    for r in info_rows:
+        c = normalize_code(r.get("ISU_SRT_CD") or r.get("종목코드") or r.get("code"))
+        if re.fullmatch(r"\d{6}", c) and c not in seen_all_codes:
+            seen_all_codes.add(c)
+            all_codes.append(c)
+    for r in trade_rows:
+        c = normalize_code(r.get("ISU_SRT_CD") or r.get("종목코드") or r.get("ISU_CD") or r.get("code"))
+        if re.fullmatch(r"\d{6}", c) and c not in seen_all_codes:
+            seen_all_codes.add(c)
+            all_codes.append(c)
+
     spacs: list[dict] = []
     seen_codes: set[str] = set()
+    dept_matched_cnt = 0
+    name_fallback_cnt = 0
 
-    source_pool = info_rows if info_rows else trade_rows
-    for r in source_pool:
-        code = normalize_code(r.get("ISU_SRT_CD") or r.get("종목코드") or r.get("ISU_CD") or r.get("code"))
-        if not re.fullmatch(r"\d{6}", code) or code in seen_codes:
+    for code in all_codes:
+        if code in seen_codes:
             continue
-
+        info = info_by_code.get(code, {})
         q_info = quote_by_code.get(code, {})
+
         dept = str(
-            r.get("SECT_TP_NM")
-            or r.get("소속부")
+            info.get("SECT_TP_NM")
+            or info.get("소속부")
             or q_info.get("dept")
             or ""
         ).strip()
 
-        if not is_spac_affiliation(dept):
-            continue
-
         name = str(
-            r.get("ISU_ABBRV")
-            or r.get("ISU_NM")
-            or r.get("종목명")
-            or r.get("회사명")
+            info.get("ISU_ABBRV")
+            or info.get("ISU_NM")
+            or info.get("종목명")
+            or info.get("회사명")
+            or q_info.get("name")
             or ""
         ).strip()
         if not name:
             continue
 
+        matched_by_dept = is_spac_affiliation(dept)
+        matched_by_name = (not matched_by_dept) and is_spac_name(name)
+
+        if not (matched_by_dept or matched_by_name):
+            continue
+
         seen_codes.add(code)
+        if matched_by_dept:
+            dept_matched_cnt += 1
+        else:
+            name_fallback_cnt += 1
+
         listing_date = str(
-            r.get("LIST_DD") or r.get("상장일") or q_info.get("listing_date") or ""
+            info.get("LIST_DD") or q_info.get("listing_date") or ""
         ).strip()
 
         spacs.append({
             "code": code,
             "name": name,
             "listing_date": listing_date,
-            "krx_dept": dept,
+            "krx_dept": dept or ("SPAC(명칭추정)" if matched_by_name else ""),
         })
 
     print(
-        f"[INFO] KRX 기준일={used_date or '미확인'}, 전체종목={len(quote_by_code)}개, "
-        f"소속=SPAC 종목={len(spacs)}개"
+        f"[INFO] KRX 기준일={used_date or '미확인'}, info={len(info_rows)}건, "
+        f"trade={len(trade_rows)}건, SPAC종목={len(spacs)}개 "
+        f"(소속일치={dept_matched_cnt}, 명칭보완={name_fallback_cnt})"
     )
     return spacs, quote_by_code, used_date
 
@@ -749,7 +803,7 @@ def main() -> None:
         spac_list, quote_by_code, trade_date = get_krx_spac_market_data(ref_dt)
 
         if not spac_list:
-            print("[WARN] KRX 소속=SPAC 종목이 비어 있음 — 기존 데이터 유지")
+            print("[WARN] KRX SPAC 종목이 비어 있음 — 기존 데이터 유지")
             save_json(existing_spacs, OUTPUT_PATH, updated_at)
             save_json(existing_liqs, LIQUIDATIONS_PATH, updated_at)
             return
