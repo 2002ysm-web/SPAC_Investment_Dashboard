@@ -13,6 +13,19 @@ DEPOSIT_NET_FACTOR = 0.845
 GENERAL_TAX_RATE = 0.154
 MERGER_THRESHOLD_DAYS = 365
 DEFAULT_PRE_TAX_DEPOSIT_RATE = 2.35
+EXCLUDE_DELISTING_NOTICE = os.environ.get("EXCLUDE_DELISTING_NOTICE", "true").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+    "y",
+}
+
+EXCLUDED_SPAC_CODES = {
+    "206400",  # 아인스팩씨엔에스
+    "468760",  # 유진스팩10호
+    "474930",  # 신한제13호스팩
+    "475250",  # 하나33호스팩
+}
 
 
 def get_today_kst_str() -> str:
@@ -85,7 +98,7 @@ def get_remaining_days(delisting_date_str: str, today_dt: datetime) -> Optional[
 
 def normalize_status(raw: Dict[str, Any], remaining_days: Optional[int]) -> str:
     status = str(raw.get("status") or raw.get("trade_status") or "").strip()
-    if remaining_days is not None and remaining_days < 0:
+    if remaining_days is not None and remaining_days <= 0:
         return "상장폐지"
     if "상장폐지" in status or "폐지" in status or "해산" in status:
         return "상장폐지"
@@ -98,7 +111,30 @@ def normalize_status(raw: Dict[str, Any], remaining_days: Optional[int]) -> str:
     return status
 
 
-def is_valid_active_spac(raw: Dict[str, Any], delisting_date_str: str, remaining_days: Optional[int], status: str) -> bool:
+def has_delisting_or_liquidation_flag(raw: Dict[str, Any]) -> bool:
+    dept = str(raw.get("krx_dept") or "")
+    if "관리종목" in dept or bool(raw.get("has_liquidation_notice")):
+        return True
+    disclosures = raw.get("recent_disclosures") or []
+    if isinstance(disclosures, list):
+        for d in disclosures:
+            if isinstance(d, dict) and "상장폐지 사유발생" in str(d.get("report_nm") or ""):
+                return True
+    return False
+
+
+def is_valid_active_spac(
+    raw: Dict[str, Any],
+    delisting_date_str: str,
+    remaining_days: Optional[int],
+    status: str,
+    yield_isa: Optional[float],
+    yield_general: Optional[float],
+) -> bool:
+    code = str(raw.get("code") or raw.get("ticker") or raw.get("short_code") or "").strip().zfill(6)
+    if code in EXCLUDED_SPAC_CODES:
+        return False
+
     name = str(raw.get("name") or raw.get("stock_name") or "").strip()
     if not name:
         return False
@@ -111,14 +147,24 @@ def is_valid_active_spac(raw: Dict[str, Any], delisting_date_str: str, remaining
         if ("스팩" not in name) and ("기업인수목적" not in name):
             return False
 
-    # 상장폐지·만기경과·합병완료 등 종료된 항목 제외
+    # 상장폐지일 누락 또는 만기경과/당일만료/합병완료 등 종료된 항목 제외
+    if not delisting_date_str:
+        return False
     if status in {"상장폐지", "합병"}:
         return False
-    if remaining_days is not None and remaining_days < 0:
+    if remaining_days is None or remaining_days <= 0:
         return False
 
     raw_rem = to_float(raw.get("remaining_days"))
-    if raw_rem is not None and raw_rem < 0:
+    if raw_rem is not None and raw_rem <= 0:
+        return False
+
+    # 수익률 누락 항목 제외
+    if yield_isa is None or yield_general is None:
+        return False
+
+    # 상장폐지 사유발생 / 청산 공시 / 관리종목 제외 옵션
+    if EXCLUDE_DELISTING_NOTICE and has_delisting_or_liquidation_flag(raw):
         return False
 
     return True
@@ -165,10 +211,8 @@ def determine_fair_buy(
 ) -> str:
     explicit = str(raw.get("is_fair_buy") or "").strip().upper()
     if explicit in {"O", "X"}:
-        # 시세/청산가 기준 재검증이 필요하면 아래 로직을 사용
         pass
 
-    # 청산가와 현재가가 모두 있는 경우: 예상수익률이 0% 이상이면 매수적정(O)
     candidates = [v for v in (yield_isa, yield_general) if v is not None]
     if candidates:
         return "O" if max(candidates) >= 0.0 else "X"
@@ -188,9 +232,6 @@ def transform_spac_item(
     delisting_date = extract_delisting_date(raw)
     remaining_days = get_remaining_days(delisting_date, today_dt)
     status = normalize_status(raw, remaining_days)
-
-    if not is_valid_active_spac(raw, delisting_date, remaining_days, status):
-        return None
 
     current_price = to_int(raw.get("current_price") or raw.get("price") or raw.get("close"))
     liquidation_price = to_int(
@@ -216,6 +257,9 @@ def transform_spac_item(
             remaining_days,
             "general",
         )
+
+    if not is_valid_active_spac(raw, delisting_date, remaining_days, status, yield_isa, yield_general):
+        return None
 
     invest_type = determine_invest_type(raw, remaining_days)
     after_tax_deposit = round(deposit_rate_pre_tax * DEPOSIT_NET_FACTOR, 2)
