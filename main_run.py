@@ -8,6 +8,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 import requests
@@ -62,7 +63,7 @@ def load_existing_items(path: Path) -> list[dict]:
 
 
 def get_base_deposit_rate() -> float:
-    fallback = 2.4
+    fallback = 2.35
     if DEPOSIT_RATE_PATH.exists():
         try:
             with DEPOSIT_RATE_PATH.open("r", encoding="utf-8") as f:
@@ -101,9 +102,69 @@ def get_dart_corp_codes() -> dict[str, str]:
     return mapping
 
 
+def normalize_code(val: Any) -> str:
+    raw = str(val or "").strip()
+    if raw.endswith(".0"):
+        raw = raw[:-2]
+    digits = re.sub(r"[^0-9]", "", raw)
+    return digits.zfill(6) if digits else ""
+
+
+def extract_dept_value(row: dict[str, Any]) -> str:
+    dept_keys = (
+        "소속부",
+        "종목구분",
+        "증권구분",
+        "시장구분",
+        "dept_nm",
+        "sect_tp_nm",
+        "secugrp_nm",
+        "mkt_nm",
+        "krx_dept",
+    )
+    parts: list[str] = []
+    for k in dept_keys:
+        v = row.get(k)
+        if v is not None and str(v).strip() and str(v).strip().lower() != "nan":
+            parts.append(str(v).strip())
+    return " / ".join(parts)
+
+
+def extract_name_value(row: dict[str, Any]) -> str:
+    name_keys = ("회사명", "종목명", "itm_nm", "kor_secn_nm", "name")
+    for k in name_keys:
+        v = row.get(k)
+        if v is not None and str(v).strip() and str(v).strip().lower() != "nan":
+            return str(v).strip()
+    return ""
+
+
+def is_krx_spac_row(row: dict[str, Any]) -> bool:
+    """
+    KRX 종목 정보에서 소속부(또는 종목구분·증권구분) 기준으로 SPAC 여부를 우선 판별하고,
+    소속부 정보가 없는 경우 종목명('스팩', 'SPAC')으로 보조 판별합니다.
+    """
+    dept_text = extract_dept_value(row)
+    name_text = extract_name_value(row)
+
+    dept_upper = dept_text.upper()
+    if "SPAC" in dept_upper or "기업인수목적" in dept_text or "스팩" in dept_text:
+        return True
+
+    if re.search(r"(스팩|SPAC)", name_text, re.IGNORECASE):
+        return True
+
+    return False
+
+
 def get_krx_spac_list() -> list[dict]:
+    """
+    KRX 상장법인/종목 정보에서 소속부(또는 구분/종목명) 기준으로 SPAC 종목만 필터링합니다.
+    """
     spacs: list[dict] = []
+    seen_codes: set[str] = set()
     url = "https://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13"
+
     try:
         res = requests.get(url, headers=HEADERS, timeout=20)
         res.raise_for_status()
@@ -121,19 +182,47 @@ def get_krx_spac_list() -> list[dict]:
         dfs = parse_html_tables(raw_html)
         if not dfs:
             return spacs
-        df = dfs[0]
-        if "회사명" not in df.columns or "종목코드" not in df.columns:
+
+        df = dfs[0].copy()
+        df.columns = [str(c).strip() for c in df.columns]
+
+        code_col = next(
+            (c for c in ("종목코드", "단축코드", "isu_srt_cd", "code") if c in df.columns),
+            None,
+        )
+        name_col = next(
+            (c for c in ("회사명", "종목명", "itm_nm", "kor_secn_nm", "name") if c in df.columns),
+            None,
+        )
+        if not code_col or not name_col:
             return spacs
 
-        spac_df = df[df["회사명"].astype(str).str.contains("스팩", na=False)].copy()
-        for _, row in spac_df.iterrows():
-            code = str(row["종목코드"]).strip().replace(".0", "").zfill(6)
-            name = str(row["회사명"]).strip()
-            listing_date = str(row.get("상장일", "")).strip()
-            spacs.append({"code": code, "name": name, "listing_date": listing_date})
-        print(f"[INFO] KRX 스팩 {len(spacs)}개 조회")
+        for raw_row in df.to_dict(orient="records"):
+            if not is_krx_spac_row(raw_row):
+                continue
+
+            code = normalize_code(raw_row.get(code_col))
+            name = str(raw_row.get(name_col) or "").strip()
+            if not code or len(code) != 6 or not name or code in seen_codes:
+                continue
+
+            seen_codes.add(code)
+            listing_date = str(
+                raw_row.get("상장일") or raw_row.get("list_dd") or raw_row.get("listing_date") or ""
+            ).strip()
+            krx_dept = extract_dept_value(raw_row)
+
+            spacs.append({
+                "code": code,
+                "name": name,
+                "listing_date": listing_date,
+                "krx_dept": krx_dept,
+            })
+
+        print(f"[INFO] KRX 소속부/종목 기준 SPAC {len(spacs)}개 필터링 완료")
     except Exception as exc:
-        print(f"[WARN] KRX 스팩 목록 조회 실패: {exc}")
+        print(f"[WARN] KRX SPAC 목록 조회 실패: {exc}")
+
     return spacs
 
 
@@ -314,11 +403,6 @@ def calc_sheet_liquidation_unit_price(
     r2: float | None,
     r3: float | None,
 ) -> float:
-    """
-    시트 산식 반영:
-    1~2년차 연 이율 적용 후 마지막 해는 보수적으로 6개월만 반영:
-    IF(O3="", IF(N3="", K3*(1+M3*84.5%*6/12), K3*(1+N3*84.5%*6/12)), K3*(1+O3*84.5%*6/12))
-    """
     rate_1 = max(0.0, float(r1)) / 100.0
     y1 = base_price * (1.0 + rate_1)
 
@@ -346,7 +430,6 @@ def resolve_liquidation_price(
     par_base_price: int | None,
     deposit_rate: float,
 ) -> tuple[float, int, str]:
-    """(청산단가 S3, 공모가 C3, 산출근거)를 반환합니다."""
     base_price = par_base_price if par_base_price is not None else (10000 if current_price >= 5000 else 2000)
 
     for d in disclosures:
@@ -425,11 +508,6 @@ def calc_annualized_yields(
     delisting_date_str: str,
     ref_dt: datetime,
 ) -> tuple[float | None, float | None, int | None]:
-    """
-    시트 ISA 예상수익률 산식 반영:
-    (S3 - D3) / D3 / (F3 + 30 - $Y$3) * 365  (*100 백분율 환산)
-    일반 계좌는 수익(S3 > D3) 발생 시 차익에 세후 비율(1 - 0.154) 적용.
-    """
     if d_current_price <= 0 or s_liq_price <= 0:
         return None, None, None
 
@@ -467,10 +545,6 @@ def calc_fair_buy_status(
     ref_dt: datetime,
     is_suspended: bool,
 ) -> tuple[str, float | None]:
-    """
-    시트 매수적정여부 산식 반영:
-    if(C3 + (S3 - C3) / 1095 * ($Y$3 - E3) >= D3, "O", "X")
-    """
     if is_suspended or d_current_price <= 0:
         return "X", None
 
@@ -536,6 +610,7 @@ def build_spac_record(
     record = {
         "code": code,
         "name": spac["name"],
+        "krx_dept": spac.get("krx_dept", ""),
         "listing_date": spac["listing_date"],
         "delisting_date": delisting_date,
         "remaining_days": rem_days,
@@ -581,7 +656,7 @@ def main() -> None:
         spac_list = get_krx_spac_list()
 
         if not spac_list:
-            print("[WARN] KRX 스팩 목록 비어 있음 — 기존 데이터 유지")
+            print("[WARN] KRX SPAC 필터링 결과 비어 있음 — 기존 데이터 유지")
             save_json(existing_spacs, OUTPUT_PATH, updated_at)
             save_json(existing_liqs, LIQUIDATIONS_PATH, updated_at)
             return
