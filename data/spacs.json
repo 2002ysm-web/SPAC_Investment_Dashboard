@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-20 15:23:00 KST",
+  "updated_at": "2026-11-20 17:40:30 KST",
   "count": 60,
   "items": [
     {
@@ -23,15 +23,15 @@
       "trade_date": "20261119",
       "liquidation_price": 2115.91,
       "liquidation_price_source": "공모가(2,000원)+복리+최종6개월산식",
-      "fair_buy_price": null,
-      "is_fair_buy": "X",
+      "fair_buy_price": 2087.75,
+      "is_fair_buy": "O",
       "invest_type": "합병",
       "yield_isa": 3.04,
       "yield_general": 2.57,
       "deposit_rate": 2.35,
-      "is_suspended": true,
+      "is_suspended": false,
       "has_liquidation_notice": false,
-      "status": "정지",
+      "status": "합병",
       "recent_disclosures": [
         {
           "report_nm": "분기보고서 (2026.09)",
@@ -1505,15 +1505,15 @@
       "trade_date": "20261119",
       "liquidation_price": 2115.91,
       "liquidation_price_source": "공모가(2,000원)+복리+최종6개월산식",
-      "fair_buy_price": null,
-      "is_fair_buy": "X",
+      "fair_buy_price": 2084.68,
+      "is_fair_buy": "O",
       "invest_type": "합병",
       "yield_isa": 3.33,
       "yield_general": 2.82,
       "deposit_rate": 2.35,
-      "is_suspended": true,
+      "is_suspended": false,
       "has_liquidation_notice": false,
-      "status": "정지",
+      "status": "합병",
       "recent_disclosures": [
         {
           "report_nm": "분기보고서 (2026.09)",
@@ -2535,6 +2535,11 @@
       "status": "합병",
       "recent_disclosures": [
         {
+          "report_nm": "임시주주총회결과              ",
+          "rcept_dt": "20261120",
+          "rcept_no": "20261120900684"
+        },
+        {
           "report_nm": "[첨부정정]주요사항보고서(회사합병결정)",
           "rcept_dt": "20261106",
           "rcept_no": "20261106000338"
@@ -2603,11 +2608,6 @@
           "report_nm": "주권매매거래정지해제              (상장예비심사결과 통지(승인))",
           "rcept_dt": "20260928",
           "rcept_no": "20260928900934"
-        },
-        {
-          "report_nm": "반기보고서 (2026.06)",
-          "rcept_dt": "20260807",
-          "rcept_no": "20260807000018"
         }
       ]
     },
@@ -3345,15 +3345,15 @@
       "trade_date": "20261119",
       "liquidation_price": 2115.91,
       "liquidation_price_source": "공모가(2,000원)+복리+최종6개월산식",
-      "fair_buy_price": null,
-      "is_fair_buy": "X",
+      "fair_buy_price": 2105.32,
+      "is_fair_buy": "O",
       "invest_type": "합병",
       "yield_isa": null,
       "yield_general": null,
       "deposit_rate": 2.35,
-      "is_suspended": true,
+      "is_suspended": false,
       "has_liquidation_notice": false,
-      "status": "정지",
+      "status": "합병",
       "recent_disclosures": [
         {
           "report_nm": "분기보고서 (2026.09)",
@@ -3463,6 +3463,11 @@
       "has_liquidation_notice": false,
       "status": "일반",
       "recent_disclosures": [
+        {
+          "report_nm": "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+          "rcept_dt": "20261120",
+          "rcept_no": "20261120900637"
+        },
         {
           "report_nm": "분기보고서 (2026.09)",
           "rcept_dt": "20261116",
@@ -4223,15 +4228,15 @@
       "trade_date": "20261119",
       "liquidation_price": 2115.91,
       "liquidation_price_source": "공모가(2,000원)+복리+최종6개월산식",
-      "fair_buy_price": null,
+      "fair_buy_price": 2074.1,
       "is_fair_buy": "X",
       "invest_type": "합병",
       "yield_isa": -3.09,
       "yield_general": -3.09,
       "deposit_rate": 2.35,
-      "is_suspended": true,
+      "is_suspended": false,
       "has_liquidation_notice": false,
-      "status": "정지",
+      "status": "합병",
       "recent_disclosures": [
         {
           "report_nm": "분기보고서 (2026.09)",
@@ -4331,15 +4336,15 @@
       "trade_date": "20261119",
       "liquidation_price": 2115.91,
       "liquidation_price_source": "공모가(2,000원)+복리+최종6개월산식",
-      "fair_buy_price": null,
+      "fair_buy_price": 2075.05,
       "is_fair_buy": "X",
       "invest_type": "합병",
       "yield_isa": -3.35,
       "yield_general": -3.35,
       "deposit_rate": 2.35,
-      "is_suspended": true,
+      "is_suspended": false,
       "has_liquidation_notice": false,
-      "status": "정지",
+      "status": "합병",
       "recent_disclosures": [
         {
           "report_nm": "분기보고서 (2026.09)",
@@ -5018,6 +5023,11 @@
       "recent_disclosures": [
         {
           "report_nm": "주식등의대량보유상황보고서(일반)",
+          "rcept_dt": "20261120",
+          "rcept_no": "20261120000572"
+        },
+        {
+          "report_nm": "주식등의대량보유상황보고서(일반)",
           "rcept_dt": "20261118",
           "rcept_no": "20261118000329"
         },
@@ -5085,11 +5095,6 @@
           "report_nm": "주식등의대량보유상황보고서(일반)",
           "rcept_dt": "20261014",
           "rcept_no": "20261014000422"
-        },
-        {
-          "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
-          "rcept_dt": "20261008",
-          "rcept_no": "20261008000726"
         }
       ]
     }
