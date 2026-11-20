@@ -43,7 +43,7 @@
                 <div class="flex items-center gap-3 flex-wrap">
                     <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">🚀 SPAC Investment Dashboard</h1>
                     <span id="deposit-rate-badge" class="bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-                        기준 예금금리: 연 --%
+                        기준 예금금리(세후): 연 --%
                     </span>
                 </div>
             </div>
@@ -242,8 +242,8 @@
                     <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">예상 수익률</label>
                     <select id="filter-yield-range" onchange="applyFilters()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                         <option value="all" selected>전체</option>
-                        <option value="above_deposit">예금 이상</option>
-                        <option value="low_positive">0% 이상 ~ 예금 미만</option>
+                        <option value="above_deposit">예금 이상(세후)</option>
+                        <option value="low_positive">0% 이상 ~ 예금 미만(세후)</option>
                         <option value="negative">0% 미만</option>
                     </select>
                 </div>
@@ -380,7 +380,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">예금 이상</label>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">예금 이상(세후)</label>
                         <select id="hold-filter-benchmark" onchange="renderHoldings()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                             <option value="all" selected>전체</option>
                             <option value="beat">달성</option>
@@ -466,7 +466,7 @@
                     <div class="flex items-center justify-between mb-4">
                         <div>
                             <h2 class="text-base font-bold text-slate-800">📝 추가하기</h2>
-                            <p class="text-xs text-slate-400 mt-0.5">매수일을 입력하면 해당 시점의 한국은행 정기예금 금리가 자동으로 조회되어 비교됩니다.</p>
+                            <p class="text-xs text-slate-400 mt-0.5">매수일을 입력하면 해당 시점의 한국은행 정기예금 금리(세후 기준)가 자동 조회되어 비교됩니다.</p>
                         </div>
                         <button onclick="lockPrivateTabs()" class="text-xs text-rose-500 hover:underline font-semibold">🔒 잠금</button>
                     </div>
@@ -527,7 +527,7 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">예금 이상</label>
+                            <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">예금 이상(세후)</label>
                             <select id="perf-filter-benchmark" onchange="renderPerformance()" class="h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
                                 <option value="all" selected>전체</option>
                                 <option value="beat">달성</option>
@@ -612,6 +612,10 @@
 
         let perfSortColumn = 'sell_date';
         let perfSortDirection = 'desc';
+
+        const DEPOSIT_NET_FACTOR = 0.845;
+        const GENERAL_TAX_RATE = 0.154;
+        const MERGER_THRESHOLD_DAYS = 365;
 
         let bokDepositRates = {
             "2024-01": 3.67, "2024-02": 3.63, "2024-03": 3.58, "2024-04": 3.53,
@@ -706,8 +710,13 @@
             {"account": "남편", "acct": "ISA", "name": "KB제31호스팩", "buy_amount": 2072480, "quantity": 1019, "buy_date": "2026-10-13"}
         ];
         const SEED_KEY = 'spac_seed_applied_v2';
-        const GENERAL_TAX_RATE = 0.154;
         const MERGER_THRESHOLD_DAYS = 365;
+
+        function toAfterTaxDepositRate(preTaxRate) {
+            const r = toFiniteNumber(preTaxRate);
+            if (r === null) return null;
+            return r * DEPOSIT_NET_FACTOR;
+        }
 
         function normName(n) {
             return String(n || '').replace(/\s+/g, '').replace(/^KB/i, '케이비').replace(/^IBKS/i, '아이비케이에스').toLowerCase();
@@ -823,7 +832,6 @@
             return s;
         }
 
-        // 투자 유형 '합병'은 청산일까지 1년(365일) 이상 남은 곳으로 판정
         function normalizeInvestType(item) {
             const delistingDate = getDelistingDateValue(item);
             const daysLeft = getDaysUntilDelisting(delistingDate);
@@ -842,12 +850,13 @@
             return raw ? String(raw).trim() : null;
         }
 
+        // 세금 제외(세후) 기준 예금금리 반환
         function getCurrentBaseDepositRate() {
             const fromItem = allItems.length > 0 ? toFiniteNumber(allItems[0].deposit_rate) : null;
-            if (fromItem !== null && fromItem > 0) return fromItem;
+            if (fromItem !== null && fromItem > 0) return toAfterTaxDepositRate(fromItem);
             const latestKey = Object.keys(bokDepositRates).sort().pop();
             const fromMap = latestKey ? toFiniteNumber(bokDepositRates[latestKey]) : null;
-            return fromMap !== null ? fromMap : 2.35;
+            return toAfterTaxDepositRate(fromMap !== null ? fromMap : 2.35);
         }
 
         function calculateSingleAnnualYield(buyAmount, sellAmount, buyDate, sellDate) {
@@ -911,16 +920,15 @@
             return computeFallbackYieldFromSpac(item, accountType);
         }
 
-        function formatSpreadPp(yieldVal, baseRate) {
+        function formatSpreadPp(yieldVal, baseAfterTaxRate) {
             const y = toFiniteNumber(yieldVal);
-            const b = toFiniteNumber(baseRate);
+            const b = toFiniteNumber(baseAfterTaxRate);
             if (y === null || b === null) return null;
             const diff = y - b;
             const sign = diff > 0.05 ? '+' : (diff < -0.05 ? '-' : '');
             return `(${sign}${Math.abs(diff).toFixed(1)}%p)`;
         }
 
-        // 청산 공시에 해당 내용이 확인되고 단가·지급일이 확정된 건만 자동 이관
         async function processLiquidations() {
             let list = [];
             try {
@@ -1045,16 +1053,23 @@
             return ((low + high) / 2) * 100;
         }
 
+        // 해당 매수일 시점의 예금금리를 세금 제외(세후) 기준으로 반환
         function getBokRateForDate(dateStr) {
-            if (!dateStr || dateStr.length < 7) return 3.2;
-            const ym = dateStr.substring(0, 7);
-            if (bokDepositRates[ym] !== undefined) return bokDepositRates[ym];
-            const sortedKeys = Object.keys(bokDepositRates).sort();
-            let fallbackRate = sortedKeys.length > 0 ? bokDepositRates[sortedKeys[sortedKeys.length - 1]] : 3.2;
-            for (const k of sortedKeys) {
-                if (k <= ym) fallbackRate = bokDepositRates[k];
+            let rawRate = 3.2;
+            if (dateStr && dateStr.length >= 7) {
+                const ym = dateStr.substring(0, 7);
+                if (bokDepositRates[ym] !== undefined) {
+                    rawRate = bokDepositRates[ym];
+                } else {
+                    const sortedKeys = Object.keys(bokDepositRates).sort();
+                    let fallbackRate = sortedKeys.length > 0 ? bokDepositRates[sortedKeys[sortedKeys.length - 1]] : 3.2;
+                    for (const k of sortedKeys) {
+                        if (k <= ym) fallbackRate = bokDepositRates[k];
+                    }
+                    rawRate = fallbackRate;
+                }
             }
-            return fallbackRate;
+            return toAfterTaxDepositRate(rawRate) ?? (rawRate * DEPOSIT_NET_FACTOR);
         }
 
         function switchTab(tabName) {
@@ -1253,10 +1268,10 @@
                 const currentAnnual = calculateSingleAnnualYield(item.buy_amount, estimatedEval, buyDateObj, todayDate);
                 const evalDiff = estimatedEval - item.buy_amount;
                 const simpleYield = item.buy_amount > 0 ? (evalDiff / item.buy_amount) * 100 : 0;
-                const bokRate = getBokRateForDate(item.buy_date);
-                const isBeat = currentAnnual >= bokRate;
+                const afterTaxDepositRate = getBokRateForDate(item.buy_date);
+                const isBeat = currentAnnual >= afterTaxDepositRate;
 
-                return { ...item, account: accountOwner, acct, origIndex: idx, estimatedEval, evalDiff, simpleYield, currentAnnual, bokRate, isBeat, delistingYear, spacStatus };
+                return { ...item, account: accountOwner, acct, origIndex: idx, estimatedEval, evalDiff, simpleYield, currentAnnual, afterTaxDepositRate, isBeat, delistingYear, spacStatus };
             });
 
             const filteredHoldings = enrichedHoldings.filter(item => {
@@ -1301,7 +1316,7 @@
                 totalCashFlows.push({ date: parseDateOnly(item.buy_date) || todayDate, amount: -item.buy_amount });
                 totalCashFlows.push({ date: todayDate, amount: item.estimatedEval });
 
-                const diffRate = (item.currentAnnual - item.bokRate).toFixed(2);
+                const diffRate = (item.currentAnnual - item.afterTaxDepositRate).toFixed(2);
                 const evalColor = item.evalDiff >= 0 ? 'text-emerald-600 font-bold' : 'text-rose-500 font-bold';
                 const simpleColor = item.simpleYield >= 0 ? 'text-slate-600' : 'text-rose-500';
                 const annualColor = item.isBeat ? 'text-emerald-600 font-extrabold' : 'text-rose-500 font-extrabold';
@@ -1424,11 +1439,11 @@
                 const buyDateObj = parseDateOnly(item.buy_date);
                 const sellDateObj = parseDateOnly(item.sell_date);
                 const annualYield = calculateSingleAnnualYield(item.buy_amount, item.sell_amount, buyDateObj, sellDateObj);
-                const bokRate = getBokRateForDate(item.buy_date);
-                const isBeat = annualYield >= bokRate;
+                const afterTaxDepositRate = getBokRateForDate(item.buy_date);
+                const isBeat = annualYield >= afterTaxDepositRate;
                 const sellYear = item.sell_date ? item.sell_date.substring(0, 4) : '';
 
-                return { ...item, origIndex: idx, pnl, simpleYield, annualYield, bokRate, isBeat, sellYear, buyDateObj, sellDateObj };
+                return { ...item, origIndex: idx, pnl, simpleYield, annualYield, afterTaxDepositRate, isBeat, sellYear, buyDateObj, sellDateObj };
             });
 
             const filteredItems = processedItems.filter(item => {
@@ -1475,7 +1490,7 @@
                     perfCashFlows.push({ date: item.sellDateObj, amount: item.sell_amount });
                 }
 
-                const diffRate = (item.annualYield - item.bokRate).toFixed(2);
+                const diffRate = (item.annualYield - item.afterTaxDepositRate).toFixed(2);
                 const pnlColor = item.pnl >= 0 ? 'text-emerald-600 font-bold' : 'text-rose-500 font-bold';
                 const simpleColor = item.simpleYield >= 0 ? 'text-slate-600' : 'text-rose-500';
                 const annualColor = item.isBeat ? 'text-emerald-600 font-extrabold' : 'text-rose-500 font-extrabold';
@@ -1551,9 +1566,9 @@
                     datalist.innerHTML = allItems.map(i => `<option value="${i.name}">`).join('');
                 }
 
-                const baseRate = getCurrentBaseDepositRate();
-                if (baseRate !== null && baseRate !== undefined) {
-                    document.getElementById('deposit-rate-badge').innerText = `기준 예금금리: 연 ${Number(baseRate).toFixed(2)}%`;
+                const baseAfterTaxRate = getCurrentBaseDepositRate();
+                if (baseAfterTaxRate !== null && baseAfterTaxRate !== undefined) {
+                    document.getElementById('deposit-rate-badge').innerText = `기준 예금금리(세후): 연 ${Number(baseAfterTaxRate).toFixed(2)}%`;
                 }
 
                 updateSummaryStats(allItems);
@@ -1652,13 +1667,13 @@
             updateRecommendations(items);
         }
 
-        function pickBucketItems(pool, accountType, baseRate, bucket) {
+        function pickBucketItems(pool, accountType, baseAfterTaxRate, bucket) {
             return pool
                 .map(item => ({ item, y: resolveAccountYield(item, accountType) }))
                 .filter(entry => {
                     if (entry.y === null || !Number.isFinite(entry.y)) return false;
-                    if (bucket === 'high') return entry.y >= baseRate;
-                    if (bucket === 'mid') return entry.y >= 0 && entry.y < baseRate;
+                    if (bucket === 'high') return entry.y >= baseAfterTaxRate;
+                    if (bucket === 'mid') return entry.y >= 0 && entry.y < baseAfterTaxRate;
                     return false;
                 })
                 .sort((a, b) => b.y - a.y)
@@ -1666,7 +1681,7 @@
         }
 
         function updateRecommendations(items) {
-            const baseRate = getCurrentBaseDepositRate();
+            const baseAfterTaxRate = getCurrentBaseDepositRate();
 
             const fairNormalItems = items.filter(i => i.is_fair_buy === 'O' && i.status === '일반');
             const fallbackNormalItems = fairNormalItems.length > 0 ? fairNormalItems : items.filter(i => i.status === '일반');
@@ -1674,28 +1689,28 @@
             const mergerPool = fallbackNormalItems.filter(i => i.invest_type === '합병');
             const liqPool = fallbackNormalItems.filter(i => i.invest_type === '청산');
 
-            const mergerIsaHigh = pickBucketItems(mergerPool, 'isa', baseRate, 'high');
-            const mergerIsaMid = pickBucketItems(mergerPool, 'isa', baseRate, 'mid');
-            const mergerGenHigh = pickBucketItems(mergerPool, 'general', baseRate, 'high');
-            const mergerGenMid = pickBucketItems(mergerPool, 'general', baseRate, 'mid');
+            const mergerIsaHigh = pickBucketItems(mergerPool, 'isa', baseAfterTaxRate, 'high');
+            const mergerIsaMid = pickBucketItems(mergerPool, 'isa', baseAfterTaxRate, 'mid');
+            const mergerGenHigh = pickBucketItems(mergerPool, 'general', baseAfterTaxRate, 'high');
+            const mergerGenMid = pickBucketItems(mergerPool, 'general', baseAfterTaxRate, 'mid');
 
-            const liqIsaHigh = pickBucketItems(liqPool, 'isa', baseRate, 'high');
-            const liqIsaMid = pickBucketItems(liqPool, 'isa', baseRate, 'mid');
-            const liqGenHigh = pickBucketItems(liqPool, 'general', baseRate, 'high');
-            const liqGenMid = pickBucketItems(liqPool, 'general', baseRate, 'mid');
+            const liqIsaHigh = pickBucketItems(liqPool, 'isa', baseAfterTaxRate, 'high');
+            const liqIsaMid = pickBucketItems(liqPool, 'isa', baseAfterTaxRate, 'mid');
+            const liqGenHigh = pickBucketItems(liqPool, 'general', baseAfterTaxRate, 'high');
+            const liqGenMid = pickBucketItems(liqPool, 'general', baseAfterTaxRate, 'mid');
 
-            fillCard('merger-high-isa', mergerIsaHigh[0], 'isa', baseRate);
-            fillCard('merger-high-gen', mergerGenHigh[0], 'general', baseRate);
-            fillCard('merger-mid-isa', mergerIsaMid[0], 'isa', baseRate);
-            fillCard('merger-mid-gen', mergerGenMid[0], 'general', baseRate);
+            fillCard('merger-high-isa', mergerIsaHigh[0], 'isa', baseAfterTaxRate);
+            fillCard('merger-high-gen', mergerGenHigh[0], 'general', baseAfterTaxRate);
+            fillCard('merger-mid-isa', mergerIsaMid[0], 'isa', baseAfterTaxRate);
+            fillCard('merger-mid-gen', mergerGenMid[0], 'general', baseAfterTaxRate);
 
-            fillCard('liq-high-isa', liqIsaHigh[0], 'isa', baseRate);
-            fillCard('liq-high-gen', liqGenHigh[0], 'general', baseRate);
-            fillCard('liq-mid-isa', liqIsaMid[0], 'isa', baseRate);
-            fillCard('liq-mid-gen', liqGenMid[0], 'general', baseRate);
+            fillCard('liq-high-isa', liqIsaHigh[0], 'isa', baseAfterTaxRate);
+            fillCard('liq-high-gen', liqGenHigh[0], 'general', baseAfterTaxRate);
+            fillCard('liq-mid-isa', liqIsaMid[0], 'isa', baseAfterTaxRate);
+            fillCard('liq-mid-gen', liqGenMid[0], 'general', baseAfterTaxRate);
         }
 
-        function fillCard(cardId, item, accountType, baseRate) {
+        function fillCard(cardId, item, accountType, baseAfterTaxRate) {
             const nameEl = document.getElementById(`rec-${cardId}-name`);
             const priceEl = document.getElementById(`rec-${cardId}-price`);
             const yieldEl = document.getElementById(`rec-${cardId}-yield`);
@@ -1712,13 +1727,13 @@
             const yVal = resolveAccountYield(item, accountType);
             const curPrice = toFiniteNumber(item.current_price);
             const liqPrice = toFiniteNumber(item.liquidation_price);
-            const ppText = formatSpreadPp(yVal, baseRate);
+            const ppText = formatSpreadPp(yVal, baseAfterTaxRate);
 
             if (nameEl) nameEl.innerText = item.name || '-';
             if (priceEl) priceEl.innerText = curPrice !== null ? curPrice.toLocaleString() + '원' : '-';
             if (yieldEl) {
                 if (yVal !== null) {
-                    const yColor = yVal >= baseRate ? 'text-emerald-400' : (yVal >= 0 ? 'text-amber-300' : 'text-rose-400');
+                    const yColor = yVal >= baseAfterTaxRate ? 'text-emerald-400' : (yVal >= 0 ? 'text-amber-300' : 'text-rose-400');
                     const ppColor = ppText && ppText.startsWith('(+') ? 'text-emerald-300' : 'text-rose-300';
                     yieldEl.innerHTML = `<div class="${yColor}">${yVal.toFixed(2)}%</div>${ppText ? `<div class="text-[10px] font-semibold ${ppColor}">${ppText}</div>` : ''}`;
                 } else {
@@ -1768,7 +1783,7 @@
                 yieldHeader.innerText = '예상수익률';
             }
 
-            const baseRate = getCurrentBaseDepositRate();
+            const baseAfterTaxRate = getCurrentBaseDepositRate();
 
             updateRecommendations(allItems);
 
@@ -1784,8 +1799,8 @@
                 const resolvedYield = resolveAccountYield(item, accountVal);
                 if (yieldRangeVal !== 'all' && resolvedYield === null) return false;
                 const yVal = resolvedYield !== null ? Number(resolvedYield) : null;
-                if (yieldRangeVal === 'above_deposit' && (yVal === null || yVal < baseRate)) return false;
-                if (yieldRangeVal === 'low_positive' && (yVal === null || yVal < 0 || yVal >= baseRate)) return false;
+                if (yieldRangeVal === 'above_deposit' && (yVal === null || yVal < baseAfterTaxRate)) return false;
+                if (yieldRangeVal === 'low_positive' && (yVal === null || yVal < 0 || yVal >= baseAfterTaxRate)) return false;
                 if (yieldRangeVal === 'negative' && (yVal === null || yVal >= 0)) return false;
 
                 if (searchVal && !String(item.name || '').toLowerCase().includes(searchVal)) return false;
@@ -1812,10 +1827,10 @@
             });
 
             updateSortIcons();
-            renderTable(filtered, accountVal, baseRate);
+            renderTable(filtered, accountVal, baseAfterTaxRate);
         }
 
-        function renderTable(items, accountVal, baseRate) {
+        function renderTable(items, accountVal, baseAfterTaxRate) {
             const tbody = document.getElementById('spac-table-body');
             tbody.innerHTML = '';
 
@@ -1828,7 +1843,7 @@
                 const resolvedYield = resolveAccountYield(item, accountVal);
                 const hasYield = resolvedYield !== null && Number.isFinite(resolvedYield);
                 const yVal = hasYield ? Number(resolvedYield) : null;
-                const ppText = hasYield ? formatSpreadPp(yVal, baseRate) : null;
+                const ppText = hasYield ? formatSpreadPp(yVal, baseAfterTaxRate) : null;
 
                 const fairBadge = item.is_fair_buy === 'O'
                     ? `<span class="bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded text-xs">O</span>`
@@ -1874,3 +1889,4 @@
     </script>
 </body>
 </html>
+```[cite: 27]
