@@ -328,7 +328,14 @@
                         <button onclick="lockPrivateTabs()" class="text-xs text-rose-500 hover:underline font-semibold">🔒 잠금</button>
                     </div>
                     <form onsubmit="addHoldingItem(event)" class="space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">계좌 명의</label>
+                                <select id="hold-input-holder" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                                    <option value="남편" selected>남편</option>
+                                    <option value="아내">아내</option>
+                                </select>
+                            </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">계좌 구분</label>
                                 <select id="hold-input-account" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
@@ -361,7 +368,15 @@
                 </div>
 
                 <!-- 3. 보유 종목 필터 바 -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-center">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-center">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">계좌 명의</label>
+                        <select id="hold-filter-holder" onchange="renderHoldings()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                            <option value="all" selected>전체</option>
+                            <option value="남편">남편</option>
+                            <option value="아내">아내</option>
+                        </select>
+                    </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">계좌 구분</label>
                         <select id="hold-filter-account" onchange="renderHoldings()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
@@ -408,6 +423,7 @@
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200 select-none">
+                                    <th onclick="sortHoldingData('holder')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-center">명의 <span id="hold-sort-icon-holder" class="text-slate-400">↕</span></th>
                                     <th onclick="sortHoldingData('acct')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-center">계좌 <span id="hold-sort-icon-acct" class="text-slate-400">↕</span></th>
                                     <th onclick="sortHoldingData('name')" class="py-4 px-5 font-bold cursor-pointer hover:bg-slate-200 transition-colors">종목명 <span id="hold-sort-icon-name" class="text-slate-400">↕</span></th>
                                     <th onclick="sortHoldingData('buy_amount')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors">매수금 <span id="hold-sort-icon-buy_amount" class="text-slate-400">↕</span></th>
@@ -617,6 +633,7 @@
         const GENERAL_TAX_RATE = 0.154;
         const MERGER_THRESHOLD_DAYS = 365;
         const SEED_KEY = 'spac_seed_applied_v2';
+        const EXCLUDED_SPAC_CODES = new Set(['206400', '468760', '474930', '475250']);
 
         let bokDepositRates = {
             "2024-01": 3.67, "2024-02": 3.63, "2024-03": 3.58, "2024-04": 3.53,
@@ -724,8 +741,13 @@
             const k = normName(name);
             return allItems.find(s => s.name === name) || allItems.find(s => normName(s.name) === k);
         }
+        function getHoldingHolder(item) {
+            const h = String(item?.account || item?.accountHolder || item?.holder || '남편').trim();
+            return h === '아내' ? '아내' : '남편';
+        }
         function getHoldingUniqueKey(item) {
             return [
+                getHoldingHolder(item),
                 item.acct || '일반',
                 normName(item.name),
                 Number(item.buy_amount || 0),
@@ -738,10 +760,11 @@
             const out = [];
             for (const item of items) {
                 if (!item) continue;
-                const key = getHoldingUniqueKey(item);
+                const normalized = { ...item, account: getHoldingHolder(item) };
+                const key = getHoldingUniqueKey(normalized);
                 if (!seen.has(key)) {
                     seen.add(key);
-                    out.push(item);
+                    out.push(normalized);
                 }
             }
             return out;
@@ -766,7 +789,7 @@
                     return;
                 }
             } catch (e) { return; }
-            holdingItems = deduplicateHoldings(holdingItems.concat(SEED_HOLDINGS.map(r => ({ ...r }))));
+            holdingItems = deduplicateHoldings(holdingItems.concat(SEED_HOLDINGS.map(r => ({ ...r, account: getHoldingHolder(r) }))));
             saveHoldings();
             try {
                 localStorage.setItem(SEED_KEY, new Date().toISOString());
@@ -825,20 +848,35 @@
             return Math.floor(diffMs / (1000 * 60 * 60 * 24));
         }
 
-        // 상장폐지·만기경과 등 이미 종료된 스팩 제외 판별
+        // 상장폐지·만기경과·수익률누락·청산/상폐사유 종목 제외 판별
         function isExpiredOrDelistedSpac(item) {
             if (!item || typeof item !== 'object') return true;
+            const code = String(item.code || '').trim().padStart(6, '0');
+            if (EXCLUDED_SPAC_CODES.has(code)) return true;
+
             const rawStatus = String(item.status || '').trim();
             if (rawStatus === '상장폐지') return true;
 
-            const remDays = toFiniteNumber(item.remaining_days);
-            if (remDays !== null && remDays < 0) return true;
-
             const delistingDate = getDelistingDateValue(item);
-            if (delistingDate) {
-                const daysLeft = getDaysUntilDelisting(delistingDate);
-                if (daysLeft !== null && daysLeft < 0) return true;
+            if (!delistingDate) return true;
+
+            const remDays = toFiniteNumber(item.remaining_days);
+            if (remDays === null || remDays <= 0) return true;
+
+            const daysLeft = getDaysUntilDelisting(delistingDate);
+            if (daysLeft === null || daysLeft <= 0) return true;
+
+            const yIsa = toFiniteNumber(item.yield_isa);
+            const yGen = toFiniteNumber(item.yield_general);
+            if (yIsa === null && yGen === null) return true;
+
+            const dept = String(item.krx_dept || '');
+            const disclosures = Array.isArray(item.recent_disclosures) ? item.recent_disclosures : [];
+            const hasDelistReason = disclosures.some(d => String(d?.report_nm || '').includes('상장폐지 사유발생'));
+            if (hasDelistReason || Boolean(item.has_liquidation_notice) || dept.includes('관리종목')) {
+                return true;
             }
+
             return false;
         }
 
@@ -979,7 +1017,8 @@
                 const tax = acct === '일반' ? Math.floor(Math.max(0, gain) * GENERAL_TAX_RATE) : 0;
                 const rec = {
                     name: item.name, type: '청산', buy_amount: item.buy_amount, buy_date: item.buy_date,
-                    sell_amount: gross - tax, sell_date: l.pay_date, acct, report_nm: l.report_nm, auto: true
+                    sell_amount: gross - tax, sell_date: l.pay_date, acct, account: getHoldingHolder(item),
+                    report_nm: l.report_nm, auto: true
                 };
                 if (tax > 0) rec.tax = tax;
                 performanceItems.unshift(rec);
@@ -1134,8 +1173,9 @@
 
         function addHoldingItem(event) {
             event.preventDefault();
+            const holderEl = document.getElementById('hold-input-holder');
             const newItem = {
-                account: '남편',
+                account: holderEl ? holderEl.value : '남편',
                 acct: document.getElementById('hold-input-account').value,
                 name: document.getElementById('hold-input-name').value.trim(),
                 buy_amount: Number(document.getElementById('hold-input-amount').value),
@@ -1145,7 +1185,7 @@
 
             const dupKey = getHoldingUniqueKey(newItem);
             if (holdingItems.some(existing => getHoldingUniqueKey(existing) === dupKey)) {
-                alert('동일한 계좌·종목·매수금·매수량·매수일의 보유 내역이 이미 등록되어 있습니다.');
+                alert('동일한 명의·계좌·종목·매수금·매수량·매수일의 보유 내역이 이미 등록되어 있습니다.');
                 return;
             }
 
@@ -1172,8 +1212,9 @@
         function openSellModal(index, estimatedEval) {
             const item = holdingItems[index];
             if (!item) return;
+            const holder = getHoldingHolder(item);
             document.getElementById('sell-modal-index').value = index;
-            document.getElementById('sell-modal-subtitle').innerText = `[${item.acct || '일반'} - ${item.name}] 매수금 ${item.buy_amount.toLocaleString()}원 (${item.buy_date})`;
+            document.getElementById('sell-modal-subtitle').innerText = `[${holder} - ${item.acct || '일반'} - ${item.name}] 매수금 ${item.buy_amount.toLocaleString()}원 (${item.buy_date})`;
             document.getElementById('sell-modal-amount').value = estimatedEval > 0 ? Math.round(estimatedEval) : item.buy_amount;
             document.getElementById('sell-modal-date').value = getTodayStr();
             document.getElementById('sell-modal').classList.remove('hidden');
@@ -1196,7 +1237,8 @@
                 buy_date: item.buy_date,
                 sell_amount: Number(document.getElementById('sell-modal-amount').value),
                 sell_date: document.getElementById('sell-modal-date').value,
-                acct: item.acct || '일반'
+                acct: item.acct || '일반',
+                account: getHoldingHolder(item)
             };
 
             performanceItems.unshift(perfRecord);
@@ -1216,13 +1258,13 @@
                 holdingSortDirection = holdingSortDirection === 'asc' ? 'desc' : 'asc';
             } else {
                 holdingSortColumn = column;
-                holdingSortDirection = (column === 'acct' || column === 'name' || column === 'spacStatus') ? 'asc' : 'desc';
+                holdingSortDirection = (column === 'holder' || column === 'acct' || column === 'name' || column === 'spacStatus') ? 'asc' : 'desc';
             }
             renderHoldings();
         }
 
         function updateHoldingSortIcons() {
-            const columns = ['acct', 'name', 'buy_amount', 'eval_amount', 'annualYield', 'spacStatus'];
+            const columns = ['holder', 'acct', 'name', 'buy_amount', 'eval_amount', 'annualYield', 'spacStatus'];
             columns.forEach(col => {
                 const iconEl = document.getElementById(`hold-sort-icon-${col}`);
                 if (iconEl) {
@@ -1243,6 +1285,8 @@
             const tbody = document.getElementById('holdings-table-body');
             tbody.innerHTML = '';
 
+            const filterHolderEl = document.getElementById('hold-filter-holder');
+            const filterHolder = filterHolderEl ? filterHolderEl.value : 'all';
             const filterAccount = document.getElementById('hold-filter-account').value;
             const filterDelYear = document.getElementById('hold-filter-delisting-year').value;
             const filterBenchmark = document.getElementById('hold-filter-benchmark').value;
@@ -1256,7 +1300,7 @@
             const totalCashFlows = [];
 
             if (holdingItems.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="py-12 text-center text-slate-400 font-normal">등록된 보유 종목이 없습니다. 위 폼에서 보유 중인 스팩을 추가해보세요.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="py-12 text-center text-slate-400 font-normal">등록된 보유 종목이 없습니다. 위 폼에서 보유 중인 스팩을 추가해보세요.</td></tr>`;
                 document.getElementById('hold-total-buy').innerText = '0 원';
                 document.getElementById('hold-total-eval').innerText = '0 원';
                 document.getElementById('hold-total-simple').innerText = '0.00 %';
@@ -1270,7 +1314,7 @@
                 const delistingDate = matchedSpac ? getDelistingDateValue(matchedSpac) : '';
                 const delistingYear = delistingDate ? delistingDate.substring(0, 4) : '';
                 const spacStatus = matchedSpac ? normalizeStatus(matchedSpac.status) : '일반';
-                const accountOwner = item.account || '남편';
+                const accountOwner = getHoldingHolder(item);
                 const acct = item.acct || '일반';
 
                 let estimatedEval = item.buy_amount;
@@ -1285,10 +1329,11 @@
                 const afterTaxDepositRate = getBokRateForDate(item.buy_date);
                 const isBeat = currentAnnual >= afterTaxDepositRate;
 
-                return { ...item, account: accountOwner, acct, origIndex: idx, estimatedEval, evalDiff, simpleYield, currentAnnual, afterTaxDepositRate, isBeat, delistingYear, spacStatus };
+                return { ...item, account: accountOwner, holder: accountOwner, acct, origIndex: idx, estimatedEval, evalDiff, simpleYield, currentAnnual, afterTaxDepositRate, isBeat, delistingYear, spacStatus };
             });
 
             const filteredHoldings = enrichedHoldings.filter(item => {
+                if (filterHolder !== 'all' && item.holder !== filterHolder) return false;
                 if (filterAccount !== 'all' && item.acct !== filterAccount) return false;
                 if (filterDelYear !== 'all' && item.delistingYear !== filterDelYear) return false;
                 if (filterBenchmark === 'beat' && !item.isBeat) return false;
@@ -1320,7 +1365,7 @@
             updateHoldingSortIcons();
 
             if (filteredHoldings.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="py-12 text-center text-slate-400 font-normal">조건에 일치하는 보유 종목이 없습니다.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="py-12 text-center text-slate-400 font-normal">조건에 일치하는 보유 종목이 없습니다.</td></tr>`;
             }
 
             filteredHoldings.forEach(item => {
@@ -1342,6 +1387,10 @@
                     ? `<span class="text-slate-700 font-normal">일반</span>`
                     : `<span class="bg-rose-50 text-rose-600 text-xs px-2 py-0.5 rounded font-bold">${item.spacStatus}</span>`;
 
+                const holderBadge = item.holder === '아내'
+                    ? `<span class="bg-amber-50 text-amber-700 text-xs px-2 py-0.5 rounded font-semibold">아내</span>`
+                    : `<span class="bg-sky-50 text-sky-700 text-xs px-2 py-0.5 rounded font-semibold">남편</span>`;
+
                 const accountBadge = item.acct === 'ISA'
                     ? `<span class="bg-indigo-50 text-indigo-700 text-xs px-2 py-0.5 rounded font-semibold">ISA</span>`
                     : `<span class="bg-slate-100 text-slate-700 text-xs px-2 py-0.5 rounded font-semibold">일반</span>`;
@@ -1349,6 +1398,7 @@
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80 transition-colors";
                 tr.innerHTML = `
+                    <td class="py-4 px-4 text-center">${holderBadge}</td>
                     <td class="py-4 px-4 text-center">${accountBadge}</td>
                     <td class="py-4 px-5 font-bold text-slate-900">${item.name}</td>
                     <td class="py-4 px-4 text-slate-700 font-semibold">${item.buy_amount.toLocaleString()}원</td>
@@ -1519,7 +1569,7 @@
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80 transition-colors";
                 tr.innerHTML = `
-                    <td class="py-4 px-5 font-bold text-slate-900">${item.name}${item.acct ? ` <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded ${item.acct === 'ISA' ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-100 text-slate-600'}">${item.acct}</span>` : ''}${item.tax ? `<div class="text-[10px] font-normal text-slate-400">세금 ${item.tax.toLocaleString()}원 차감</div>` : ''}</td>
+                    <td class="py-4 px-5 font-bold text-slate-900">${item.name}${item.account ? ` <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded ${item.account === '아내' ? 'bg-amber-50 text-amber-700' : 'bg-sky-50 text-sky-700'}">${item.account}</span>` : ''}${item.acct ? ` <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded ${item.acct === 'ISA' ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-100 text-slate-600'}">${item.acct}</span>` : ''}${item.tax ? `<div class="text-[10px] font-normal text-slate-400">세금 ${item.tax.toLocaleString()}원 차감</div>` : ''}</td>
                     <td class="py-4 px-4">${typeBadge}</td>
                     <td class="py-4 px-5 text-slate-700 font-semibold">${item.buy_amount.toLocaleString()}원</td>
                     <td class="py-4 px-4 text-slate-600">${item.buy_date}</td>
@@ -1562,7 +1612,6 @@
                 document.getElementById('update-time').innerText = `최종 갱신: ${data.updated_at || '-'}`;
                 const rawItems = Array.isArray(data) ? data : (data.items || []);
 
-                // 만기경과·상장폐지 스팩 제외 및 중복 코드/종목명 제거
                 const seenKeys = new Set();
                 const activeItems = rawItems.filter(item => {
                     if (isExpiredOrDelistedSpac(item)) return false;
