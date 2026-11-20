@@ -26,7 +26,7 @@ HEADERS = {
         "AppleWebKit/537.36 (KHTML, like Gecko) "
         "Chrome/124.0.0.0 Safari/537.36"
     ),
-    "Referer": "https://kind.krx.co.kr/",
+    "Referer": "https://data.krx.co.kr/",
 }
 GENERAL_TAX_RATE = 0.154
 FINAL_YEAR_TAX_FACTOR = 0.845
@@ -107,173 +107,262 @@ def normalize_code(val: Any) -> str:
     if raw.endswith(".0"):
         raw = raw[:-2]
     digits = re.sub(r"[^0-9]", "", raw)
+    if len(digits) > 6:
+        digits = digits[-6:]
     return digits.zfill(6) if digits else ""
 
 
-def extract_dept_value(row: dict[str, Any]) -> str:
-    dept_keys = (
-        "소속부",
-        "종목구분",
-        "증권구분",
-        "시장구분",
-        "dept_nm",
-        "sect_tp_nm",
-        "secugrp_nm",
-        "mkt_nm",
-        "krx_dept",
+def parse_krw_int(val: Any) -> int:
+    if val is None:
+        return 0
+    s = re.sub(r"[^0-9\-]", "", str(val).strip())
+    if not s or s == "-":
+        return 0
+    try:
+        return int(float(s))
+    except ValueError:
+        return 0
+
+
+def parse_krw_float(val: Any) -> float | None:
+    if val is None:
+        return None
+    s = str(val).replace(",", "").replace("%", "").strip()
+    if not s or s == "-":
+        return None
+    try:
+        return float(s)
+    except ValueError:
+        return None
+
+
+def is_spac_affiliation(dept_val: Any) -> bool:
+    """KRX 종목 정보 소속(소속부 / SECT_TP_NM)이 SPAC인지 판별합니다."""
+    dept = str(dept_val or "").strip().upper()
+    return dept == "SPAC" or "SPAC" in dept
+
+
+def _fetch_krx_openapi_rows(endpoint: str, bas_dd: str) -> list[dict[str, Any]]:
+    if not KRX_OPENAPI_KEY:
+        return []
+    bases = (
+        "https://data-dbg.krx.co.kr/svc/apis",
+        "https://openapi.krx.co.kr/svc/apis",
     )
-    parts: list[str] = []
-    for k in dept_keys:
-        v = row.get(k)
-        if v is not None and str(v).strip() and str(v).strip().lower() != "nan":
-            parts.append(str(v).strip())
-    return " / ".join(parts)
-
-
-def extract_name_value(row: dict[str, Any]) -> str:
-    name_keys = ("회사명", "종목명", "itm_nm", "kor_secn_nm", "name")
-    for k in name_keys:
-        v = row.get(k)
-        if v is not None and str(v).strip() and str(v).strip().lower() != "nan":
-            return str(v).strip()
-    return ""
-
-
-def is_krx_spac_row(row: dict[str, Any]) -> bool:
-    """
-    KRX 종목 정보에서 소속부(또는 종목구분·증권구분) 기준으로 SPAC 여부를 우선 판별하고,
-    소속부 정보가 없는 경우 종목명('스팩', 'SPAC')으로 보조 판별합니다.
-    """
-    dept_text = extract_dept_value(row)
-    name_text = extract_name_value(row)
-
-    dept_upper = dept_text.upper()
-    if "SPAC" in dept_upper or "기업인수목적" in dept_text or "스팩" in dept_text:
-        return True
-
-    if re.search(r"(스팩|SPAC)", name_text, re.IGNORECASE):
-        return True
-
-    return False
-
-
-def get_krx_spac_list() -> list[dict]:
-    """
-    KRX 상장법인/종목 정보에서 소속부(또는 구분/종목명) 기준으로 SPAC 종목만 필터링합니다.
-    """
-    spacs: list[dict] = []
-    seen_codes: set[str] = set()
-    url = "https://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13"
-
-    try:
-        res = requests.get(url, headers=HEADERS, timeout=20)
-        res.raise_for_status()
-        raw_html = res.content.decode("euc-kr", errors="ignore")
-        if "<table" not in raw_html.lower():
-            res2 = requests.post(
-                "https://kind.krx.co.kr/corpgeneral/corpList.do",
-                data={"method": "download", "searchType": "13"},
-                headers=HEADERS,
-                timeout=20,
-            )
-            res2.raise_for_status()
-            raw_html = res2.content.decode("euc-kr", errors="ignore")
-
-        dfs = parse_html_tables(raw_html)
-        if not dfs:
-            return spacs
-
-        df = dfs[0].copy()
-        df.columns = [str(c).strip() for c in df.columns]
-
-        code_col = next(
-            (c for c in ("종목코드", "단축코드", "isu_srt_cd", "code") if c in df.columns),
-            None,
-        )
-        name_col = next(
-            (c for c in ("회사명", "종목명", "itm_nm", "kor_secn_nm", "name") if c in df.columns),
-            None,
-        )
-        if not code_col or not name_col:
-            return spacs
-
-        for raw_row in df.to_dict(orient="records"):
-            if not is_krx_spac_row(raw_row):
+    api_headers = {
+        **HEADERS,
+        "AUTH_KEY": KRX_OPENAPI_KEY,
+        "Accept": "application/json",
+    }
+    for base in bases:
+        url = f"{base}/{endpoint}"
+        for method in ("GET", "POST"):
+            try:
+                if method == "GET":
+                    res = requests.get(url, params={"basDd": bas_dd}, headers=api_headers, timeout=12)
+                else:
+                    res = requests.post(url, json={"basDd": bas_dd}, headers=api_headers, timeout=12)
+                if res.status_code != 200:
+                    continue
+                payload = res.json()
+                if isinstance(payload, list):
+                    return payload
+                if isinstance(payload, dict):
+                    for key in ("OutBlock_1", "outBlock_1", "output", "data", "items"):
+                        rows = payload.get(key)
+                        if isinstance(rows, list) and rows:
+                            return rows
+            except Exception:
                 continue
-
-            code = normalize_code(raw_row.get(code_col))
-            name = str(raw_row.get(name_col) or "").strip()
-            if not code or len(code) != 6 or not name or code in seen_codes:
-                continue
-
-            seen_codes.add(code)
-            listing_date = str(
-                raw_row.get("상장일") or raw_row.get("list_dd") or raw_row.get("listing_date") or ""
-            ).strip()
-            krx_dept = extract_dept_value(raw_row)
-
-            spacs.append({
-                "code": code,
-                "name": name,
-                "listing_date": listing_date,
-                "krx_dept": krx_dept,
-            })
-
-        print(f"[INFO] KRX 소속부/종목 기준 SPAC {len(spacs)}개 필터링 완료")
-    except Exception as exc:
-        print(f"[WARN] KRX SPAC 목록 조회 실패: {exc}")
-
-    return spacs
+    return []
 
 
-def get_naver_quote_and_base(code: str) -> tuple[int, bool, int | None]:
-    current_price = 0
-    is_suspended = False
-    par_base_price: int | None = None
-
+def _fetch_krx_web_kosdaq_quotes(bas_dd: str) -> list[dict[str, Any]]:
+    """KRX 정보데이터시스템 전종목 시세(코스닥) 조회"""
+    url = "https://data.krx.co.kr/contents/MDC/MDI/outerLoader/index.cmd"
+    payload = {
+        "bld": "dbms/MDC/STAT/standard/MDCSTAT01501",
+        "locale": "ko_KR",
+        "mktId": "KSQ",
+        "trdDd": bas_dd,
+        "share": "1",
+        "money": "1",
+        "csvxls_isNo": "false",
+    }
     try:
-        url = f"https://polling.finance.naver.com/api/realtime?query=SERVICE_ITEM:{code}"
-        res = requests.get(url, headers=HEADERS, timeout=7)
+        res = requests.post(url, data=payload, headers=HEADERS, timeout=15)
         res.raise_for_status()
-        payload = res.json()
-        areas = payload.get("result", {}).get("areas", [])
-        if areas and areas[0].get("datas"):
-            item = areas[0]["datas"][0]
-            nv = item.get("nv", 0)
-            current_price = int(nv) if nv is not None else 0
-            stop_flag = str(item.get("stopReason", "") or item.get("isStop", "") or "").lower()
-            if stop_flag in {"true", "1", "y", "yes"} or current_price == 0:
-                is_suspended = True
+        data = res.json()
+        rows = data.get("OutBlock_1") or data.get("output") or []
+        if isinstance(rows, list):
+            return rows
     except Exception:
         pass
+    return []
 
-    try:
-        page_url = f"https://finance.naver.com/item/main.naver?code={code}"
-        res = requests.get(page_url, headers=HEADERS, timeout=8)
-        res.raise_for_status()
-        html = res.text
-        if current_price == 0:
-            m = re.search(r'id="_nowVal"[^>]*>([0-9,]+)<', html) or re.search(
-                r'class="no_today"[^>]*>.*?<span class="blind">([0-9,]+)</span>', html, re.S
-            )
-            if m:
-                current_price = int(m.group(1).replace(",", ""))
-        if "거래정지" in html or current_price == 0:
-            is_suspended = True
 
-        m_par = re.search(r"액면가.*?([0-9,]+)\s*원", html, re.S)
-        if m_par:
-            raw_par = int(m_par.group(1).replace(",", ""))
-            if raw_par == 100:
-                par_base_price = 2000
-            elif raw_par == 500:
-                par_base_price = 10000
-            elif raw_par in (2000, 10000):
-                par_base_price = raw_par
-    except Exception as exc:
-        print(f"[WARN] [{code}] 시세/액면가 조회 실패: {exc}")
+def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, dict[str, Any]], str]:
+    """
+    KRX API(및 KRX 시세 데이터)에서 소속이 'SPAC'인 종목 목록과 종가·시세 정보를 가져옵니다.
+    반환값: (spac_list, quote_by_code, trade_date_used)
+    """
+    candidate_dates = [
+        (ref_dt - timedelta(days=offset)).strftime("%Y%m%d")
+        for offset in range(0, 8)
+    ]
 
-    return current_price, is_suspended, par_base_price
+    info_rows: list[dict[str, Any]] = []
+    trade_rows: list[dict[str, Any]] = []
+    used_date = ""
+
+    # 1순위: KRX Open API (코스닥 종목기본정보 + 코스닥 일별매매정보)
+    if KRX_OPENAPI_KEY:
+        for d_str in candidate_dates:
+            t_rows = _fetch_krx_openapi_rows("sto/ksq_bydd_trd", d_str)
+            if t_rows:
+                trade_rows = t_rows
+                used_date = d_str
+                info_rows = _fetch_krx_openapi_rows("sto/ksq_isu_base_info", d_str)
+                break
+
+    # 2순위: KRX 정보데이터시스템 전종목 시세(코스닥)
+    if not trade_rows:
+        for d_str in candidate_dates:
+            t_rows = _fetch_krx_web_kosdaq_quotes(d_str)
+            if t_rows:
+                trade_rows = t_rows
+                used_date = d_str
+                break
+
+    info_by_code: dict[str, dict[str, Any]] = {}
+    for r in info_rows:
+        code = normalize_code(r.get("ISU_SRT_CD") or r.get("종목코드") or r.get("code"))
+        if re.fullmatch(r"\d{6}", code):
+            info_by_code[code] = r
+
+    quote_by_code: dict[str, dict[str, Any]] = {}
+    for r in trade_rows:
+        code = normalize_code(r.get("ISU_SRT_CD") or r.get("종목코드") or r.get("ISU_CD") or r.get("code"))
+        if not re.fullmatch(r"\d{6}", code):
+            continue
+
+        info = info_by_code.get(code, {})
+        dept = (
+            info.get("SECT_TP_NM")
+            or info.get("소속부")
+            or r.get("SECT_TP_NM")
+            or r.get("소속부")
+            or ""
+        ).strip()
+
+        close_price = parse_krw_int(
+            r.get("TDD_CLSPRC") or r.get("종가") or r.get("CLSPRC") or r.get("close_price")
+        )
+        open_price = parse_krw_int(r.get("TDD_OPNPRC") or r.get("시가"))
+        high_price = parse_krw_int(r.get("TDD_HGPRC") or r.get("고가"))
+        low_price = parse_krw_int(r.get("TDD_LWPRC") or r.get("저가"))
+        prev_diff = parse_krw_int(r.get("CMPPREVDD_PRC") or r.get("대비"))
+        chg_rate = parse_krw_float(r.get("FLUC_RT") or r.get("등락률"))
+        volume = parse_krw_int(r.get("ACC_TRDVOL") or r.get("거래량"))
+        trading_value = parse_krw_int(r.get("ACC_TRDVAL") or r.get("거래대금"))
+        market_cap = parse_krw_int(r.get("MKTCAP") or r.get("시가총액"))
+        list_dd = str(
+            info.get("LIST_DD") or r.get("LIST_DD") or r.get("상장일") or ""
+        ).strip()
+
+        quote_by_code[code] = {
+            "dept": dept,
+            "close_price": close_price,
+            "open_price": open_price,
+            "high_price": high_price,
+            "low_price": low_price,
+            "prev_diff": prev_diff,
+            "chg_rate": chg_rate,
+            "volume": volume,
+            "trading_value": trading_value,
+            "market_cap": market_cap,
+            "listing_date": list_dd,
+            "trade_date": used_date,
+        }
+
+    # 소속이 SPAC인 종목만 추출
+    spacs: list[dict] = []
+    seen_codes: set[str] = set()
+
+    source_pool = info_rows if info_rows else trade_rows
+    for r in source_pool:
+        code = normalize_code(r.get("ISU_SRT_CD") or r.get("종목코드") or r.get("ISU_CD") or r.get("code"))
+        if not re.fullmatch(r"\d{6}", code) or code in seen_codes:
+            continue
+
+        q_info = quote_by_code.get(code, {})
+        dept = (
+            r.get("SECT_TP_NM")
+            or r.get("소속부")
+            or q_info.get("dept")
+            or ""
+        ).strip()
+
+        if not is_spac_affiliation(dept):
+            continue
+
+        name = str(
+            r.get("ISU_ABBRV")
+            or r.get("ISU_NM")
+            or r.get("종목명")
+            or r.get("회사명")
+            or ""
+        ).strip()
+        if not name:
+            continue
+
+        seen_codes.add(code)
+        listing_date = str(
+            r.get("LIST_DD") or r.get("상장일") or q_info.get("listing_date") or ""
+        ).strip()
+
+        spacs.append({
+            "code": code,
+            "name": name,
+            "listing_date": listing_date,
+            "krx_dept": dept,
+        })
+
+    print(
+        f"[INFO] KRX 기준일={used_date or '미확인'}, 전체종목={len(quote_by_code)}개, "
+        f"소속=SPAC 종목={len(spacs)}개"
+    )
+    return spacs, quote_by_code, used_date
+
+
+def get_krx_quote_and_base(
+    code: str,
+    quote_by_code: dict[str, dict[str, Any]],
+) -> tuple[int, bool, int | None, dict[str, Any]]:
+    """
+    KRX 시세 데이터에서 종가, 거래정지 여부, 공모 기준가 추정, 부가 시세를 반환합니다.
+    """
+    q = quote_by_code.get(code, {})
+    current_price = parse_krw_int(q.get("close_price"))
+    volume = parse_krw_int(q.get("volume"))
+    is_suspended = current_price <= 0 or (current_price > 0 and volume == 0)
+
+    par_base_price: int | None = None
+    if current_price > 0:
+        par_base_price = 10000 if current_price >= 5000 else 2000
+
+    market_meta = {
+        "open_price": parse_krw_int(q.get("open_price")),
+        "high_price": parse_krw_int(q.get("high_price")),
+        "low_price": parse_krw_int(q.get("low_price")),
+        "prev_diff": parse_krw_int(q.get("prev_diff")),
+        "chg_rate": q.get("chg_rate"),
+        "volume": volume,
+        "trading_value": parse_krw_int(q.get("trading_value")),
+        "market_cap": parse_krw_int(q.get("market_cap")),
+        "trade_date": q.get("trade_date", ""),
+    }
+    return current_price, is_suspended, par_base_price, market_meta
 
 
 def get_recent_dart_disclosures(corp_code: str, days: int = 365) -> list[dict]:
@@ -562,15 +651,13 @@ def calc_fair_buy_status(
 def build_spac_record(
     spac: dict,
     corp_codes: dict[str, str],
+    quote_by_code: dict[str, dict[str, Any]],
     deposit_rate: float,
     ref_dt: datetime,
-    existing_item: dict | None = None,
 ) -> tuple[dict, dict | None]:
     code = spac["code"]
     corp_code = corp_codes.get(code, "")
-    current_price, is_suspended, par_base_price = get_naver_quote_and_base(code)
-    if current_price == 0 and existing_item and (existing_item.get("current_price") or 0) > 0:
-        current_price = int(existing_item["current_price"])
+    current_price, is_suspended, par_base_price, market_meta = get_krx_quote_and_base(code, quote_by_code)
 
     disclosures = get_recent_dart_disclosures(corp_code, days=365)
 
@@ -617,6 +704,15 @@ def build_spac_record(
         "corp_code": corp_code,
         "base_price": c_base_price,
         "current_price": current_price,
+        "open_price": market_meta["open_price"],
+        "high_price": market_meta["high_price"],
+        "low_price": market_meta["low_price"],
+        "prev_diff": market_meta["prev_diff"],
+        "chg_rate": market_meta["chg_rate"],
+        "volume": market_meta["volume"],
+        "trading_value": market_meta["trading_value"],
+        "market_cap": market_meta["market_cap"],
+        "trade_date": market_meta["trade_date"],
         "liquidation_price": liq_display,
         "liquidation_price_source": liq_source,
         "fair_buy_price": fair_buy_price,
@@ -644,7 +740,6 @@ def save_json(items: list[dict], path: Path, updated_at: str) -> None:
 def main() -> None:
     existing_spacs = load_existing_items(OUTPUT_PATH)
     existing_liqs = load_existing_items(LIQUIDATIONS_PATH)
-    existing_by_code = {str(x.get("code", "")).zfill(6): x for x in existing_spacs if x.get("code")}
 
     now_kst = datetime.now(KST)
     ref_dt = datetime(now_kst.year, now_kst.month, now_kst.day)
@@ -653,10 +748,10 @@ def main() -> None:
     try:
         deposit_rate = get_base_deposit_rate()
         corp_codes = get_dart_corp_codes()
-        spac_list = get_krx_spac_list()
+        spac_list, quote_by_code, trade_date = get_krx_spac_market_data(ref_dt)
 
         if not spac_list:
-            print("[WARN] KRX SPAC 필터링 결과 비어 있음 — 기존 데이터 유지")
+            print("[WARN] KRX 소속=SPAC 종목이 비어 있음 — 기존 데이터 유지")
             save_json(existing_spacs, OUTPUT_PATH, updated_at)
             save_json(existing_liqs, LIQUIDATIONS_PATH, updated_at)
             return
@@ -666,33 +761,24 @@ def main() -> None:
 
         for idx, spac in enumerate(spac_list, start=1):
             code = spac["code"]
-            prev_item = existing_by_code.get(code)
             try:
-                rec, liq = build_spac_record(spac, corp_codes, deposit_rate, ref_dt, prev_item)
+                rec, liq = build_spac_record(spac, corp_codes, quote_by_code, deposit_rate, ref_dt)
                 spac_results.append(rec)
                 if liq is not None:
                     liq_results.append(liq)
             except Exception as exc:
                 print(f"[WARN] [{code}] 처리 오류: {exc}")
-                if prev_item:
-                    spac_results.append(prev_item)
             if idx % 20 == 0:
                 print(f"[PROGRESS] {idx}/{len(spac_list)} 완료")
-            time.sleep(0.03)
+            time.sleep(0.02)
 
         valid_prices = sum(1 for r in spac_results if (r.get("current_price") or 0) > 0)
-        if valid_prices == 0 and existing_spacs:
-            print("[WARN] 현재가 유효 건수 0 — 기존 spacs.json 데이터 유지")
-            spac_results = existing_spacs
-
-        if not liq_results and existing_liqs:
-            liq_results = existing_liqs
-
         resolved_liq_cnt = sum(1 for r in spac_results if r.get("liquidation_price") is not None)
         fair_o_cnt = sum(1 for r in spac_results if r.get("is_fair_buy") == "O")
         print(
-            f"[SUMMARY] 전체={len(spac_results)}개, 현재가유효={valid_prices}개, "
-            f"청산가확보={resolved_liq_cnt}개, 매수적정(O)={fair_o_cnt}개, 청산내역={len(liq_results)}건"
+            f"[SUMMARY] KRX기준일={trade_date or '-'}, SPAC종목={len(spac_results)}개, "
+            f"종가확보={valid_prices}개, 청산가확보={resolved_liq_cnt}개, "
+            f"매수적정(O)={fair_o_cnt}개, 청산내역={len(liq_results)}건"
         )
 
         save_json(spac_results, OUTPUT_PATH, updated_at)
