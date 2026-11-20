@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-11-20 17:40:30 KST",
-  "count": 60,
+  "updated_at": "2026-11-20 17:54:16 KST",
+  "count": 62,
   "items": [
     {
       "code": "482520",
@@ -210,11 +210,11 @@
     },
     {
       "code": "000410",
-      "name": "교보18호스팩",
+      "name": "하나35호스팩",
       "krx_dept": "SPAC(소속부없음)",
-      "listing_date": "20250814",
-      "delisting_date": "2028-08-14",
-      "remaining_days": 633,
+      "listing_date": "20250806",
+      "delisting_date": "2028-08-06",
+      "remaining_days": 625,
       "corp_code": "",
       "base_price": 2000,
       "current_price": 1999,
@@ -229,11 +229,11 @@
       "trade_date": "20261119",
       "liquidation_price": 2115.91,
       "liquidation_price_source": "공모가(2,000원)+복리+최종6개월산식",
-      "fair_buy_price": 2049.01,
+      "fair_buy_price": 2049.86,
       "is_fair_buy": "O",
       "invest_type": "청산",
-      "yield_isa": 3.22,
-      "yield_general": 2.72,
+      "yield_isa": 3.26,
+      "yield_general": 2.76,
       "deposit_rate": 2.35,
       "is_suspended": false,
       "has_liquidation_notice": false,
@@ -717,222 +717,6 @@
       ]
     },
     {
-      "code": "000040",
-      "name": "디비금융제14호스팩",
-      "krx_dept": "SPAC(소속부없음)",
-      "listing_date": "20250722",
-      "delisting_date": "2028-07-22",
-      "remaining_days": 610,
-      "corp_code": "00112378",
-      "base_price": 2000,
-      "current_price": 3875,
-      "open_price": 3840,
-      "high_price": 3920,
-      "low_price": 3720,
-      "prev_diff": 0,
-      "chg_rate": 0.0,
-      "volume": 84921,
-      "trading_value": 321597616,
-      "market_cap": 42665238000,
-      "trade_date": "20261119",
-      "liquidation_price": 2115.91,
-      "liquidation_price_source": "공모가(2,000원)+복리+최종6개월산식",
-      "fair_buy_price": 2051.44,
-      "is_fair_buy": "X",
-      "invest_type": "청산",
-      "yield_isa": -25.89,
-      "yield_general": -25.89,
-      "deposit_rate": 2.35,
-      "is_suspended": false,
-      "has_liquidation_notice": false,
-      "status": "일반",
-      "recent_disclosures": [
-        {
-          "report_nm": "분기보고서 (2026.09)",
-          "rcept_dt": "20261116",
-          "rcept_no": "20261116001866"
-        },
-        {
-          "report_nm": "독립이사의선임ㆍ해임또는중도퇴임에관한신고",
-          "rcept_dt": "20261112",
-          "rcept_no": "20261112000275"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(일반)",
-          "rcept_dt": "20261105",
-          "rcept_no": "20261105000353"
-        },
-        {
-          "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
-          "rcept_dt": "20261103",
-          "rcept_no": "20261103000252"
-        },
-        {
-          "report_nm": "주요사항보고서(자기전환사채만기전취득결정)",
-          "rcept_dt": "20261029",
-          "rcept_no": "20261029000294"
-        },
-        {
-          "report_nm": "주요사항보고서(자기전환사채만기전취득결정)",
-          "rcept_dt": "20261029",
-          "rcept_no": "20261029000291"
-        },
-        {
-          "report_nm": "주요사항보고서(자기전환사채만기전취득결정)",
-          "rcept_dt": "20261029",
-          "rcept_no": "20261029000287"
-        },
-        {
-          "report_nm": "임시주주총회결과              ",
-          "rcept_dt": "20261022",
-          "rcept_no": "20261022800752"
-        },
-        {
-          "report_nm": "주요사항보고서(자기전환사채만기전취득결정)",
-          "rcept_dt": "20261023",
-          "rcept_no": "20261022000510"
-        },
-        {
-          "report_nm": "주요사항보고서(자기전환사채만기전취득결정)",
-          "rcept_dt": "20261023",
-          "rcept_no": "20261022000509"
-        },
-        {
-          "report_nm": "[기재정정]주주총회소집공고",
-          "rcept_dt": "20261020",
-          "rcept_no": "20261020000327"
-        },
-        {
-          "report_nm": "주요사항보고서(유형자산양도결정)",
-          "rcept_dt": "20261019",
-          "rcept_no": "20261019000331"
-        },
-        {
-          "report_nm": "생산중단              ",
-          "rcept_dt": "20261019",
-          "rcept_no": "20261019800602"
-        },
-        {
-          "report_nm": "기타시장안내              ",
-          "rcept_dt": "20261007",
-          "rcept_no": "20261007800778"
-        },
-        {
-          "report_nm": "주주총회소집공고",
-          "rcept_dt": "20261007",
-          "rcept_no": "20261007000079"
-        }
-      ]
-    },
-    {
-      "code": "000880",
-      "name": "메리츠제1호스팩",
-      "krx_dept": "SPAC(소속부없음)",
-      "listing_date": "20251215",
-      "delisting_date": "2028-12-15",
-      "remaining_days": 756,
-      "corp_code": "00160588",
-      "base_price": 10000,
-      "current_price": 14500,
-      "open_price": 14210,
-      "high_price": 14540,
-      "low_price": 13610,
-      "prev_diff": 570,
-      "chg_rate": 4.09,
-      "volume": 80499,
-      "trading_value": 1129260420,
-      "market_cap": 143285375000,
-      "trade_date": "20261119",
-      "liquidation_price": 10579.53,
-      "liquidation_price_source": "공모가(10,000원)+복리+최종6개월산식",
-      "fair_buy_price": 10179.95,
-      "is_fair_buy": "X",
-      "invest_type": "청산",
-      "yield_isa": -12.56,
-      "yield_general": -12.56,
-      "deposit_rate": 2.35,
-      "is_suspended": false,
-      "has_liquidation_notice": false,
-      "status": "일반",
-      "recent_disclosures": [
-        {
-          "report_nm": "주식등의대량보유상황보고서(일반)",
-          "rcept_dt": "20261112",
-          "rcept_no": "20261112000562"
-        },
-        {
-          "report_nm": "주요사항보고서(자기주식취득결정)",
-          "rcept_dt": "20261112",
-          "rcept_no": "20261112000498"
-        },
-        {
-          "report_nm": "주식소각결정              ",
-          "rcept_dt": "20261112",
-          "rcept_no": "20261112800725"
-        },
-        {
-          "report_nm": "분기보고서 (2026.09)",
-          "rcept_dt": "20261112",
-          "rcept_no": "20261112000446"
-        },
-        {
-          "report_nm": "[기재정정]특수관계인으로부터받은담보",
-          "rcept_dt": "20261112",
-          "rcept_no": "20261112000168"
-        },
-        {
-          "report_nm": "기업설명회(IR)개최(안내공시)              ",
-          "rcept_dt": "20261111",
-          "rcept_no": "20261111800469"
-        },
-        {
-          "report_nm": "영업(잠정)실적(공정공시)              ",
-          "rcept_dt": "20261104",
-          "rcept_no": "20261104800213"
-        },
-        {
-          "report_nm": "특수관계인에대한출자",
-          "rcept_dt": "20261016",
-          "rcept_no": "20261016000029"
-        },
-        {
-          "report_nm": "특수관계인에대한담보제공",
-          "rcept_dt": "20261016",
-          "rcept_no": "20261016000028"
-        },
-        {
-          "report_nm": "기업설명회(IR)개최(안내공시)              ",
-          "rcept_dt": "20261016",
-          "rcept_no": "20261016800036"
-        },
-        {
-          "report_nm": "기업설명회(IR)개최(안내공시)              ",
-          "rcept_dt": "20261016",
-          "rcept_no": "20261016800024"
-        },
-        {
-          "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
-          "rcept_dt": "20260930",
-          "rcept_no": "20260930000591"
-        },
-        {
-          "report_nm": "[기재정정]약관에의한금융거래시계열금융회사의거래상대방의공시",
-          "rcept_dt": "20260922",
-          "rcept_no": "20260922000166"
-        },
-        {
-          "report_nm": "기업설명회(IR)개최(안내공시)              ",
-          "rcept_dt": "20260910",
-          "rcept_no": "20260910800279"
-        },
-        {
-          "report_nm": "[기재정정]중대재해발생(종속회사의주요경영사항)              ",
-          "rcept_dt": "20260909",
-          "rcept_no": "20260909800631"
-        }
-      ]
-    },
-    {
       "code": "001650",
       "name": "메리츠제2호스팩",
       "krx_dept": "SPAC(소속부없음)",
@@ -1074,11 +858,11 @@
     },
     {
       "code": "000990",
-      "name": "미래에셋비전스팩11호",
+      "name": "IBKS제25호스팩",
       "krx_dept": "SPAC(소속부없음)",
-      "listing_date": "20251222",
-      "delisting_date": "2028-12-22",
-      "remaining_days": 763,
+      "listing_date": "20251219",
+      "delisting_date": "2028-12-19",
+      "remaining_days": 760,
       "corp_code": "00160843",
       "base_price": 2000,
       "current_price": 1970,
@@ -1093,11 +877,11 @@
       "trade_date": "20261119",
       "liquidation_price": 2115.91,
       "liquidation_price_source": "공모가(2,000원)+복리+최종6개월산식",
-      "fair_buy_price": 2035.25,
+      "fair_buy_price": 2035.57,
       "is_fair_buy": "O",
       "invest_type": "청산",
-      "yield_isa": 3.41,
-      "yield_general": 2.88,
+      "yield_isa": 3.42,
+      "yield_general": 2.9,
       "deposit_rate": 2.35,
       "is_suspended": false,
       "has_liquidation_notice": false,
@@ -1626,11 +1410,11 @@
     },
     {
       "code": "000960",
-      "name": "미래에셋비전스팩9호",
+      "name": "삼성스팩12호",
       "krx_dept": "SPAC(소속부없음)",
-      "listing_date": "20251201",
-      "delisting_date": "2028-12-01",
-      "remaining_days": 742,
+      "listing_date": "20251128",
+      "delisting_date": "2028-11-28",
+      "remaining_days": 739,
       "corp_code": "",
       "base_price": 2000,
       "current_price": 1978,
@@ -1645,11 +1429,11 @@
       "trade_date": "20261119",
       "liquidation_price": 2115.91,
       "liquidation_price_source": "공모가(2,000원)+복리+최종6개월산식",
-      "fair_buy_price": 2037.47,
+      "fair_buy_price": 2037.79,
       "is_fair_buy": "O",
       "invest_type": "청산",
-      "yield_isa": 3.3,
-      "yield_general": 2.79,
+      "yield_isa": 3.31,
+      "yield_general": 2.8,
       "deposit_rate": 2.35,
       "is_suspended": false,
       "has_liquidation_notice": false,
@@ -1761,109 +1545,6 @@
           "report_nm": "사업보고서 (2025.12)",
           "rcept_dt": "20260318",
           "rcept_no": "20260318001521"
-        }
-      ]
-    },
-    {
-      "code": "000440",
-      "name": "삼성스팩10호",
-      "krx_dept": "SPAC(소속부없음)",
-      "listing_date": "20250821",
-      "delisting_date": "2028-08-21",
-      "remaining_days": 640,
-      "corp_code": "00149770",
-      "base_price": 10000,
-      "current_price": 9570,
-      "open_price": 9490,
-      "high_price": 9600,
-      "low_price": 9300,
-      "prev_diff": 70,
-      "chg_rate": 0.74,
-      "volume": 4636,
-      "trading_value": 43790260,
-      "market_cap": 59593634100,
-      "trade_date": "20261119",
-      "liquidation_price": 10579.53,
-      "liquidation_price_source": "공모가(10,000원)+복리+최종6개월산식",
-      "fair_buy_price": 10241.34,
-      "is_fair_buy": "O",
-      "invest_type": "청산",
-      "yield_isa": 5.75,
-      "yield_general": 4.86,
-      "deposit_rate": 2.35,
-      "is_suspended": false,
-      "has_liquidation_notice": false,
-      "status": "일반",
-      "recent_disclosures": [
-        {
-          "report_nm": "분기보고서 (2026.09)",
-          "rcept_dt": "20261113",
-          "rcept_no": "20261113000749"
-        },
-        {
-          "report_nm": "반기보고서 (2026.06)",
-          "rcept_dt": "20260813",
-          "rcept_no": "20260813001189"
-        },
-        {
-          "report_nm": "[첨부정정]사업보고서 (2025.12)",
-          "rcept_dt": "20260730",
-          "rcept_no": "20260730000551"
-        },
-        {
-          "report_nm": "[첨부정정]사업보고서 (2025.12)",
-          "rcept_dt": "20260730",
-          "rcept_no": "20260730000361"
-        },
-        {
-          "report_nm": "[기재정정]사업보고서 (2025.12)",
-          "rcept_dt": "20260730",
-          "rcept_no": "20260730000356"
-        },
-        {
-          "report_nm": "분기보고서 (2026.03)",
-          "rcept_dt": "20260514",
-          "rcept_no": "20260514000774"
-        },
-        {
-          "report_nm": "정기주주총회결과              ",
-          "rcept_dt": "20260323",
-          "rcept_no": "20260323901469"
-        },
-        {
-          "report_nm": "기업가치제고계획(자율공시)              ",
-          "rcept_dt": "20260319",
-          "rcept_no": "20260319900600"
-        },
-        {
-          "report_nm": "사업보고서 (2025.12)",
-          "rcept_dt": "20260312",
-          "rcept_no": "20260312000614"
-        },
-        {
-          "report_nm": "감사보고서제출              ",
-          "rcept_dt": "20260312",
-          "rcept_no": "20260312900639"
-        },
-        {
-          "report_nm": "주주총회소집공고",
-          "rcept_dt": "20260304",
-          "rcept_no": "20260304000784"
-        },
-        {
-          "report_nm": "주주총회소집결의              ",
-          "rcept_dt": "20260304",
-          "rcept_no": "20260304900709"
-        },
-        {
-          "report_nm": "현금ㆍ현물배당결정              ",
-          "rcept_dt": "20260219",
-          "rcept_no": "20260219900391"
-        },
-        {
-          "report_nm": "주주명부폐쇄기간또는기준일설정              ",
-          "rcept_dt": "20251210",
-          "rcept_no": "20251210900063"
         }
       ]
     },
@@ -2036,6 +1717,114 @@
           "report_nm": "주주총회소집공고",
           "rcept_dt": "20260309",
           "rcept_no": "20260309001479"
+        }
+      ]
+    },
+    {
+      "code": "474930",
+      "name": "신한제13호스팩",
+      "krx_dept": "관리종목(소속부없음)",
+      "listing_date": "20240422",
+      "delisting_date": "2027-04-22",
+      "remaining_days": 153,
+      "corp_code": "01807747",
+      "base_price": 2000,
+      "current_price": 2095,
+      "open_price": 2095,
+      "high_price": 2095,
+      "low_price": 2090,
+      "prev_diff": 0,
+      "chg_rate": 0.0,
+      "volume": 68677,
+      "trading_value": 143674770,
+      "market_cap": 7583900000,
+      "trade_date": "20261119",
+      "liquidation_price": 2115.91,
+      "liquidation_price_source": "공모가(2,000원)+복리+최종6개월산식",
+      "fair_buy_price": 2099.71,
+      "is_fair_buy": "O",
+      "invest_type": "청산",
+      "yield_isa": 1.99,
+      "yield_general": 1.68,
+      "deposit_rate": 2.35,
+      "is_suspended": false,
+      "has_liquidation_notice": true,
+      "status": "일반",
+      "recent_disclosures": [
+        {
+          "report_nm": "기타경영사항(자율공시)              (청산 관련 주요사항 안내)",
+          "rcept_dt": "20261117",
+          "rcept_no": "20261117900324"
+        },
+        {
+          "report_nm": "주권매매거래정지              (상장폐지 사유발생)",
+          "rcept_dt": "20261116",
+          "rcept_no": "20261116902611"
+        },
+        {
+          "report_nm": "[기재정정]분기보고서 (2026.09)",
+          "rcept_dt": "20261116",
+          "rcept_no": "20261116001677"
+        },
+        {
+          "report_nm": "분기보고서 (2026.09)",
+          "rcept_dt": "20261112",
+          "rcept_no": "20261112000307"
+        },
+        {
+          "report_nm": "기타시장안내              (주권 상장폐지 우려 예고)",
+          "rcept_dt": "20261109",
+          "rcept_no": "20261109900800"
+        },
+        {
+          "report_nm": "기타시장안내(관리종목지정우려종목)              ",
+          "rcept_dt": "20261007",
+          "rcept_no": "20261007900685"
+        },
+        {
+          "report_nm": "주식등의대량보유상황보고서(약식)",
+          "rcept_dt": "20261006",
+          "rcept_no": "20261006000395"
+        },
+        {
+          "report_nm": "반기보고서 (2026.06)",
+          "rcept_dt": "20260813",
+          "rcept_no": "20260813001192"
+        },
+        {
+          "report_nm": "주식등의대량보유상황보고서(약식)",
+          "rcept_dt": "20260708",
+          "rcept_no": "20260708000292"
+        },
+        {
+          "report_nm": "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+          "rcept_dt": "20260616",
+          "rcept_no": "20260616900447"
+        },
+        {
+          "report_nm": "주식등의대량보유상황보고서(약식)",
+          "rcept_dt": "20260520",
+          "rcept_no": "20260520000049"
+        },
+        {
+          "report_nm": "분기보고서 (2026.03)",
+          "rcept_dt": "20260513",
+          "rcept_no": "20260513000591"
+        },
+        {
+          "report_nm": "정기주주총회결과              ",
+          "rcept_dt": "20260319",
+          "rcept_no": "20260319902046"
+        },
+        {
+          "report_nm": "사업보고서 (2025.12)",
+          "rcept_dt": "20260311",
+          "rcept_no": "20260311004530"
+        },
+        {
+          "report_nm": "감사보고서제출              ",
+          "rcept_dt": "20260311",
+          "rcept_no": "20260311901185"
         }
       ]
     },
@@ -2365,11 +2154,11 @@
     },
     {
       "code": "001300",
-      "name": "신한제17호스팩",
+      "name": "엔에이치스팩33호",
       "krx_dept": "SPAC(소속부없음)",
-      "listing_date": "20260401",
-      "delisting_date": "2029-04-01",
-      "remaining_days": 863,
+      "listing_date": "20260327",
+      "delisting_date": "2029-03-27",
+      "remaining_days": 858,
       "corp_code": "00148328",
       "base_price": 2000,
       "current_price": 1969,
@@ -2384,11 +2173,11 @@
       "trade_date": "20261119",
       "liquidation_price": 2115.91,
       "liquidation_price_source": "공모가(2,000원)+복리+최종6개월산식",
-      "fair_buy_price": 2024.66,
+      "fair_buy_price": 2025.19,
       "is_fair_buy": "O",
       "invest_type": "청산",
-      "yield_isa": 3.05,
-      "yield_general": 2.58,
+      "yield_isa": 3.07,
+      "yield_general": 2.59,
       "deposit_rate": 2.35,
       "is_suspended": false,
       "has_liquidation_notice": false,
@@ -2716,6 +2505,222 @@
           "report_nm": "현금ㆍ현물배당결정              ",
           "rcept_dt": "20260305",
           "rcept_no": "20260305801005"
+        }
+      ]
+    },
+    {
+      "code": "206400",
+      "name": "아인스팩씨엔에스",
+      "krx_dept": "관리종목(소속부없음)",
+      "listing_date": "20141210",
+      "delisting_date": "2017-12-10",
+      "remaining_days": -3267,
+      "corp_code": "01043853",
+      "base_price": 2000,
+      "current_price": 1008,
+      "open_price": 1000,
+      "high_price": 1250,
+      "low_price": 950,
+      "prev_diff": 8,
+      "chg_rate": 0.8,
+      "volume": 54162,
+      "trading_value": 53877608,
+      "market_cap": 18905119632,
+      "trade_date": "20261119",
+      "liquidation_price": 2115.91,
+      "liquidation_price_source": "공모가(2,000원)+복리+최종6개월산식",
+      "fair_buy_price": 2461.84,
+      "is_fair_buy": "O",
+      "invest_type": "청산",
+      "yield_isa": null,
+      "yield_general": null,
+      "deposit_rate": 2.35,
+      "is_suspended": false,
+      "has_liquidation_notice": false,
+      "status": "일반",
+      "recent_disclosures": [
+        {
+          "report_nm": "분기보고서 (2026.09)",
+          "rcept_dt": "20261116",
+          "rcept_no": "20261116001488"
+        },
+        {
+          "report_nm": "주권매매거래정지해제              (액면병합 주권 변경상장)",
+          "rcept_dt": "20261113",
+          "rcept_no": "20261113901592"
+        },
+        {
+          "report_nm": "[기재정정]주식병합결정              ",
+          "rcept_dt": "20261102",
+          "rcept_no": "20261102900786"
+        },
+        {
+          "report_nm": "주주명부폐쇄기간또는기준일설정              ",
+          "rcept_dt": "20261029",
+          "rcept_no": "20261029900497"
+        },
+        {
+          "report_nm": "주주총회소집결의              (임시주주총회)",
+          "rcept_dt": "20261029",
+          "rcept_no": "20261029900500"
+        },
+        {
+          "report_nm": "단일판매ㆍ공급계약체결              ",
+          "rcept_dt": "20261026",
+          "rcept_no": "20261026900738"
+        },
+        {
+          "report_nm": "[기재정정]주식병합결정              ",
+          "rcept_dt": "20261026",
+          "rcept_no": "20261026900713"
+        },
+        {
+          "report_nm": "[기재정정]주요사항보고서(유상증자결정)",
+          "rcept_dt": "20261016",
+          "rcept_no": "20261016000414"
+        },
+        {
+          "report_nm": "주권매매거래정지              (주식의 병합, 분할 등 전자등록 변경, 말소)",
+          "rcept_dt": "20261008",
+          "rcept_no": "20261008900765"
+        },
+        {
+          "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
+          "rcept_dt": "20261007",
+          "rcept_no": "20261007000356"
+        },
+        {
+          "report_nm": "주식등의대량보유상황보고서(일반)",
+          "rcept_dt": "20261006",
+          "rcept_no": "20261006000458"
+        },
+        {
+          "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
+          "rcept_dt": "20261006",
+          "rcept_no": "20261006000443"
+        },
+        {
+          "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
+          "rcept_dt": "20261006",
+          "rcept_no": "20261006000442"
+        },
+        {
+          "report_nm": "주식등의대량보유상황보고서(일반)",
+          "rcept_dt": "20261006",
+          "rcept_no": "20261006000441"
+        },
+        {
+          "report_nm": "독립이사의선임ㆍ해임또는중도퇴임에관한신고",
+          "rcept_dt": "20260930",
+          "rcept_no": "20260930000777"
+        }
+      ]
+    },
+    {
+      "code": "473000",
+      "name": "에스케이증권제12호스팩",
+      "krx_dept": "관리종목(소속부없음)",
+      "listing_date": "20240507",
+      "delisting_date": "2027-05-07",
+      "remaining_days": 168,
+      "corp_code": "01798722",
+      "base_price": 2000,
+      "current_price": 2090,
+      "open_price": 2090,
+      "high_price": 2090,
+      "low_price": 2085,
+      "prev_diff": 0,
+      "chg_rate": 0.0,
+      "volume": 1090,
+      "trading_value": 2273805,
+      "market_cap": 6917900000,
+      "trade_date": "20261119",
+      "liquidation_price": 2115.91,
+      "liquidation_price_source": "공모가(2,000원)+복리+최종6개월산식",
+      "fair_buy_price": 2098.13,
+      "is_fair_buy": "O",
+      "invest_type": "청산",
+      "yield_isa": 2.29,
+      "yield_general": 1.93,
+      "deposit_rate": 2.35,
+      "is_suspended": false,
+      "has_liquidation_notice": true,
+      "status": "일반",
+      "recent_disclosures": [
+        {
+          "report_nm": "기타시장안내              (주권 상장폐지 우려 예고)",
+          "rcept_dt": "20261118",
+          "rcept_no": "20261118900536"
+        },
+        {
+          "report_nm": "분기보고서 (2026.09)",
+          "rcept_dt": "20261110",
+          "rcept_no": "20261110000103"
+        },
+        {
+          "report_nm": "기타시장안내(관리종목지정우려종목)              ",
+          "rcept_dt": "20261016",
+          "rcept_no": "20261016900831"
+        },
+        {
+          "report_nm": "반기보고서 (2026.06)",
+          "rcept_dt": "20260811",
+          "rcept_no": "20260811000304"
+        },
+        {
+          "report_nm": "주식등의대량보유상황보고서(약식)",
+          "rcept_dt": "20260709",
+          "rcept_no": "20260709000683"
+        },
+        {
+          "report_nm": "주식등의대량보유상황보고서(약식)",
+          "rcept_dt": "20260622",
+          "rcept_no": "20260622000377"
+        },
+        {
+          "report_nm": "분기보고서 (2026.03)",
+          "rcept_dt": "20260514",
+          "rcept_no": "20260514000076"
+        },
+        {
+          "report_nm": "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+          "rcept_dt": "20260430",
+          "rcept_no": "20260430901495"
+        },
+        {
+          "report_nm": "정기주주총회결과              ",
+          "rcept_dt": "20260326",
+          "rcept_no": "20260326901118"
+        },
+        {
+          "report_nm": "사업보고서 (2025.12)",
+          "rcept_dt": "20260312",
+          "rcept_no": "20260312001239"
+        },
+        {
+          "report_nm": "의결권대리행사권유참고서류",
+          "rcept_dt": "20260311",
+          "rcept_no": "20260311003539"
+        },
+        {
+          "report_nm": "주주총회소집공고",
+          "rcept_dt": "20260311",
+          "rcept_no": "20260311003525"
+        },
+        {
+          "report_nm": "주주총회소집결의              ",
+          "rcept_dt": "20260306",
+          "rcept_no": "20260306900452"
+        },
+        {
+          "report_nm": "감사보고서제출              ",
+          "rcept_dt": "20260305",
+          "rcept_no": "20260305901912"
+        },
+        {
+          "report_nm": "매출액또는손익구조30%(대규모법인은15%)이상변동              ",
+          "rcept_dt": "20260209",
+          "rcept_no": "20260209900817"
         }
       ]
     },
@@ -3223,6 +3228,104 @@
           "report_nm": "주요사항보고서(유상증자결정)",
           "rcept_dt": "20251120",
           "rcept_no": "20251120000262"
+        }
+      ]
+    },
+    {
+      "code": "474490",
+      "name": "유안타제16호스팩",
+      "krx_dept": "관리종목(소속부없음)",
+      "listing_date": "20240502",
+      "delisting_date": "2027-05-02",
+      "remaining_days": 163,
+      "corp_code": "01804476",
+      "base_price": 2000,
+      "current_price": 2085,
+      "open_price": 2085,
+      "high_price": 2090,
+      "low_price": 2085,
+      "prev_diff": 0,
+      "chg_rate": 0.0,
+      "volume": 6448,
+      "trading_value": 13455601,
+      "market_cap": 11488350000,
+      "trade_date": "20261119",
+      "liquidation_price": 2115.91,
+      "liquidation_price_source": "공모가(2,000원)+복리+최종6개월산식",
+      "fair_buy_price": 2098.66,
+      "is_fair_buy": "O",
+      "invest_type": "청산",
+      "yield_isa": 2.8,
+      "yield_general": 2.37,
+      "deposit_rate": 2.35,
+      "is_suspended": false,
+      "has_liquidation_notice": true,
+      "status": "일반",
+      "recent_disclosures": [
+        {
+          "report_nm": "기타시장안내              (주권 상장폐지 우려 예고)",
+          "rcept_dt": "20261118",
+          "rcept_no": "20261118900572"
+        },
+        {
+          "report_nm": "분기보고서 (2026.09)",
+          "rcept_dt": "20261113",
+          "rcept_no": "20261113000161"
+        },
+        {
+          "report_nm": "기타시장안내(관리종목지정우려종목)              ",
+          "rcept_dt": "20261016",
+          "rcept_no": "20261016900652"
+        },
+        {
+          "report_nm": "반기보고서 (2026.06)",
+          "rcept_dt": "20260814",
+          "rcept_no": "20260814000684"
+        },
+        {
+          "report_nm": "분기보고서 (2026.03)",
+          "rcept_dt": "20260514",
+          "rcept_no": "20260514000871"
+        },
+        {
+          "report_nm": "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+          "rcept_dt": "20260429",
+          "rcept_no": "20260429900289"
+        },
+        {
+          "report_nm": "정기주주총회결과              ",
+          "rcept_dt": "20260330",
+          "rcept_no": "20260330900581"
+        },
+        {
+          "report_nm": "주주총회소집공고",
+          "rcept_dt": "20260313",
+          "rcept_no": "20260313000602"
+        },
+        {
+          "report_nm": "감사보고서제출              ",
+          "rcept_dt": "20260311",
+          "rcept_no": "20260311902258"
+        },
+        {
+          "report_nm": "사업보고서 (2025.12)",
+          "rcept_dt": "20260311",
+          "rcept_no": "20260311004541"
+        },
+        {
+          "report_nm": "주주총회집중일개최사유신고              ",
+          "rcept_dt": "20260306",
+          "rcept_no": "20260306900240"
+        },
+        {
+          "report_nm": "주주총회소집결의              ",
+          "rcept_dt": "20260305",
+          "rcept_no": "20260305901457"
+        },
+        {
+          "report_nm": "주주명부폐쇄기간또는기준일설정              ",
+          "rcept_dt": "20251215",
+          "rcept_no": "20251215900392"
         }
       ]
     },
@@ -4571,6 +4674,114 @@
           "report_nm": "감사보고서 (2025.12)",
           "rcept_dt": "20260409",
           "rcept_no": "20260409001390"
+        }
+      ]
+    },
+    {
+      "code": "475250",
+      "name": "하나33호스팩",
+      "krx_dept": "관리종목(소속부없음)",
+      "listing_date": "20240424",
+      "delisting_date": "2027-04-24",
+      "remaining_days": 155,
+      "corp_code": "01807729",
+      "base_price": 2000,
+      "current_price": 2095,
+      "open_price": 0,
+      "high_price": 0,
+      "low_price": 0,
+      "prev_diff": 0,
+      "chg_rate": 0.0,
+      "volume": 0,
+      "trading_value": 0,
+      "market_cap": 7751500000,
+      "trade_date": "20261119",
+      "liquidation_price": 2115.91,
+      "liquidation_price_source": "공모가(2,000원)+복리+최종6개월산식",
+      "fair_buy_price": 2099.5,
+      "is_fair_buy": "O",
+      "invest_type": "청산",
+      "yield_isa": 1.97,
+      "yield_general": 1.67,
+      "deposit_rate": 2.35,
+      "is_suspended": false,
+      "has_liquidation_notice": true,
+      "status": "일반",
+      "recent_disclosures": [
+        {
+          "report_nm": "기타경영사항(자율공시)              (청산 관련 주요사항 안내)",
+          "rcept_dt": "20261119",
+          "rcept_no": "20261119900250"
+        },
+        {
+          "report_nm": "주권매매거래정지              (상장폐지 사유발생)",
+          "rcept_dt": "20261118",
+          "rcept_no": "20261118900641"
+        },
+        {
+          "report_nm": "분기보고서 (2026.09)",
+          "rcept_dt": "20261116",
+          "rcept_no": "20261116000078"
+        },
+        {
+          "report_nm": "기타시장안내              (주권 상장폐지 우려 예고)",
+          "rcept_dt": "20261111",
+          "rcept_no": "20261111900764"
+        },
+        {
+          "report_nm": "기타시장안내(관리종목지정우려종목)              ",
+          "rcept_dt": "20261008",
+          "rcept_no": "20261008900881"
+        },
+        {
+          "report_nm": "반기보고서 (2026.06)",
+          "rcept_dt": "20260814",
+          "rcept_no": "20260814000517"
+        },
+        {
+          "report_nm": "주식등의대량보유상황보고서(약식)",
+          "rcept_dt": "20260519",
+          "rcept_no": "20260519000009"
+        },
+        {
+          "report_nm": "분기보고서 (2026.03)",
+          "rcept_dt": "20260514",
+          "rcept_no": "20260514000598"
+        },
+        {
+          "report_nm": "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+          "rcept_dt": "20260421",
+          "rcept_no": "20260421900365"
+        },
+        {
+          "report_nm": "정기주주총회결과              ",
+          "rcept_dt": "20260320",
+          "rcept_no": "20260320901605"
+        },
+        {
+          "report_nm": "의결권대리행사권유참고서류",
+          "rcept_dt": "20260305",
+          "rcept_no": "20260305001427"
+        },
+        {
+          "report_nm": "주주총회소집공고",
+          "rcept_dt": "20260305",
+          "rcept_no": "20260305001393"
+        },
+        {
+          "report_nm": "사업보고서 (2025.12)",
+          "rcept_dt": "20260305",
+          "rcept_no": "20260305001318"
+        },
+        {
+          "report_nm": "감사보고서제출              ",
+          "rcept_dt": "20260305",
+          "rcept_no": "20260305901191"
+        },
+        {
+          "report_nm": "주주총회소집결의              ",
+          "rcept_dt": "20260226",
+          "rcept_no": "20260226900948"
         }
       ]
     },
