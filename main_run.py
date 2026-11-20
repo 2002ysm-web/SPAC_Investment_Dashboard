@@ -31,6 +31,23 @@ HEADERS = {
 GENERAL_TAX_RATE = 0.154
 FINAL_YEAR_TAX_FACTOR = 0.845
 FINAL_YEAR_MONTH_RATIO = 6.0 / 12.0
+MAX_SPAC_AGE_DAYS = 1460  # 약 4년(상장 3년 만기 + 유예/정리 여유)
+
+
+def normalize_spac_name_key(name: str) -> str:
+    s = re.sub(r"\(주\)|주식회사|\s+", "", str(name or "").strip())
+    s = s.replace("기업인수목적주식회사", "스팩").replace("기업인수목적", "스팩")
+    return s.lower()
+
+
+def parse_date_yyyymmdd(date_str: str) -> datetime | None:
+    digits = re.sub(r"[^0-9]", "", date_str or "")
+    if len(digits) >= 8:
+        try:
+            return datetime.strptime(digits[:8], "%Y%m%d")
+        except ValueError:
+            return None
+    return None
 
 
 def load_existing_items(path: Path) -> list[dict]:
@@ -48,6 +65,16 @@ def load_existing_items(path: Path) -> list[dict]:
     return []
 
 
+def filter_stale_spac_items(items: list[dict], ref_dt: datetime) -> list[dict]:
+    cleaned: list[dict] = []
+    for item in items:
+        list_dt = parse_date_yyyymmdd(str(item.get("listing_date") or ""))
+        if list_dt and (ref_dt - list_dt).days > MAX_SPAC_AGE_DAYS:
+            continue
+        cleaned.append(item)
+    return cleaned
+
+
 def get_base_deposit_rate() -> float:
     fallback = 2.35
     if DEPOSIT_RATE_PATH.exists():
@@ -63,11 +90,12 @@ def get_base_deposit_rate() -> float:
     return fallback
 
 
-def get_dart_corp_codes() -> dict[str, str]:
-    mapping: dict[str, str] = {}
+def get_dart_corp_codes() -> tuple[dict[str, str], dict[str, str]]:
+    by_stock_code: dict[str, str] = {}
+    by_norm_name: dict[str, str] = {}
     if not DART_API_KEY:
         print("[INFO] DART_API_KEY 미설정 — 공시 조회 생략")
-        return mapping
+        return by_stock_code, by_norm_name
 
     url = f"https://opendart.fss.or.kr/api/corpCode.xml?crtfc_key={DART_API_KEY}"
     try:
@@ -80,12 +108,19 @@ def get_dart_corp_codes() -> dict[str, str]:
                 for item in root.findall("list"):
                     stock_code = (item.findtext("stock_code") or "").strip()
                     corp_code = (item.findtext("corp_code") or "").strip()
-                    if stock_code and corp_code:
-                        mapping[stock_code.zfill(6)] = corp_code
-        print(f"[INFO] DART 고유번호 {len(mapping)}개 로드")
+                    corp_name = (item.findtext("corp_name") or "").strip()
+                    if not corp_code:
+                        continue
+                    if stock_code:
+                        by_stock_code[stock_code.zfill(6)] = corp_code
+                    if corp_name and ("스팩" in corp_name or "기업인수목적" in corp_name):
+                        norm_key = normalize_spac_name_key(corp_name)
+                        if norm_key and norm_key not in by_norm_name:
+                            by_norm_name[norm_key] = corp_code
+        print(f"[INFO] DART 고유번호 {len(by_stock_code)}개(종목코드 기준), {len(by_norm_name)}개(스팩명 기준) 로드")
     except Exception as exc:
         print(f"[WARN] DART corpCode 조회 실패: {exc}")
-    return mapping
+    return by_stock_code, by_norm_name
 
 
 def normalize_code(val: Any) -> str:
@@ -367,7 +402,7 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
             info.get("LIST_DD") or q_info.get("listing_date") or ""
         ).strip()
         dt_list = parse_date_yyyymmdd(listing_date)
-        if dt_list and (ref_dt - dt_list).days > 1460:
+        if dt_list and (ref_dt - dt_list).days > MAX_SPAC_AGE_DAYS:
             continue
 
         seen_codes.add(code)
@@ -529,16 +564,6 @@ def extract_pay_date(text: str, fallback_rcept_dt: str = "") -> str:
     return ""
 
 
-def parse_date_yyyymmdd(date_str: str) -> datetime | None:
-    digits = re.sub(r"[^0-9]", "", date_str or "")
-    if len(digits) >= 8:
-        try:
-            return datetime.strptime(digits[:8], "%Y%m%d")
-        except ValueError:
-            return None
-    return None
-
-
 def calc_sheet_liquidation_unit_price(
     base_price: int,
     r1: float,
@@ -639,8 +664,15 @@ def infer_delisting_date(listing_date: str) -> str:
         try:
             return dt.replace(year=dt.year + 3).strftime("%Y-%m-%d")
         except ValueError:
-            pass
+            try:
+                return datetime(dt.year + 3, 2, 28).strftime("%Y-%m-%d")
+            except ValueError:
+                pass
     return ""
+
+
+def _clamp_annual_pct(val: float) -> float:
+    return round(max(-50.0, min(200.0, val * 100.0)), 2)
 
 
 def calc_annualized_yields(
@@ -654,12 +686,9 @@ def calc_annualized_yields(
         return None, None, None
 
     dt_delist = parse_date_yyyymmdd(delisting_date_str)
-    dt_list = parse_date_yyyymmdd(listing_date_str)
-    if not dt_delist and dt_list:
-        try:
-            dt_delist = dt_list.replace(year=dt_list.year + 3)
-        except ValueError:
-            dt_delist = None
+    if not dt_delist:
+        inferred = infer_delisting_date(listing_date_str)
+        dt_delist = parse_date_yyyymmdd(inferred)
 
     if not dt_delist:
         return None, None, None
@@ -676,7 +705,7 @@ def calc_annualized_yields(
         net_liq = d_current_price + (s_liq_price - d_current_price) * (1.0 - GENERAL_TAX_RATE)
         gen_ratio = ((net_liq - d_current_price) / d_current_price) / denom_days * 365.0
 
-    return round(isa_ratio * 100.0, 2), round(gen_ratio * 100.0, 2), f_rem_days
+    return _clamp_annual_pct(isa_ratio), _clamp_annual_pct(gen_ratio), f_rem_days
 
 
 def calc_fair_buy_status(
@@ -695,21 +724,34 @@ def calc_fair_buy_status(
         fair_price = float(s_liq_price)
         return ("O" if fair_price >= d_current_price else "X"), round(fair_price, 2)
 
-    elapsed_days = (ref_dt - dt_list).days
+    elapsed_days = max(0, (ref_dt - dt_list).days)
     fair_price = c_base_price + ((s_liq_price - c_base_price) / 1095.0) * elapsed_days
     status_yn = "O" if fair_price >= d_current_price else "X"
     return status_yn, round(fair_price, 2)
 
 
+def resolve_corp_code(
+    code: str,
+    name: str,
+    by_stock_code: dict[str, str],
+    by_norm_name: dict[str, str],
+) -> str:
+    if code in by_stock_code:
+        return by_stock_code[code]
+    norm_key = normalize_spac_name_key(name)
+    return by_norm_name.get(norm_key, "")
+
+
 def build_spac_record(
     spac: dict,
-    corp_codes: dict[str, str],
+    corp_codes_by_stock: dict[str, str],
+    corp_codes_by_name: dict[str, str],
     quote_by_code: dict[str, dict[str, Any]],
     deposit_rate: float,
     ref_dt: datetime,
 ) -> tuple[dict, dict | None]:
     code = spac["code"]
-    corp_code = corp_codes.get(code, "")
+    corp_code = resolve_corp_code(code, spac.get("name", ""), corp_codes_by_stock, corp_codes_by_name)
     current_price, is_suspended, par_base_price, market_meta = get_krx_quote_and_base(code, quote_by_code)
 
     disclosures = get_recent_dart_disclosures(corp_code, days=365)
@@ -791,20 +833,20 @@ def save_json(items: list[dict], path: Path, updated_at: str) -> None:
 
 
 def main() -> None:
-    existing_spacs = load_existing_items(OUTPUT_PATH)
-    existing_liqs = load_existing_items(LIQUIDATIONS_PATH)
-
     now_kst = datetime.now(KST)
     ref_dt = datetime(now_kst.year, now_kst.month, now_kst.day)
     updated_at = now_kst.strftime("%Y-%m-%d %H:%M:%S KST")
 
+    existing_spacs = filter_stale_spac_items(load_existing_items(OUTPUT_PATH), ref_dt)
+    existing_liqs = load_existing_items(LIQUIDATIONS_PATH)
+
     try:
         deposit_rate = get_base_deposit_rate()
-        corp_codes = get_dart_corp_codes()
+        corp_codes_by_stock, corp_codes_by_name = get_dart_corp_codes()
         spac_list, quote_by_code, trade_date = get_krx_spac_market_data(ref_dt)
 
         if not spac_list:
-            print("[WARN] KRX SPAC 종목이 비어 있음 — 기존 데이터 유지")
+            print("[WARN] KRX SPAC 종목이 비어 있음 — 정제된 기존 데이터 유지")
             save_json(existing_spacs, OUTPUT_PATH, updated_at)
             save_json(existing_liqs, LIQUIDATIONS_PATH, updated_at)
             return
@@ -815,7 +857,14 @@ def main() -> None:
         for idx, spac in enumerate(spac_list, start=1):
             code = spac["code"]
             try:
-                rec, liq = build_spac_record(spac, corp_codes, quote_by_code, deposit_rate, ref_dt)
+                rec, liq = build_spac_record(
+                    spac,
+                    corp_codes_by_stock,
+                    corp_codes_by_name,
+                    quote_by_code,
+                    deposit_rate,
+                    ref_dt,
+                )
                 spac_results.append(rec)
                 if liq is not None:
                     liq_results.append(liq)
