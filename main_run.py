@@ -10,7 +10,6 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-import pandas as pd
 import requests
 
 DART_API_KEY = os.environ.get("DART_API_KEY", "").strip()
@@ -26,25 +25,12 @@ HEADERS = {
         "AppleWebKit/537.36 (KHTML, like Gecko) "
         "Chrome/124.0.0.0 Safari/537.36"
     ),
-    "Referer": "https://data.krx.co.kr/",
+    "Referer": "https://data.krx.co.kr/contents/MDC/MDI/outerLoader/index.cmd",
+    "Origin": "https://data.krx.co.kr",
 }
 GENERAL_TAX_RATE = 0.154
 FINAL_YEAR_TAX_FACTOR = 0.845
 FINAL_YEAR_MONTH_RATIO = 6.0 / 12.0
-
-
-def parse_html_tables(html_text: str) -> list[pd.DataFrame]:
-    for flavor in ("lxml", "html5lib", "bs4"):
-        try:
-            dfs = pd.read_html(io.StringIO(html_text), flavor=flavor)
-            if dfs:
-                return dfs
-        except Exception:
-            continue
-    try:
-        return pd.read_html(io.StringIO(html_text))
-    except Exception:
-        return []
 
 
 def load_existing_items(path: Path) -> list[dict]:
@@ -85,7 +71,7 @@ def get_dart_corp_codes() -> dict[str, str]:
 
     url = f"https://opendart.fss.or.kr/api/corpCode.xml?crtfc_key={DART_API_KEY}"
     try:
-        res = requests.get(url, headers=HEADERS, timeout=25)
+        res = requests.get(url, headers={"User-Agent": HEADERS["User-Agent"]}, timeout=25)
         res.raise_for_status()
         with zipfile.ZipFile(io.BytesIO(res.content)) as zf:
             xml_name = zf.namelist()[0]
@@ -150,7 +136,7 @@ def _fetch_krx_openapi_rows(endpoint: str, bas_dd: str) -> list[dict[str, Any]]:
         "https://openapi.krx.co.kr/svc/apis",
     )
     api_headers = {
-        **HEADERS,
+        "User-Agent": HEADERS["User-Agent"],
         "AUTH_KEY": KRX_OPENAPI_KEY,
         "Accept": "application/json",
     }
@@ -177,7 +163,7 @@ def _fetch_krx_openapi_rows(endpoint: str, bas_dd: str) -> list[dict[str, Any]]:
     return []
 
 
-def _fetch_krx_web_kosdaq_quotes(bas_dd: str) -> list[dict[str, Any]]:
+def _fetch_krx_web_kosdaq_quotes(session: requests.Session, bas_dd: str) -> list[dict[str, Any]]:
     """KRX 정보데이터시스템 전종목 시세(코스닥) 조회"""
     url = "https://data.krx.co.kr/contents/MDC/MDI/outerLoader/index.cmd"
     payload = {
@@ -190,8 +176,9 @@ def _fetch_krx_web_kosdaq_quotes(bas_dd: str) -> list[dict[str, Any]]:
         "csvxls_isNo": "false",
     }
     try:
-        res = requests.post(url, data=payload, headers=HEADERS, timeout=15)
-        res.raise_for_status()
+        res = session.post(url, data=payload, headers=HEADERS, timeout=15)
+        if res.status_code != 200:
+            return []
         data = res.json()
         rows = data.get("OutBlock_1") or data.get("output") or []
         if isinstance(rows, list):
@@ -208,14 +195,14 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
     """
     candidate_dates = [
         (ref_dt - timedelta(days=offset)).strftime("%Y%m%d")
-        for offset in range(0, 8)
+        for offset in range(0, 10)
     ]
 
     info_rows: list[dict[str, Any]] = []
     trade_rows: list[dict[str, Any]] = []
     used_date = ""
 
-    # 1순위: KRX Open API (코스닥 종목기본정보 + 코스닥 일별매매정보)
+    # 1순위: KRX Open API (코스닥 일별매매정보 + 코스닥 종목기본정보)
     if KRX_OPENAPI_KEY:
         for d_str in candidate_dates:
             t_rows = _fetch_krx_openapi_rows("sto/ksq_bydd_trd", d_str)
@@ -227,8 +214,18 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
 
     # 2순위: KRX 정보데이터시스템 전종목 시세(코스닥)
     if not trade_rows:
+        session = requests.Session()
+        try:
+            session.get(
+                "https://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201020101",
+                headers={"User-Agent": HEADERS["User-Agent"]},
+                timeout=12,
+            )
+        except Exception:
+            pass
+
         for d_str in candidate_dates:
-            t_rows = _fetch_krx_web_kosdaq_quotes(d_str)
+            t_rows = _fetch_krx_web_kosdaq_quotes(session, d_str)
             if t_rows:
                 trade_rows = t_rows
                 used_date = d_str
@@ -247,7 +244,7 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
             continue
 
         info = info_by_code.get(code, {})
-        dept = (
+        dept = str(
             info.get("SECT_TP_NM")
             or info.get("소속부")
             or r.get("SECT_TP_NM")
@@ -296,7 +293,7 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
             continue
 
         q_info = quote_by_code.get(code, {})
-        dept = (
+        dept = str(
             r.get("SECT_TP_NM")
             or r.get("소속부")
             or q_info.get("dept")
@@ -341,11 +338,12 @@ def get_krx_quote_and_base(
 ) -> tuple[int, bool, int | None, dict[str, Any]]:
     """
     KRX 시세 데이터에서 종가, 거래정지 여부, 공모 기준가 추정, 부가 시세를 반환합니다.
+    당일 거래량이 0이어도 종가가 존재하면 거래정지로 오인하지 않습니다.
     """
     q = quote_by_code.get(code, {})
     current_price = parse_krw_int(q.get("close_price"))
     volume = parse_krw_int(q.get("volume"))
-    is_suspended = current_price <= 0 or (current_price > 0 and volume == 0)
+    is_suspended = current_price <= 0
 
     par_base_price: int | None = None
     if current_price > 0:
@@ -381,7 +379,7 @@ def get_recent_dart_disclosures(corp_code: str, days: int = 365) -> list[dict]:
                 "end_de": end_de,
                 "page_count": 30,
             },
-            headers=HEADERS,
+            headers={"User-Agent": HEADERS["User-Agent"]},
             timeout=8,
         )
         res.raise_for_status()
@@ -415,7 +413,7 @@ def fetch_document_text(rcept_no: str) -> str:
         res = requests.get(
             "https://opendart.fss.or.kr/api/document.xml",
             params={"crtfc_key": DART_API_KEY, "rcept_no": rcept_no},
-            headers=HEADERS,
+            headers={"User-Agent": HEADERS["User-Agent"]},
             timeout=10,
         )
         res.raise_for_status()
