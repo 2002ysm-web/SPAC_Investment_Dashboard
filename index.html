@@ -270,7 +270,6 @@
                             </tr>
                         </thead>
                         <tbody id="spac-table-body" class="divide-y divide-slate-100 text-sm font-medium text-slate-700">
-                            <!-- 동적 삽입 -->
                         </tbody>
                     </table>
                 </div>
@@ -281,7 +280,6 @@
         <!-- TAB 2: 보유 종목 뷰                                        -->
         <!-- ========================================================= -->
         <div id="view-holdings" class="hidden">
-            <!-- 비밀번호 잠금 모달 영역 -->
             <div id="holdings-lock-screen" class="bg-white p-10 rounded-2xl shadow-sm border border-slate-200 text-center max-w-md mx-auto my-20">
                 <div class="text-4xl mb-4">🔒</div>
                 <h2 class="text-xl font-extrabold text-slate-800 mb-2">보유 종목 탭 보호</h2>
@@ -292,9 +290,7 @@
                 </form>
             </div>
 
-            <!-- 실제 보유 종목 콘텐츠 -->
             <div id="holdings-content" class="hidden">
-                <!-- 1. 보유 종목 요약 카드 -->
                 <div class="space-y-3 mb-6">
                     <div class="grid grid-cols-2 gap-3 sm:gap-4">
                         <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
@@ -318,7 +314,6 @@
                     </div>
                 </div>
 
-                <!-- 2. 보유 종목 추가 폼 -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
                     <div class="flex items-center justify-between mb-4">
                         <div>
@@ -367,7 +362,6 @@
                     </form>
                 </div>
 
-                <!-- 3. 보유 종목 필터 바 -->
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-center">
                     <div>
                         <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">계좌 명의</label>
@@ -417,7 +411,6 @@
                     </div>
                 </div>
 
-                <!-- 4. 보유 종목 테이블 -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
@@ -434,7 +427,6 @@
                                 </tr>
                             </thead>
                             <tbody id="holdings-table-body" class="divide-y divide-slate-100 text-sm font-medium text-slate-700">
-                                <!-- 동적 삽입 -->
                             </tbody>
                         </table>
                     </div>
@@ -446,7 +438,6 @@
         <!-- TAB 3: 성과 관리 뷰                                        -->
         <!-- ========================================================= -->
         <div id="view-performance" class="hidden">
-            <!-- 비밀번호 잠금 모달 영역 -->
             <div id="perf-lock-screen" class="bg-white p-10 rounded-2xl shadow-sm border border-slate-200 text-center max-w-md mx-auto my-20">
                 <div class="text-4xl mb-4">🔒</div>
                 <h2 class="text-xl font-extrabold text-slate-800 mb-2">성과 관리 탭 보호</h2>
@@ -457,9 +448,7 @@
                 </form>
             </div>
 
-            <!-- 실제 성과 콘텐츠 -->
             <div id="perf-content" class="hidden">
-                <!-- 1. 최상단 요약 카드 바 -->
                 <div class="space-y-3 mb-6">
                     <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">손익금액</span>
@@ -477,7 +466,6 @@
                     </div>
                 </div>
 
-                <!-- 2. 성과 입력 폼 카드 -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
                     <div class="flex items-center justify-between mb-4">
                         <div>
@@ -522,7 +510,6 @@
                     </form>
                 </div>
 
-                <!-- 3. 성과 필터 바 -->
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4 items-center justify-between">
                     <div class="flex gap-4 items-center flex-wrap">
                         <div>
@@ -557,7 +544,6 @@
                     </div>
                 </div>
 
-                <!-- 4. 성과 내역 테이블 -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
@@ -575,7 +561,6 @@
                                 </tr>
                             </thead>
                             <tbody id="perf-table-body" class="divide-y divide-slate-100 text-sm font-medium text-slate-700">
-                                <!-- 동적 삽입 -->
                             </tbody>
                         </table>
                     </div>
@@ -584,9 +569,7 @@
         </div>
     </div>
 
-    <!-- ========================================================= -->
     <!-- 매도/청산 완료 처리 모달 -->
-    <!-- ========================================================= -->
     <div id="sell-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center z-50 px-4">
         <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-md w-full p-6">
             <h3 class="text-lg font-extrabold text-slate-800 mb-1">💰 매도/청산 및 성과 기록</h3>
@@ -836,7 +819,7 @@
 
         function getDelistingDateValue(item) {
             if (!item || typeof item !== 'object') return '';
-            return item.delisting_date || item.liquidation_date || item.maturity_date || '';
+            return item.delisting_date || item.liquidation_date || item.maturity_date || item.maturityDate || '';
         }
 
         function getDaysUntilDelisting(dateStr) {
@@ -848,7 +831,7 @@
             return Math.floor(diffMs / (1000 * 60 * 60 * 24));
         }
 
-        // 상장폐지·만기경과·수익률누락·청산/상폐사유 종목 제외 판별
+        // 상장폐지·관리종목·상폐사유·실제 만기경과 종목만 제외 (만기일/잔여일/수익률이 null인 정상 종목은 포함)
         function isExpiredOrDelistedSpac(item) {
             if (!item || typeof item !== 'object') return true;
             const code = String(item.code || '').trim().padStart(6, '0');
@@ -857,18 +840,14 @@
             const rawStatus = String(item.status || '').trim();
             if (rawStatus === '상장폐지') return true;
 
+            const remDays = toFiniteNumber(item.remaining_days ?? item.remainingDays);
+            if (remDays !== null && remDays <= 0) return true;
+
             const delistingDate = getDelistingDateValue(item);
-            if (!delistingDate) return true;
-
-            const remDays = toFiniteNumber(item.remaining_days);
-            if (remDays === null || remDays <= 0) return true;
-
-            const daysLeft = getDaysUntilDelisting(delistingDate);
-            if (daysLeft === null || daysLeft <= 0) return true;
-
-            const yIsa = toFiniteNumber(item.yield_isa);
-            const yGen = toFiniteNumber(item.yield_general);
-            if (yIsa === null && yGen === null) return true;
+            if (delistingDate) {
+                const daysLeft = getDaysUntilDelisting(delistingDate);
+                if (daysLeft !== null && daysLeft <= 0) return true;
+            }
 
             const dept = String(item.krx_dept || '');
             const disclosures = Array.isArray(item.recent_disclosures) ? item.recent_disclosures : [];
@@ -882,7 +861,9 @@
 
         function normalizeStatus(status) {
             const s = String(status || '').trim();
-            if (!s || s === '정상') return '일반';
+            if (!s || s === '정상' || s === '정상거래') return '일반';
+            if (s === '거래정지') return '정지';
+            if (s === '합병진행') return '합병';
             return s;
         }
 
@@ -892,13 +873,13 @@
             if (daysLeft !== null) {
                 return daysLeft >= MERGER_THRESHOLD_DAYS ? '합병' : '청산';
             }
-            const raw = String(item?.invest_type ?? item?.type ?? item?.category ?? '').trim();
+            const raw = String(item?.invest_type ?? item?.investType ?? item?.type ?? item?.category ?? '').trim();
             if (raw.includes('합병')) return '합병';
             return '청산';
         }
 
         function normalizeFairBuy(item) {
-            const raw = item?.is_fair_buy ?? item?.fair_buy ?? item?.isFairBuy;
+            const raw = item?.is_fair_buy ?? item?.fair_buy ?? item?.fairBuy ?? item?.isFairBuy;
             if (raw === true || String(raw).trim().toUpperCase() === 'O' || String(raw).trim().toUpperCase() === 'Y') return 'O';
             if (raw === false || String(raw).trim().toUpperCase() === 'X' || String(raw).trim().toUpperCase() === 'N') return 'X';
             return raw ? String(raw).trim() : null;
@@ -934,8 +915,8 @@
         }
 
         function computeFallbackYieldFromSpac(item, accountType) {
-            const curPrice = toFiniteNumber(item?.current_price);
-            const liqPrice = toFiniteNumber(item?.liquidation_price);
+            const curPrice = toFiniteNumber(item?.current_price ?? item?.currentPrice);
+            const liqPrice = toFiniteNumber(item?.liquidation_price ?? item?.liquidationPrice);
             const targetDateStr = getDelistingDateValue(item) || item?.expected_date;
             if (curPrice && curPrice > 0 && liqPrice && liqPrice > 0) {
                 const grossRatio = liqPrice / curPrice;
@@ -958,8 +939,8 @@
             if (!item) return null;
             const isIsa = accountType === 'isa';
             const directCandidates = isIsa
-                ? [item.yield_isa, item.isa_yield, item.expected_yield_isa]
-                : [item.yield_general, item.general_yield, item.expected_yield_general];
+                ? [item.yield_isa, item.isa_yield, item.expected_yield_isa, item.rates?.isaAnnualized]
+                : [item.yield_general, item.general_yield, item.expected_yield_general, item.rates?.generalAnnualized];
 
             for (const c of directCandidates) {
                 const n = toFiniteNumber(c);
@@ -1317,7 +1298,7 @@
 
             const enrichedHoldings = holdingItems.map((item, idx) => {
                 const matchedSpac = findSpacByName(item.name);
-                const currentPrice = matchedSpac ? (toFiniteNumber(matchedSpac.current_price) ?? 0) : 0;
+                const currentPrice = matchedSpac ? (toFiniteNumber(matchedSpac.current_price ?? matchedSpac.currentPrice) ?? 0) : 0;
                 const delistingDate = matchedSpac ? getDelistingDateValue(matchedSpac) : '';
                 const delistingYear = delistingDate ? delistingDate.substring(0, 4) : '';
                 const spacStatus = matchedSpac ? normalizeStatus(matchedSpac.status) : '일반';
@@ -1616,7 +1597,8 @@
                     throw new Error(`HTTP ${response.status}`);
                 }
                 const data = await response.json();
-                document.getElementById('update-time').innerText = `최종 갱신: ${data.updated_at || '-'}`;
+                const updatedText = data.updated_at || data.updatedAt || '-';
+                document.getElementById('update-time').innerText = `최종 갱신: ${updatedText}`;
                 const rawItems = Array.isArray(data) ? data : (data.items || []);
 
                 const seenKeys = new Set();
@@ -1632,6 +1614,8 @@
                     const resolvedDelistingDate = getDelistingDateValue(item);
                     const normalizedItem = {
                         ...item,
+                        current_price: toFiniteNumber(item.current_price ?? item.currentPrice),
+                        liquidation_price: toFiniteNumber(item.liquidation_price ?? item.liquidationPrice),
                         delisting_date: resolvedDelistingDate,
                         is_fair_buy: normalizeFairBuy(item),
                         status: normalizeStatus(item.status)
