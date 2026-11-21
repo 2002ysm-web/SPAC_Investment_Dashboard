@@ -633,7 +633,7 @@
         const GENERAL_TAX_RATE = 0.154;
         const MERGER_THRESHOLD_DAYS = 365;
         const SEED_KEY = 'spac_seed_applied_v2';
-        const EXCLUDED_SPAC_CODES = new Set(['206400', '468760', '474930', '475250']);
+        const EXCLUDED_SPAC_CODES = new Set(['206400']);
 
         let bokDepositRates = {
             "2024-01": 3.67, "2024-02": 3.63, "2024-03": 3.58, "2024-04": 3.53,
@@ -905,11 +905,18 @@
         }
 
         function getCurrentBaseDepositRate() {
-            const fromItem = allItems.length > 0 ? toFiniteNumber(allItems[0].deposit_rate) : null;
-            if (fromItem !== null && fromItem > 0) return toAfterTaxDepositRate(fromItem);
+            const first = allItems.length > 0 ? allItems[0] : null;
+            const afterTaxFromItem = first ? toFiniteNumber(first.deposit_rate_after_tax ?? first.deposit_rate) : null;
+            if (afterTaxFromItem !== null && afterTaxFromItem > 0) {
+                return afterTaxFromItem;
+            }
+            const grossFromItem = first ? toFiniteNumber(first.deposit_rate_gross) : null;
+            if (grossFromItem !== null && grossFromItem > 0) {
+                return toAfterTaxDepositRate(grossFromItem);
+            }
             const latestKey = Object.keys(bokDepositRates).sort().pop();
             const fromMap = latestKey ? toFiniteNumber(bokDepositRates[latestKey]) : null;
-            return toAfterTaxDepositRate(fromMap !== null ? fromMap : 2.35);
+            return toAfterTaxDepositRate(fromMap !== null ? fromMap : 3.21);
         }
 
         function calculateSingleAnnualYield(buyAmount, sellAmount, buyDate, sellDate) {
