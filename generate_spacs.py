@@ -6,7 +6,6 @@ import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from urllib.request import Request, urlopen
 
 KST = timezone(timedelta(hours=9))
 DEPOSIT_NET_FACTOR = 0.845
@@ -19,10 +18,6 @@ EXCLUDE_DELISTING_NOTICE = os.environ.get("EXCLUDE_DELISTING_NOTICE", "true").st
     "yes",
     "y",
 }
-
-
-def get_today_kst_str() -> str:
-    return datetime.now(KST).strftime("%Y-%m-%d")
 
 
 def parse_date_only(value: Any) -> Optional[datetime]:
@@ -77,7 +72,6 @@ def extract_delisting_date(raw: Dict[str, Any]) -> str:
             return dt.strftime("%Y-%m-%d")
     listing_dt = parse_date_only(raw.get("listing_date") or raw.get("ipo_date"))
     if listing_dt:
-        # 스팩 기본 존속기간(3년 = 1095일) 기준 fallback
         return (listing_dt + timedelta(days=1095)).strftime("%Y-%m-%d")
     return ""
 
@@ -95,7 +89,7 @@ def normalize_status(raw: Dict[str, Any], remaining_days: Optional[int]) -> str:
         return "상장폐지"
     if "상장폐지" in status or "폐지" in status or "해산" in status:
         return "상장폐지"
-    if "정지" in status or "거래정지" in status:
+    if bool(raw.get("is_suspended")) or "정지" in status or "거래정지" in status:
         return "정지"
     if "합병" in status:
         return "합병"
@@ -105,12 +99,13 @@ def normalize_status(raw: Dict[str, Any], remaining_days: Optional[int]) -> str:
 
 
 def get_risk_disclosure_titles(raw: Dict[str, Any]) -> List[str]:
-    risk_keywords = (
-        "상장폐지",
-        "해산",
-        "청산",
-        "주권매매정지",
-        "기업인수목적회사 해산",
+    # 일반 안내 문구 오탐을 줄이기 위해 확정·사유발생·실행 성격의 공시 패턴 위주로 판별
+    risk_patterns = (
+        r"상장폐지\s*(결정|사유\s*발생|통지|실행)",
+        r"주권\s*매매거래\s*정지",
+        r"기업인수목적회사\s*해산",
+        r"해산\s*(사유\s*발생|결정|등기)",
+        r"청산\s*(종결|결정|절차\s*개시)",
     )
     disclosures = raw.get("recent_disclosures") or []
     if not isinstance(disclosures, list):
@@ -119,7 +114,7 @@ def get_risk_disclosure_titles(raw: Dict[str, Any]) -> List[str]:
     for d in disclosures:
         if isinstance(d, dict):
             title = str(d.get("report_nm") or "").strip()
-            if title and any(k in title for k in risk_keywords):
+            if title and any(re.search(pat, title) for pat in risk_patterns):
                 matched.append(title)
     return matched
 
@@ -159,9 +154,6 @@ def evaluate_spac_eligibility(
 
     if any(k in status for k in ("상장폐지", "폐지", "해산", "청산", "합병완료")):
         reasons.append(f"status:{status}")
-
-    if bool(raw.get("is_suspended")) or "정지" in status:
-        reasons.append("trading_suspended")
 
     if current_price is None or current_price <= 0:
         reasons.append("invalid_current_price")
@@ -342,7 +334,7 @@ def deduplicate_spacs(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         dedup_key = code if code else norm
         if not dedup_key:
             continue
-        if dedup_key in seen_keys or norm in seen_keys:
+        if dedup_key in seen_keys or (norm and norm in seen_keys):
             continue
         seen_keys.add(dedup_key)
         if norm:
@@ -352,23 +344,12 @@ def deduplicate_spacs(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return unique_items
 
 
-def fetch_json_if_exists(url_or_path: str) -> Any:
-    if url_or_path.startswith(("http://", "https://")):
-        req = Request(url_or_path, headers={"User-Agent": "Mozilla/5.0"})
-        with urlopen(req, timeout=15) as resp:
-            return json.loads(resp.read().decode("utf-8"))
-    path = Path(url_or_path)
-    if path.exists():
-        return json.loads(path.read_text(encoding="utf-8"))
-    return None
-
-
-def load_raw_records(source_path: Optional[str] = None) -> List[Dict[str, Any]]:
+def load_raw_records(source_path: Optional[str] = None, data_dir: Path = Path("data")) -> List[Dict[str, Any]]:
     candidates = [
         source_path,
-        "data/spacs_raw.json",
-        "data/spacs.json",
-        "data/spacs_raw.csv",
+        os.environ.get("SPAC_SOURCE_PATH"),
+        str(data_dir / "spacs_raw.json"),
+        str(data_dir / "spacs_raw.csv"),
     ]
     for candidate in candidates:
         if not candidate:
@@ -413,7 +394,7 @@ def generate_spacs_json(
 
     today_dt = datetime.now(KST)
     deposit_rate_pre_tax = get_latest_deposit_rate(out_file.parent)
-    raw_records = load_raw_records(source_path)
+    raw_records = load_raw_records(source_path, data_dir=out_file.parent)
 
     transformed: List[Dict[str, Any]] = []
     for raw in raw_records:
