@@ -3,7 +3,7 @@ import json
 import math
 import os
 import re
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from urllib.request import Request, urlopen
@@ -18,13 +18,6 @@ EXCLUDE_DELISTING_NOTICE = os.environ.get("EXCLUDE_DELISTING_NOTICE", "true").st
     "true",
     "yes",
     "y",
-}
-
-EXCLUDED_SPAC_CODES = {
-    "206400",  # 아인스팩씨엔에스
-    "468760",  # 유진스팩10호
-    "474930",  # 신한제13호스팩
-    "475250",  # 하나33호스팩
 }
 
 
@@ -111,16 +104,85 @@ def normalize_status(raw: Dict[str, Any], remaining_days: Optional[int]) -> str:
     return status
 
 
-def has_delisting_or_liquidation_flag(raw: Dict[str, Any]) -> bool:
-    dept = str(raw.get("krx_dept") or "")
-    if "관리종목" in dept or bool(raw.get("has_liquidation_notice")):
-        return True
+def get_risk_disclosure_titles(raw: Dict[str, Any]) -> List[str]:
+    risk_keywords = (
+        "상장폐지",
+        "해산",
+        "청산",
+        "주권매매정지",
+        "기업인수목적회사 해산",
+    )
     disclosures = raw.get("recent_disclosures") or []
-    if isinstance(disclosures, list):
-        for d in disclosures:
-            if isinstance(d, dict) and "상장폐지 사유발생" in str(d.get("report_nm") or ""):
-                return True
-    return False
+    if not isinstance(disclosures, list):
+        return []
+    matched: List[str] = []
+    for d in disclosures:
+        if isinstance(d, dict):
+            title = str(d.get("report_nm") or "").strip()
+            if title and any(k in title for k in risk_keywords):
+                matched.append(title)
+    return matched
+
+
+def evaluate_spac_eligibility(
+    raw: Dict[str, Any],
+    name: str,
+    delisting_date_str: str,
+    remaining_days: Optional[int],
+    status: str,
+    current_price: Optional[int],
+    liquidation_price: Optional[int],
+    yield_isa: Optional[float],
+    yield_general: Optional[float],
+) -> tuple[bool, List[str]]:
+    reasons: List[str] = []
+
+    if not name:
+        reasons.append("missing_name")
+
+    is_spac_flag = raw.get("is_spac")
+    if is_spac_flag is False:
+        reasons.append("is_spac_false")
+    elif is_spac_flag is not True:
+        dept = str(raw.get("krx_dept") or "")
+        if not re.search(r"(스팩|SPAC|기업인수목적)", f"{name} {dept}", flags=re.IGNORECASE):
+            reasons.append("not_spac")
+
+    if not delisting_date_str or remaining_days is None:
+        reasons.append("missing_delisting_date")
+    elif remaining_days <= 0:
+        reasons.append("expired_maturity")
+
+    raw_rem = to_float(raw.get("remaining_days"))
+    if raw_rem is not None and raw_rem <= 0:
+        reasons.append("non_positive_raw_remaining_days")
+
+    if any(k in status for k in ("상장폐지", "폐지", "해산", "청산", "합병완료")):
+        reasons.append(f"status:{status}")
+
+    if bool(raw.get("is_suspended")) or "정지" in status:
+        reasons.append("trading_suspended")
+
+    if current_price is None or current_price <= 0:
+        reasons.append("invalid_current_price")
+
+    if liquidation_price is None or liquidation_price <= 0:
+        reasons.append("invalid_liquidation_price")
+
+    if yield_isa is None or yield_general is None:
+        reasons.append("missing_yield")
+
+    if EXCLUDE_DELISTING_NOTICE:
+        dept = str(raw.get("krx_dept") or "")
+        if "관리종목" in dept:
+            reasons.append("administrative_issue")
+        if bool(raw.get("has_liquidation_notice")):
+            reasons.append("liquidation_notice_flag")
+        risk_titles = get_risk_disclosure_titles(raw)
+        if risk_titles:
+            reasons.append(f"risk_disclosure:{risk_titles[0]}")
+
+    return (len(reasons) == 0), reasons
 
 
 def is_valid_active_spac(
@@ -131,43 +193,28 @@ def is_valid_active_spac(
     yield_isa: Optional[float],
     yield_general: Optional[float],
 ) -> bool:
-    code = str(raw.get("code") or raw.get("ticker") or raw.get("short_code") or "").strip().zfill(6)
-    if code in EXCLUDED_SPAC_CODES:
-        return False
-
     name = str(raw.get("name") or raw.get("stock_name") or "").strip()
-    if not name:
-        return False
-
-    # 스팩 종목 여부 확인(종목명에 스팩/기업인수목적 포함 또는 명시적 is_spac=True)
-    is_spac_flag = raw.get("is_spac")
-    if is_spac_flag is False:
-        return False
-    if is_spac_flag is not True:
-        if ("스팩" not in name) and ("기업인수목적" not in name):
-            return False
-
-    # 상장폐지일 누락 또는 만기경과/당일만료/합병완료 등 종료된 항목 제외
-    if not delisting_date_str:
-        return False
-    if status in {"상장폐지", "합병"}:
-        return False
-    if remaining_days is None or remaining_days <= 0:
-        return False
-
-    raw_rem = to_float(raw.get("remaining_days"))
-    if raw_rem is not None and raw_rem <= 0:
-        return False
-
-    # 수익률 누락 항목 제외
-    if yield_isa is None or yield_general is None:
-        return False
-
-    # 상장폐지 사유발생 / 청산 공시 / 관리종목 제외 옵션
-    if EXCLUDE_DELISTING_NOTICE and has_delisting_or_liquidation_flag(raw):
-        return False
-
-    return True
+    current_price = to_int(raw.get("current_price") or raw.get("price") or raw.get("close"))
+    liquidation_price = to_int(
+        raw.get("liquidation_price")
+        or raw.get("expected_liquidation_price")
+        or raw.get("refund_price")
+    )
+    ok, reasons = evaluate_spac_eligibility(
+        raw=raw,
+        name=name,
+        delisting_date_str=delisting_date_str,
+        remaining_days=remaining_days,
+        status=status,
+        current_price=current_price,
+        liquidation_price=liquidation_price,
+        yield_isa=yield_isa,
+        yield_general=yield_general,
+    )
+    if not ok:
+        code = str(raw.get("code") or raw.get("ticker") or raw.get("short_code") or "").strip()
+        print(f"[FILTER] [{code}] {name} 제외 -> {', '.join(reasons)}")
+    return ok
 
 
 def compute_annualized_yield(
@@ -211,14 +258,12 @@ def determine_fair_buy(
 ) -> str:
     explicit = str(raw.get("is_fair_buy") or "").strip().upper()
     if explicit in {"O", "X"}:
-        pass
+        return explicit
 
     candidates = [v for v in (yield_isa, yield_general) if v is not None]
     if candidates:
-        return "O" if max(candidates) >= 0.0 else "X"
+        return "O" if max(candidates) >= after_tax_deposit_rate else "X"
 
-    if explicit in {"O", "X"}:
-        return explicit
     return "미확인"
 
 
