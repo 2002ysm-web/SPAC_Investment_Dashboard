@@ -24,13 +24,6 @@ EXCLUDE_DELISTING_NOTICE = os.environ.get("EXCLUDE_DELISTING_NOTICE", "true").st
     "y",
 }
 
-EXCLUDED_SPAC_CODES = {
-    "206400",  # 아인스팩씨엔에스 (만기/상장폐지일 경과)
-    "468760",  # 유진스팩10호 (상장폐지일/수익률 누락)
-    "474930",  # 신한제13호스팩 (상장폐지 사유발생 / 청산 안내)
-    "475250",  # 하나33호스팩 (상장폐지 사유발생 / 청산 안내)
-}
-
 KST = timezone(timedelta(hours=9))
 HEADERS = {
     "User-Agent": (
@@ -377,9 +370,10 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
     seen_codes: set[str] = set()
     dept_matched_cnt = 0
     name_fallback_cnt = 0
+    skipped_no_listing_date = 0
 
     for code in all_codes:
-        if code in seen_codes or code in EXCLUDED_SPAC_CODES:
+        if code in seen_codes:
             continue
         info = info_by_code.get(code, {})
         q_info = quote_by_code.get(code, {})
@@ -412,6 +406,8 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
             info.get("LIST_DD") or q_info.get("listing_date") or ""
         ).strip()
         if not parse_date_yyyymmdd(listing_date):
+            skipped_no_listing_date += 1
+            print(f"[FILTER] [{code}] {name}: 상장일 누락/형식오류 ({listing_date!r})")
             continue
 
         seen_codes.add(code)
@@ -429,8 +425,8 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
 
     print(
         f"[INFO] KRX 기준일={used_date or '미확인'}, info={len(info_rows)}건, "
-        f"trade={len(trade_rows)}건, web={len(web_rows)}건, SPAC종목={len(spacs)}개 "
-        f"(소속일치={dept_matched_cnt}, 명칭보완={name_fallback_cnt})"
+        f"trade={len(trade_rows)}건, web={len(web_rows)}건, SPAC후보={len(spacs)}개 "
+        f"(소속일치={dept_matched_cnt}, 명칭보완={name_fallback_cnt}, 상장일누락제외={skipped_no_listing_date})"
     )
     return spacs, quote_by_code, used_date
 
@@ -633,7 +629,7 @@ def resolve_liquidation_price(
     liq_docs = [
         d for d in disclosures
         if d.get("rcept_no") and any(k in (d.get("report_nm") or "") for k in ("청산", "해산", "분배금", "예치"))
-    ][:1]
+    ][:3]
     for d in liq_docs:
         doc_text = fetch_document_text(d["rcept_no"])
         price = extract_unit_price(doc_text)
@@ -656,7 +652,7 @@ def resolve_liquidation_price(
 
 def extract_liquidation_record(spac: dict, disclosures: list[dict]) -> dict | None:
     keywords = ("청산", "해산", "분배금", "예치금 반환")
-    candidates = [d for d in disclosures if any(k in (d.get("report_nm") or "") for k in keywords)][:1]
+    candidates = [d for d in disclosures if any(k in (d.get("report_nm") or "") for k in keywords)][:3]
 
     for d in candidates:
         title = d.get("report_nm", "")
@@ -751,32 +747,73 @@ def calc_fair_buy_status(
     return status_yn, round(fair_price, 2)
 
 
-def is_valid_spac_record(record: dict[str, Any]) -> bool:
+def evaluate_spac_eligibility(record: dict[str, Any]) -> tuple[bool, list[str]]:
+    reasons: list[str] = []
+
     code = normalize_code(record.get("code"))
-    if not code or code in EXCLUDED_SPAC_CODES:
-        return False
+    name = str(record.get("name") or "").strip()
+    if not code or not name:
+        reasons.append("missing_code_or_name")
+
+    if not is_spac_name(name) and not is_spac_affiliation(record.get("krx_dept")):
+        reasons.append("not_spac")
 
     delisting_date = str(record.get("delisting_date") or "").strip()
     rem_days = record.get("remaining_days")
-    if not delisting_date or not isinstance(rem_days, int) or rem_days <= 0:
-        return False
+    if not delisting_date or not isinstance(rem_days, int):
+        reasons.append("missing_delisting_date")
+    elif rem_days <= 0:
+        reasons.append("expired_maturity")
+
+    status = str(record.get("status") or "").strip()
+    if any(k in status for k in ("상장폐지", "폐지", "해산", "청산", "합병완료")):
+        reasons.append(f"status:{status}")
+
+    if bool(record.get("is_suspended")) or "정지" in status:
+        reasons.append("trading_suspended")
+
+    current_price = record.get("current_price")
+    if current_price is None or float(current_price) <= 0:
+        reasons.append("invalid_current_price")
+
+    liq_price = record.get("liquidation_price")
+    if liq_price is None or float(liq_price) <= 0:
+        reasons.append("invalid_liquidation_price")
 
     if record.get("yield_isa") is None or record.get("yield_general") is None:
-        return False
+        reasons.append("missing_yield")
 
     dept = str(record.get("krx_dept") or "")
     disclosures = record.get("recent_disclosures") or []
-    has_delist_reason = any(
-        "상장폐지 사유발생" in (d.get("report_nm") or "")
-        for d in disclosures
+    risk_keywords = (
+        "상장폐지",
+        "해산",
+        "청산",
+        "주권매매정지",
+        "기업인수목적회사 해산",
     )
+    matched_risk_titles = [
+        str(d.get("report_nm") or "")
+        for d in disclosures
+        if isinstance(d, dict) and any(k in str(d.get("report_nm") or "") for k in risk_keywords)
+    ]
 
-    if EXCLUDE_DELISTING_NOTICE and (
-        has_delist_reason or bool(record.get("has_liquidation_notice")) or "관리종목" in dept
-    ):
-        return False
+    if EXCLUDE_DELISTING_NOTICE:
+        if "관리종목" in dept:
+            reasons.append("administrative_issue")
+        if bool(record.get("has_liquidation_notice")):
+            reasons.append("liquidation_notice_flag")
+        if matched_risk_titles:
+            reasons.append(f"risk_disclosure:{matched_risk_titles[0]}")
 
-    return True
+    return (len(reasons) == 0), reasons
+
+
+def is_valid_spac_record(record: dict[str, Any]) -> bool:
+    ok, reasons = evaluate_spac_eligibility(record)
+    if not ok:
+        print(f"[FILTER] [{record.get('code', '')}] {record.get('name', '')} 제외 -> {', '.join(reasons)}")
+    return ok
 
 
 def build_spac_record(
