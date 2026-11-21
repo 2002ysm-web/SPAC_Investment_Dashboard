@@ -28,16 +28,17 @@ jobs:
         env:
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
           KRX_OPENAPI_KEY: ${{ secrets.KRX_OPENAPI_KEY }}
+          ECOS_API_KEY: ${{ secrets.ECOS_API_KEY }}
         run: python -u main_run.py
 
       - name: Commit and push updated data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f data/spacs.json data/liquidations.json || true
+          git add -f data/spacs.json data/liquidations.json data/deposit_rates.json || true
           if git diff --staged --quiet; then
             echo "변경된 데이터가 없습니다."
           else
-            git commit -m "chore: update spacs and liquidations data"
+            git commit -m "chore: update spacs, liquidations, and deposit rates data"
             git push
           fi
