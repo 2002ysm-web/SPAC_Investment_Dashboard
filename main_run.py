@@ -140,6 +140,7 @@ def get_base_deposit_rate(ref_dt: datetime | None = None) -> tuple[float, float]
     after_tax_rate = to_after_tax_rate(gross_rate)
     return after_tax_rate, round(gross_rate, 4)
 
+
 def get_dart_corp_codes() -> dict[str, str]:
     mapping: dict[str, str] = {}
     if not DART_API_KEY:
@@ -210,15 +211,9 @@ def parse_krw_float(val: Any) -> float | None:
 
 
 def is_spac_affiliation(dept_val: Any) -> bool:
-    dept = str(dept_val or "").strip().lower()
-    return "spac" in dept
-
-
-def is_spac_name(name_val: Any) -> bool:
-    name = str(name_val or "").strip()
-    if not name:
-        return False
-    return bool(re.search(r"(스팩|SPAC|기업인수목적)", name, flags=re.IGNORECASE))
+    """KRX 소속부(krx_dept)에 'SPAC'이 포함되는지만 판별"""
+    dept = str(dept_val or "").strip().upper()
+    return "SPAC" in dept
 
 
 def _extract_rows(payload: Any) -> list[dict[str, Any]]:
@@ -439,6 +434,7 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
             or ""
         ).strip()
 
+        # KRX 소속부에 'SPAC' 포함 여부만 단순 판별
         if not is_spac_affiliation(dept):
             continue
 
