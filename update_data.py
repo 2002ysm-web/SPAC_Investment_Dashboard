@@ -1,9 +1,11 @@
+import io
 import json
 import os
 import re
 import time
 import urllib.parse
 import xml.etree.ElementTree as ET
+import zipfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import requests
@@ -12,7 +14,7 @@ import requests
 # 설정값 (환경변수 우선)
 # =========================
 DART_API_KEY = os.getenv("DART_API_KEY", "").strip()
-KRX_API_KEY = os.getenv("KRX_API_KEY", "").strip()  # 선택 (없어도 KRX 웹 BLD 폴백 지원)
+KRX_API_KEY = os.getenv("KRX_API_KEY", "").strip()
 OUT_FILE = Path(os.getenv("OUT_FILE", "data/spacs.json"))
 
 KST = timezone(timedelta(hours=9))
@@ -91,7 +93,6 @@ def add_years_safe(date_str: str, years: int) -> str | None:
     try:
         return dt.replace(year=dt.year + years).strftime("%Y-%m-%d")
     except ValueError:
-        # 윤년 2월 29일 처리
         return dt.replace(year=dt.year + years, month=2, day=28).strftime("%Y-%m-%d")
 
 
@@ -110,7 +111,6 @@ def fetch_bok_deposit_rates() -> dict:
     if not ecos_key:
         return rates
 
-    # ECOS 통계표 121Y002 (예금은행 가중평균금리 - 정기예금 신규취급액 기준)
     start_ym = "202401"
     end_ym = now_kst().strftime("%Y%m")
     url = (
@@ -140,7 +140,7 @@ def get_recent_business_days(count: int = 10) -> list[str]:
     days = []
     cur = now_kst().date()
     while len(days) < count:
-        if cur.weekday() < 5:  # 월~금
+        if cur.weekday() < 5:
             days.append(cur.strftime("%Y%m%d"))
         cur -= timedelta(days=1)
     return days
@@ -154,7 +154,6 @@ def fetch_krx_spac_list_and_quotes() -> list[dict]:
         "X-Requested-With": "XMLHttpRequest",
     })
 
-    # 세션 쿠키 확보
     try:
         session.get(
             "https://data.krx.co.kr/contents/MDC/MDI/outerLoader/index.cmd?menuId=MDC0201020101",
@@ -185,11 +184,10 @@ def fetch_krx_spac_list_and_quotes() -> list[dict]:
                     timeout=15,
                 )
                 resp.raise_for_status()
-                data = resp.json()
-                out_block = data.get("OutBlock_1", [])
+                out_block = resp.json().get("OutBlock_1", [])
                 for row in out_block:
                     name = (row.get("ISU_ABBRV") or "").strip()
-                    code = (row.get("ISU_SRT_CD") or "").strip()
+                    code = (row.get("ISU_SRT_CD") or "").strip().zfill(6)
                     if not code or not is_spac_name(name):
                         continue
 
@@ -203,12 +201,12 @@ def fetch_krx_spac_list_and_quotes() -> list[dict]:
                         "code": code,
                         "name": name,
                         "market": "KOSDAQ" if mkt_id == "KSQ" else "KOSPI",
-                        "currentPrice": close_prc,
-                        "changeRate": chg_rt,
-                        "tradingValue": acc_val,
+                        "current_price": close_prc,
+                        "change_rate": chg_rt,
+                        "trading_value": acc_val,
                         "volume": acc_vol,
-                        "marketCap": mkt_cap,
-                        "tradeDate": f"{ymd[:4]}-{ymd[4:6]}-{ymd[6:8]}",
+                        "market_cap": mkt_cap,
+                        "trade_date": f"{ymd[:4]}-{ymd[4:6]}-{ymd[6:8]}",
                     }
             except Exception as e:
                 print(f"[WARN] KRX 시세 조회 실패 ({mkt_id}, {ymd}): {e}")
@@ -220,7 +218,6 @@ def fetch_krx_spac_list_and_quotes() -> list[dict]:
 
     print(f"[INFO] KRX 스팩 시세 확보: {len(quote_map)}개 (기준일: {used_trade_date})")
 
-    # 상장일(LIST_DD) 조회 시도
     listing_map = {}
     for ymd in ([used_trade_date.replace("-", "")] if used_trade_date else get_recent_business_days(5)):
         for mkt_id in ("KSQ", "STK"):
@@ -242,7 +239,7 @@ def fetch_krx_spac_list_and_quotes() -> list[dict]:
                 if resp.status_code == 200:
                     rows = resp.json().get("OutBlock_1", [])
                     for r in rows:
-                        c = (r.get("ISU_SRT_CD") or "").strip()
+                        c = (r.get("ISU_SRT_CD") or "").strip().zfill(6)
                         ld = normalize_date(r.get("LIST_DD"))
                         if c and ld:
                             listing_map[c] = ld
@@ -253,7 +250,7 @@ def fetch_krx_spac_list_and_quotes() -> list[dict]:
 
     results = []
     for code, q in quote_map.items():
-        q["listingDate"] = listing_map.get(code)
+        q["listing_date"] = listing_map.get(code)
         results.append(q)
     return results
 
@@ -262,7 +259,6 @@ def fetch_krx_spac_list_and_quotes() -> list[dict]:
 # 3. OpenDART 공시/합병/청산 조회
 # =========================
 def fetch_dart_corp_map() -> dict:
-    """종목코드(6자리) -> corp_code(8자리) 매핑"""
     corp_map = {}
     if not DART_API_KEY:
         return corp_map
@@ -271,18 +267,15 @@ def fetch_dart_corp_map() -> dict:
     try:
         resp = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=25)
         resp.raise_for_status()
-        import zipfile
-        import io
-
         with zipfile.ZipFile(io.BytesIO(resp.content)) as zf:
             xml_name = zf.namelist()[0]
             xml_bytes = zf.read(xml_name)
         root = ET.fromstring(xml_bytes)
         for item in root.findall("list"):
-            stock_code = (item.findtext("stock_code") or "").strip()
+            stock_code = (item.findtext("stock_code") or "").strip().zfill(6)
             corp_code = (item.findtext("corp_code") or "").strip()
             corp_name = (item.findtext("corp_name") or "").strip()
-            if stock_code and corp_code and is_spac_name(corp_name):
+            if stock_code != "000000" and corp_code and is_spac_name(corp_name):
                 corp_map[stock_code] = corp_code
         print(f"[INFO] DART 스팩 고유번호 매핑: {len(corp_map)}개")
     except Exception as e:
@@ -293,14 +286,14 @@ def fetch_dart_corp_map() -> dict:
 
 def inspect_dart_disclosures(corp_code: str) -> dict:
     info = {
-        "mergerStatus": None,
-        "mergerTarget": None,
-        "mergerApprovedAt": None,
-        "liquidationNotice": False,
-        "liquidationPrice": None,
-        "liquidationDate": None,
-        "latestReport": None,
-        "latestReportDate": None,
+        "merger_status": None,
+        "merger_target": None,
+        "merger_approved_at": None,
+        "has_liquidation_notice": False,
+        "liquidation_price": None,
+        "liquidation_date": None,
+        "latest_report": None,
+        "latest_report_date": None,
     }
     if not DART_API_KEY or not corp_code:
         return info
@@ -328,38 +321,35 @@ def inspect_dart_disclosures(corp_code: str) -> dict:
 
         entries = data.get("list", [])
         if entries:
-            info["latestReport"] = entries[0].get("report_nm")
-            info["latestReportDate"] = normalize_date(entries[0].get("rcept_dt"))
+            info["latest_report"] = entries[0].get("report_nm")
+            info["latest_report_date"] = normalize_date(entries[0].get("rcept_dt"))
 
         for e in entries:
             rep = str(e.get("report_nm") or "")
             rcept_dt = normalize_date(e.get("rcept_dt"))
 
-            # 합병 관련 공시 감지
             if any(k in rep for k in ("합병", "주식교환", "영업양수도", "주요사항보고서(회사합병결정)")):
-                if not info["mergerStatus"]:
+                if not info["merger_status"]:
                     if "승인" in rep or "결의" in rep:
-                        info["mergerStatus"] = "합병승인"
+                        info["merger_status"] = "합병승인"
                     elif "신고서" in rep or "결정" in rep:
-                        info["mergerStatus"] = "합병추진"
+                        info["merger_status"] = "합병추진"
                     else:
-                        info["mergerStatus"] = "합병관련공시"
-                    info["mergerApprovedAt"] = rcept_dt
+                        info["merger_status"] = "합병관련공시"
+                    info["merger_approved_at"] = rcept_dt
                     m_target = re.search(r"합병\s*\(([^)]+)\)", rep)
                     if m_target:
-                        info["mergerTarget"] = m_target.group(1).strip()
+                        info["merger_target"] = m_target.group(1).strip()
 
-            # 해산/청산/분배금 관련 공시 감지
             if any(k in rep for k in ("해산", "청산", "분배금", "예치금반환", "상장폐지")):
-                info["liquidationNotice"] = True
-                # 제목 내 금액 패턴 추출 시도
+                info["has_liquidation_notice"] = True
                 m_amt = re.search(r"([1-9][0-9,]{2,4})\s*원", rep)
-                if m_amt and not info["liquidationPrice"]:
+                if m_amt and not info["liquidation_price"]:
                     cand_price = parse_int(m_amt.group(1), default=0)
                     if 1500 <= cand_price <= 15000:
-                        info["liquidationPrice"] = cand_price
-                if not info["liquidationDate"]:
-                    info["liquidationDate"] = rcept_dt
+                        info["liquidation_price"] = cand_price
+                if not info["liquidation_date"]:
+                    info["liquidation_date"] = rcept_dt
 
     except Exception as e:
         print(f"[WARN] DART 공시 조회 오류 ({corp_code}): {e}")
@@ -370,8 +360,7 @@ def inspect_dart_disclosures(corp_code: str) -> dict:
 # =========================
 # 4. 청산가 / 예상수익률 / 매수적정 계산
 # =========================
-def estimate_ipo_base_price(name: str, current_price: int) -> int:
-    # 국내 일반 스팩 공모가는 2,000원 기준 (일부 특수 스팩 예외 대비)
+def estimate_ipo_base_price(current_price: int) -> int:
     if current_price >= 8000:
         return 10000
     return 2000
@@ -387,7 +376,6 @@ def estimate_liquidation_price(
     if dart_liq_price and dart_liq_price > 0:
         return dart_liq_price, "DART 청산/분배 공시"
 
-    # 상장일 ~ 만기일 기간 동안 예금금리(세후 84.5%) 복리 추정
     start_dt = datetime.strptime(listing_date, "%Y-%m-%d") if listing_date else (now_kst().replace(tzinfo=None) - timedelta(days=365))
     end_dt = datetime.strptime(maturity_date, "%Y-%m-%d") if maturity_date else (start_dt + timedelta(days=1095))
     days = max(30, (end_dt - start_dt).days)
@@ -398,7 +386,6 @@ def estimate_liquidation_price(
     net_rate = (gross_rate * 0.845) / 100.0
 
     est_price = round(ipo_price * ((1.0 + net_rate) ** years))
-    # 청산가는 통상 공모가 이상~상한 범위 보정
     est_price = max(ipo_price, min(est_price, int(ipo_price * 1.25)))
     return est_price, f"예금금리({gross_rate:.2f}%·세후) 복리추정"
 
@@ -425,42 +412,54 @@ def build_spac_records() -> dict:
 
     deposit_rates = fetch_bok_deposit_rates()
     latest_ym = sorted(deposit_rates.keys())[-1]
-    base_deposit_rate = deposit_rates[latest_ym]
+    base_gross_rate = deposit_rates[latest_ym]
+    net_deposit_benchmark = round(base_gross_rate * 0.845, 2)
 
     krx_items = fetch_krx_spac_list_and_quotes()
     dart_corp_map = fetch_dart_corp_map()
 
-    # 기존 파일이 있다면 일부 메타/수동보완값 참조용으로 로드
     prev_map = {}
     if OUT_FILE.exists():
         try:
             prev_json = json.loads(OUT_FILE.read_text(encoding="utf-8"))
             for p in prev_json.get("items", []):
                 if p.get("code"):
-                    prev_map[p["code"]] = p
+                    prev_map[str(p["code"]).zfill(6)] = p
         except Exception:
             pass
 
     items = []
     for idx, q in enumerate(krx_items):
-        code = q["code"]
+        code = str(q["code"]).zfill(6)
         name = q["name"]
-        current_price = parse_int(q.get("currentPrice"), default=0)
+        current_price = parse_int(q.get("current_price"), default=0)
         prev_rec = prev_map.get(code, {})
 
-        listing_date = q.get("listingDate") or normalize_date(prev_rec.get("listingDate"))
-        maturity_date = add_years_safe(listing_date, 3) if listing_date else normalize_date(prev_rec.get("maturityDate"))
+        listing_date = (
+            q.get("listing_date")
+            or normalize_date(prev_rec.get("listing_date"))
+            or normalize_date(prev_rec.get("listingDate"))
+        )
+        maturity_date = (
+            add_years_safe(listing_date, 3)
+            if listing_date
+            else (
+                normalize_date(prev_rec.get("delisting_date"))
+                or normalize_date(prev_rec.get("maturity_date"))
+                or normalize_date(prev_rec.get("maturityDate"))
+            )
+        )
 
         corp_code = dart_corp_map.get(code)
         dart_info = inspect_dart_disclosures(corp_code) if (DART_API_KEY and corp_code) else {
-            "mergerStatus": prev_rec.get("mergerStatus"),
-            "mergerTarget": prev_rec.get("mergerTarget"),
-            "mergerApprovedAt": prev_rec.get("mergerApprovedAt"),
-            "liquidationNotice": bool(prev_rec.get("liquidationNotice", False)),
-            "liquidationPrice": prev_rec.get("liquidationPrice"),
-            "liquidationDate": prev_rec.get("liquidationDate"),
-            "latestReport": prev_rec.get("latestReport"),
-            "latestReportDate": prev_rec.get("latestReportDate"),
+            "merger_status": prev_rec.get("merger_status") or prev_rec.get("mergerStatus"),
+            "merger_target": prev_rec.get("merger_target") or prev_rec.get("mergerTarget"),
+            "merger_approved_at": prev_rec.get("merger_approved_at") or prev_rec.get("mergerApprovedAt"),
+            "has_liquidation_notice": bool(prev_rec.get("has_liquidation_notice", prev_rec.get("liquidationNotice", False))),
+            "liquidation_price": prev_rec.get("liquidation_price") or prev_rec.get("liquidationPrice"),
+            "liquidation_date": prev_rec.get("liquidation_date") or prev_rec.get("liquidationDate"),
+            "latest_report": prev_rec.get("latest_report") or prev_rec.get("latestReport"),
+            "latest_report_date": prev_rec.get("latest_report_date") or prev_rec.get("latestReportDate"),
         }
         if DART_API_KEY and corp_code and (idx % 5 == 4):
             time.sleep(0.15)
@@ -470,45 +469,37 @@ def build_spac_records() -> dict:
             mat_d = datetime.strptime(maturity_date, "%Y-%m-%d").date()
             remaining_days = (mat_d - today_date).days
 
-        ipo_price = estimate_ipo_base_price(name, current_price)
+        ipo_price = estimate_ipo_base_price(current_price)
         liq_price, liq_source = estimate_liquidation_price(
             ipo_price=ipo_price,
             listing_date=listing_date,
             maturity_date=maturity_date,
             deposit_rates=deposit_rates,
-            dart_liq_price=dart_info.get("liquidationPrice"),
+            dart_liq_price=parse_int(dart_info.get("liquidation_price"), default=0) or None,
         )
 
-        # 거래 상태 및 투자 유형 분류
         is_suspended = current_price <= 0 or parse_int(q.get("volume"), default=0) == 0
-        has_merger = bool(dart_info.get("mergerStatus"))
+        has_merger = bool(dart_info.get("merger_status"))
 
-        if is_suspended and dart_info.get("liquidationNotice"):
-            status = "청산절차"
-        elif is_suspended:
-            status = "거래정지"
+        # 대시보드 필터(일반 / 정지 / 합병)와 일치하도록 상태 지정
+        if is_suspended:
+            status = "정지"
         elif has_merger:
-            status = "합병진행"
+            status = "합병"
         else:
-            status = "정상거래"
+            status = "일반"
 
-        if has_merger:
-            invest_type = "합병형"
-        elif remaining_days is not None and remaining_days <= 180:
-            invest_type = "청산형"
-        elif dart_info.get("liquidationNotice"):
-            invest_type = "청산형"
+        # 대시보드 유형 필터(합병 / 청산)와 일치하도록 지정
+        if remaining_days is not None:
+            invest_type = "합병" if remaining_days >= 365 else "청산"
         else:
-            invest_type = "청산형" if (remaining_days is not None and remaining_days < 365) else "합병형"
+            invest_type = "합병" if has_merger else "청산"
 
         days_for_calc = remaining_days if (remaining_days and remaining_days > 0) else 365
         isa_ann_yield = calc_annualized_yield(current_price, liq_price, days_for_calc, is_isa=True) if current_price > 0 else 0.0
         gen_ann_yield = calc_annualized_yield(current_price, liq_price, days_for_calc, is_isa=False) if current_price > 0 else 0.0
         simple_yield = round(((liq_price - current_price) / current_price) * 100.0, 2) if current_price > 0 else 0.0
 
-        # 매수적정(fairBuy) 판정:
-        # 현재가가 0이 아니고, 청산가 이하이거나 ISA 연환산 수익률이 세후 예금금리(84.5%) 이상이면 적정
-        net_deposit_benchmark = round(base_deposit_rate * 0.845, 2)
         fair_buy = bool(
             (not is_suspended)
             and current_price > 0
@@ -520,46 +511,45 @@ def build_spac_records() -> dict:
             "name": name,
             "market": q.get("market", "KOSDAQ"),
             "status": status,
-            "investType": invest_type,
-            "fairBuy": fair_buy,
-            "currentPrice": current_price,
-            "changeRate": q.get("changeRate", 0.0),
-            "ipoPrice": ipo_price,
-            "liquidationPrice": liq_price,
-            "liquidationSource": liq_source,
-            "listingDate": listing_date,
-            "maturityDate": maturity_date,
-            "remainingDays": remaining_days,
-            "tradingOnKrx": not is_suspended,
+            "invest_type": invest_type,
+            "is_fair_buy": "O" if fair_buy else "X",
+            "current_price": current_price,
+            "change_rate": q.get("change_rate", 0.0),
+            "ipo_price": ipo_price,
+            "liquidation_price": liq_price,
+            "liquidation_source": liq_source,
+            "listing_date": listing_date,
+            "delisting_date": maturity_date,
+            "maturity_date": maturity_date,
+            "remaining_days": remaining_days,
+            "trading_on_krx": not is_suspended,
             "volume": q.get("volume", 0),
-            "tradingValue": q.get("tradingValue", 0),
-            "marketCap": q.get("marketCap", 0),
-            "tradeDate": q.get("tradeDate"),
-            "mergerStatus": dart_info.get("mergerStatus"),
-            "mergerTarget": dart_info.get("mergerTarget"),
-            "mergerApprovedAt": dart_info.get("mergerApprovedAt"),
-            "liquidationNotice": bool(dart_info.get("liquidationNotice", False)),
-            "latestReport": dart_info.get("latestReport"),
-            "latestReportDate": dart_info.get("latestReportDate"),
-            "rates": {
-                "simpleYield": simple_yield,
-                "isaAnnualized": isa_ann_yield,
-                "generalAnnualized": gen_ann_yield,
-                "depositRate": base_deposit_rate,
-                "netDepositBenchmark": net_deposit_benchmark,
-            },
+            "trading_value": q.get("trading_value", 0),
+            "market_cap": q.get("market_cap", 0),
+            "trade_date": q.get("trade_date"),
+            "merger_status": dart_info.get("merger_status"),
+            "merger_target": dart_info.get("merger_target"),
+            "merger_approved_at": dart_info.get("merger_approved_at"),
+            "has_liquidation_notice": bool(dart_info.get("has_liquidation_notice", False)),
+            "latest_report": dart_info.get("latest_report"),
+            "latest_report_date": dart_info.get("latest_report_date"),
+            "yield_isa": isa_ann_yield,
+            "yield_general": gen_ann_yield,
+            "simple_yield": simple_yield,
+            "deposit_rate_gross": base_gross_rate,
+            "deposit_rate_after_tax": net_deposit_benchmark,
         }
         items.append(item)
 
-    # 종목명 가나다순 정렬
     items.sort(key=lambda x: x.get("name") or "")
 
     return {
-        "updatedAt": today_dt.strftime("%Y-%m-%d %H:%M:%S KST"),
+        "updated_at": today_dt.strftime("%Y-%m-%d %H:%M:%S KST"),
         "date": today_str,
         "count": len(items),
-        "baseDepositRate": base_deposit_rate,
-        "depositRates": deposit_rates,
+        "deposit_rate_gross": base_gross_rate,
+        "deposit_rate_after_tax": net_deposit_benchmark,
+        "deposit_rates": deposit_rates,
         "items": items,
     }
 
@@ -568,7 +558,10 @@ def main():
     payload = build_spac_records()
     OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
     OUT_FILE.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"[DONE] {OUT_FILE} 저장 완료 — 총 {payload['count']}개 종목 (기준예금금리: {payload['baseDepositRate']}%)")
+    print(
+        f"[DONE] {OUT_FILE} 저장 완료 — 총 {payload['count']}개 종목 "
+        f"(기준예금금리 세후: {payload['deposit_rate_after_tax']}%)"
+    )
 
 
 if __name__ == "__main__":
