@@ -14,9 +14,20 @@ import requests
 
 DART_API_KEY = os.environ.get("DART_API_KEY", "").strip()
 KRX_OPENAPI_KEY = os.environ.get("KRX_OPENAPI_KEY", "").strip()
+ECOS_API_KEY = os.environ.get("ECOS_API_KEY", "").strip()
 OUTPUT_PATH = Path(os.environ.get("SPACS_OUTPUT_PATH", "data/spacs.json"))
 LIQUIDATIONS_PATH = Path(os.environ.get("LIQUIDATIONS_OUTPUT_PATH", "data/liquidations.json"))
 DEPOSIT_RATE_PATH = Path(os.environ.get("DEPOSIT_RATE_PATH", "data/deposit_rates.json"))
+EXCLUDE_DELISTING_NOTICE = os.environ.get("EXCLUDE_DELISTING_NOTICE", "true").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+    "y",
+}
+
+EXCLUDED_SPAC_CODES = {
+    "206400",  # 아인스팩씨엔에스
+}
 
 KST = timezone(timedelta(hours=9))
 HEADERS = {
@@ -54,25 +65,80 @@ def to_after_tax_rate(gross_rate: float) -> float:
     return round(float(gross_rate) * DEPOSIT_AFTER_TAX_FACTOR, 4)
 
 
-def get_base_deposit_rate() -> tuple[float, float]:
+def fetch_ecos_deposit_rate(ref_dt: datetime) -> tuple[str | None, float | None]:
+    """한국은행 ECOS API에서 최신 정기예금 금리(세전 %) 조회 -> (YYYY-MM, 금리)"""
+    if not ECOS_API_KEY:
+        return None, None
+
+    start_ym = (ref_dt.replace(day=1) - timedelta(days=180)).strftime("%Y%m")
+    end_ym = ref_dt.strftime("%Y%m")
+    url = (
+        f"https://ecos.bok.or.kr/api/StatisticSearch/"
+        f"{ECOS_API_KEY}/json/kr/1/30/121Y002/M/{start_ym}/{end_ym}/010200000"
+    )
+    try:
+        res = requests.get(url, timeout=15)
+        res.raise_for_status()
+        payload = res.json()
+        rows = (payload.get("StatisticSearch") or {}).get("row") or []
+        valid_rows: list[tuple[str, float]] = []
+        for r in rows:
+            ym_raw = str(r.get("TIME") or "").strip()
+            val = parse_krw_float(r.get("DATA_VALUE"))
+            if len(ym_raw) == 6 and val is not None and val > 0:
+                valid_rows.append((f"{ym_raw[:4]}-{ym_raw[4:6]}", float(val)))
+        if valid_rows:
+            valid_rows.sort(key=lambda x: x[0])
+            return valid_rows[-1]
+    except Exception as exc:
+        print(f"[WARN] ECOS 금리 조회 실패: {exc}")
+    return None, None
+
+
+def get_base_deposit_rate(ref_dt: datetime | None = None) -> tuple[float, float]:
     """(세후 기준 예금금리, 세전 기준 예금금리) 반환"""
+    now_ref = ref_dt or datetime.now(KST)
     fallback_gross = 3.21
     gross_rate = fallback_gross
+
+    rates_map: dict[str, float] = {}
     if DEPOSIT_RATE_PATH.exists():
         try:
             with DEPOSIT_RATE_PATH.open("r", encoding="utf-8") as f:
-                data = json.load(f)
-            rates = data.get("rates", {}) if isinstance(data, dict) else {}
-            if rates:
-                latest_ym = sorted(rates.keys())[-1]
-                parsed = parse_krw_float(rates[latest_ym])
-                if parsed is not None and parsed > 0:
-                    gross_rate = parsed
+                saved = json.load(f)
+            if isinstance(saved, dict) and isinstance(saved.get("rates"), dict):
+                for k, v in saved["rates"].items():
+                    parsed = parse_krw_float(v)
+                    if parsed is not None and parsed > 0:
+                        rates_map[str(k)] = float(parsed)
         except Exception as exc:
             print(f"[WARN] 기준 예금금리 읽기 실패: {exc}")
+
+    ecos_ym, ecos_rate = fetch_ecos_deposit_rate(now_ref)
+    if ecos_ym and ecos_rate is not None:
+        rates_map[ecos_ym] = ecos_rate
+        gross_rate = ecos_rate
+        try:
+            DEPOSIT_RATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+            with DEPOSIT_RATE_PATH.open("w", encoding="utf-8") as f:
+                json.dump(
+                    {
+                        "updated_at": now_ref.strftime("%Y-%m-%d %H:%M:%S KST"),
+                        "source": "BOK_ECOS_121Y002_010200000",
+                        "rates": dict(sorted(rates_map.items())),
+                    },
+                    f,
+                    ensure_ascii=False,
+                    indent=2,
+                )
+        except Exception as exc:
+            print(f"[WARN] deposit_rates.json 저장 실패: {exc}")
+    elif rates_map:
+        latest_ym = sorted(rates_map.keys())[-1]
+        gross_rate = rates_map[latest_ym]
+
     after_tax_rate = to_after_tax_rate(gross_rate)
     return after_tax_rate, round(gross_rate, 4)
-
 
 def get_dart_corp_codes() -> dict[str, str]:
     mapping: dict[str, str] = {}
@@ -724,7 +790,7 @@ def calc_fair_buy_status(
 
 def is_valid_spac_record(record: dict[str, Any]) -> bool:
     code = normalize_code(record.get("code"))
-    if not code:
+    if not code or code in EXCLUDED_SPAC_CODES:
         return False
     return is_spac_affiliation(record.get("krx_dept"))
 
@@ -834,7 +900,7 @@ def main() -> None:
     updated_at = now_kst.strftime("%Y-%m-%d %H:%M:%S KST")
 
     try:
-        deposit_rate_after_tax, deposit_rate_gross = get_base_deposit_rate()
+        deposit_rate_after_tax, deposit_rate_gross = get_base_deposit_rate(now_kst)
         corp_codes = get_dart_corp_codes()
         spac_list, quote_by_code, trade_date = get_krx_spac_market_data(ref_dt)
 
