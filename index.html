@@ -629,6 +629,11 @@
             "2026-09": 2.35, "2026-10": 2.35, "2026-11": 2.35
         };
 
+        function calcBuyAmount(settlementAmount, boughtQty, remainQty) {
+            if (!settlementAmount || !boughtQty || boughtQty <= 0 || !remainQty || remainQty <= 0) return 0;
+            return Math.round((settlementAmount / boughtQty) * remainQty);
+        }
+
         const SEED_HOLDINGS = [
             {"account": "남편", "acct": "일반", "name": "유진스팩11호", "buy_amount": 2119750, "quantity": 1024, "buy_date": "2026-02-24"},
             {"account": "남편", "acct": "일반", "name": "유진스팩10호", "buy_amount": 33840, "quantity": 16, "buy_date": "2026-02-23"},
@@ -707,7 +712,35 @@
             {"account": "남편", "acct": "ISA", "name": "신한제14호스팩", "buy_amount": 850140, "quantity": 418, "buy_date": "2026-10-06"},
             {"account": "남편", "acct": "ISA", "name": "교보17호스팩", "buy_amount": 901790, "quantity": 438, "buy_date": "2026-10-06"},
             {"account": "남편", "acct": "ISA", "name": "하나34호스팩", "buy_amount": 294310, "quantity": 144, "buy_date": "2026-10-07"},
-            {"account": "남편", "acct": "ISA", "name": "KB제31호스팩", "buy_amount": 2072480, "quantity": 1019, "buy_date": "2026-10-13"}
+            {"account": "남편", "acct": "ISA", "name": "KB제31호스팩", "buy_amount": 2072480, "quantity": 1019, "buy_date": "2026-10-13"},
+            {"account": "아내", "acct": "ISA", "name": "에스케이증권제13호스팩", "buy_amount": calcBuyAmount(1999020, 986, 986), "quantity": 986, "buy_date": "2026-01-07"},
+            {"account": "아내", "acct": "ISA", "name": "에이치엠씨제7호스팩", "buy_amount": calcBuyAmount(583025, 289, 289), "quantity": 289, "buy_date": "2026-01-08"},
+            {"account": "아내", "acct": "ISA", "name": "한화플러스제5호스팩", "buy_amount": calcBuyAmount(2029025, 991, 808), "quantity": 808, "buy_date": "2026-02-25"},
+            {"account": "아내", "acct": "ISA", "name": "유안타제17호스팩", "buy_amount": calcBuyAmount(3085020, 1533, 1533), "quantity": 1533, "buy_date": "2026-05-19"},
+            {"account": "아내", "acct": "ISA", "name": "키움제11호스팩", "buy_amount": calcBuyAmount(3084625, 1529, 1529), "quantity": 1529, "buy_date": "2026-05-21"},
+            {"account": "아내", "acct": "ISA", "name": "신한제15호스팩", "buy_amount": calcBuyAmount(3083715, 1521, 1521), "quantity": 1521, "buy_date": "2026-06-04"},
+            {"account": "아내", "acct": "ISA", "name": "교보16호스팩", "buy_amount": calcBuyAmount(999515, 493, 493), "quantity": 493, "buy_date": "2026-06-30"},
+            {"account": "아내", "acct": "ISA", "name": "KB제30호스팩", "buy_amount": calcBuyAmount(1058890, 521, 521), "quantity": 521, "buy_date": "2026-06-30"},
+            {"account": "아내", "acct": "ISA", "name": "교보16호스팩", "buy_amount": calcBuyAmount(385210, 190, 190), "quantity": 190, "buy_date": "2026-07-16"},
+            {"account": "아내", "acct": "ISA", "name": "디비금융제13호스팩", "buy_amount": calcBuyAmount(2002190, 990, 990), "quantity": 990, "buy_date": "2026-07-16"},
+            {"account": "아내", "acct": "ISA", "name": "키움제10호스팩", "buy_amount": calcBuyAmount(1080660, 537, 537), "quantity": 537, "buy_date": "2026-07-21"},
+            {"account": "아내", "acct": "ISA", "name": "교보17호스팩", "buy_amount": calcBuyAmount(361115, 179, 179), "quantity": 179, "buy_date": "2026-07-21"},
+            {"account": "아내", "acct": "ISA", "name": "KB제30호스팩", "buy_amount": calcBuyAmount(999950, 492, 492), "quantity": 492, "buy_date": "2026-07-22"},
+            {"account": "아내", "acct": "ISA", "name": "키움제10호스팩", "buy_amount": calcBuyAmount(2010, 1, 1), "quantity": 1, "buy_date": "2026-07-22"},
+            {"account": "아내", "acct": "ISA", "name": "신한제14호스팩", "buy_amount": calcBuyAmount(985635, 491, 491), "quantity": 491, "buy_date": "2026-07-24"},
+            {"account": "아내", "acct": "ISA", "name": "키움제10호스팩", "buy_amount": calcBuyAmount(1000630, 496, 496), "quantity": 496, "buy_date": "2026-07-24"},
+            {"account": "아내", "acct": "ISA", "name": "교보17호스팩", "buy_amount": calcBuyAmount(1650290, 816, 816), "quantity": 816, "buy_date": "2026-07-24"},
+            {"account": "아내", "acct": "ISA", "name": "대신밸런스제19호스팩", "buy_amount": calcBuyAmount(1999700, 966, 966), "quantity": 966, "buy_date": "2026-08-18"},
+            {"account": "아내", "acct": "ISA", "name": "유진스팩11호", "buy_amount": calcBuyAmount(1999880, 990, 990), "quantity": 990, "buy_date": "2026-08-18"},
+            {"account": "아내", "acct": "ISA", "name": "교보16호스팩", "buy_amount": calcBuyAmount(477380, 234, 234), "quantity": 234, "buy_date": "2026-08-19"},
+            {"account": "아내", "acct": "ISA", "name": "유진스팩11호", "buy_amount": calcBuyAmount(999940, 495, 495), "quantity": 495, "buy_date": "2026-08-19"},
+            {"account": "아내", "acct": "ISA", "name": "KB제30호스팩", "buy_amount": calcBuyAmount(998800, 492, 492), "quantity": 492, "buy_date": "2026-08-25"},
+            {"account": "아내", "acct": "ISA", "name": "키움제10호스팩", "buy_amount": calcBuyAmount(1078065, 535, 535), "quantity": 535, "buy_date": "2026-08-25"},
+            {"account": "아내", "acct": "ISA", "name": "디비금융제13호스팩", "buy_amount": calcBuyAmount(941665, 465, 465), "quantity": 465, "buy_date": "2026-08-25"},
+            {"account": "아내", "acct": "ISA", "name": "신한제14호스팩", "buy_amount": calcBuyAmount(1057090, 522, 522), "quantity": 522, "buy_date": "2026-08-26"},
+            {"account": "아내", "acct": "ISA", "name": "교보17호스팩", "buy_amount": calcBuyAmount(998800, 492, 492), "quantity": 492, "buy_date": "2026-08-26"},
+            {"account": "아내", "acct": "ISA", "name": "유안타제17호스팩", "buy_amount": calcBuyAmount(2056450, 1018, 1018), "quantity": 1018, "buy_date": "2026-08-28"},
+            {"account": "아내", "acct": "ISA", "name": "하나34호스팩", "buy_amount": calcBuyAmount(2634635, 1301, 1301), "quantity": 1301, "buy_date": "2026-10-02"}
         ];
 
         function toAfterTaxDepositRate(preTaxRate) {
