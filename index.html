@@ -1,468 +1,4 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPAC Investment Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        input[type="date"] {
-            display: block;
-            width: 100%;
-            min-width: 0;
-            max-width: 100%;
-            height: 42px;
-            line-height: 42px;
-            padding: 0 12px;
-            box-sizing: border-box;
-            text-align: left;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-        input[type="date"]::-webkit-date-and-time-value {
-            text-align: left;
-            min-height: 0;
-            height: 42px;
-            line-height: 42px;
-            margin: 0;
-        }
-        input[type="date"]::-webkit-datetime-edit,
-        input[type="date"]::-webkit-datetime-edit-fields-wrapper {
-            padding: 0;
-            line-height: 42px;
-        }
-        input[type="date"]::-webkit-calendar-picker-indicator { margin: 0; padding: 0; }
-        #toast-auto { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 60; }
-    </style>
-</head>
-<body class="bg-slate-50 text-slate-900 font-sans">
-    <div class="max-w-7xl mx-auto px-4 py-10">
-        <!-- Header & Main Tab Navigation -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-slate-200 pb-6">
-            <div>
-                <div class="flex items-center gap-3 flex-wrap">
-                    <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">🚀 SPAC Investment Dashboard</h1>
-                    <span id="deposit-rate-badge" class="bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-                        기준 예금금리(세후): 연 --%
-                    </span>
-                </div>
-            </div>
-            <div class="flex items-center gap-3 flex-wrap">
-                <!-- 탭 전환 버튼 -->
-                <div class="bg-slate-200/80 p-1 rounded-xl flex gap-1">
-                    <button id="tab-btn-dashboard" onclick="switchTab('dashboard')" class="px-3.5 py-2 rounded-lg text-xs font-extrabold transition-all bg-white text-indigo-600 shadow-sm">
-                        📊 종목 분석
-                    </button>
-                    <button id="tab-btn-holdings" onclick="switchTab('holdings')" class="px-3.5 py-2 rounded-lg text-xs font-extrabold transition-all text-slate-600 hover:text-slate-900">
-                        📂 보유 종목 🔒
-                    </button>
-                    <button id="tab-btn-performance" onclick="switchTab('performance')" class="px-3.5 py-2 rounded-lg text-xs font-extrabold transition-all text-slate-600 hover:text-slate-900">
-                        💰 성과 관리 🔒
-                    </button>
-                </div>
-                <div id="update-time" class="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200 text-xs font-semibold text-slate-600">
-                    데이터 로딩 중...
-                </div>
-            </div>
-        </div>
-
-        <!-- ========================================================= -->
-        <!-- TAB 1: 종목 분석 뷰                                        -->
-        <!-- ========================================================= -->
-        <div id="view-dashboard">
-            <!-- Summary Stats Bar -->
-            <div class="grid grid-cols-3 gap-3 mb-8">
-                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">전체 스팩 수</span>
-                    <div id="stat-total-count" class="text-xl font-extrabold text-slate-800">- 개</div>
-                </div>
-                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-                    <span class="text-[11px] font-bold text-indigo-600 uppercase tracking-wider block mb-1">합병형 <span class="block text-slate-400 font-normal">(매수적정, 0%↑)</span></span>
-                    <div id="stat-merger-count" class="text-xl font-extrabold text-indigo-600 mt-1">- 개</div>
-                </div>
-                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-                    <span class="text-[11px] font-bold text-blue-600 uppercase tracking-wider block mb-1">청산형 <span class="block text-slate-400 font-normal">(매수적정, 예금↑)</span></span>
-                    <div id="stat-liq-count" class="text-xl font-extrabold text-blue-600 mt-1">- 개</div>
-                </div>
-            </div>
-
-            <!-- Recommendations Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-                <!-- 1. 합병형 추천 -->
-                <div class="bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-900 text-white p-6 rounded-2xl shadow-lg border border-indigo-500/25">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-base font-bold tracking-tight text-indigo-200">🤝 합병형 추천</h2>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
-                            <div>
-                                <span class="text-[10px] font-bold text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded">예금 이상 (ISA)</span>
-                                <h3 id="rec-merger-high-isa-name" class="text-sm font-bold mt-2 mb-2 truncate">-</h3>
-                            </div>
-                            <div class="space-y-1 text-xs text-slate-300">
-                                <div class="flex justify-between"><span>현재가</span><span id="rec-merger-high-isa-price" class="font-bold text-white">-</span></div>
-                                <div class="flex justify-between items-start"><span>수익률</span><span id="rec-merger-high-isa-yield" class="font-bold text-emerald-400 text-right">-</span></div>
-                                <div class="flex justify-between"><span>청산가</span><span id="rec-merger-high-isa-liq" class="font-bold text-white">-</span></div>
-                            </div>
-                        </div>
-                        <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
-                            <div>
-                                <span class="text-[10px] font-bold text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded">예금 이상 (일반)</span>
-                                <h3 id="rec-merger-high-gen-name" class="text-sm font-bold mt-2 mb-2 truncate">-</h3>
-                            </div>
-                            <div class="space-y-1 text-xs text-slate-300">
-                                <div class="flex justify-between"><span>현재가</span><span id="rec-merger-high-gen-price" class="font-bold text-white">-</span></div>
-                                <div class="flex justify-between items-start"><span>수익률</span><span id="rec-merger-high-gen-yield" class="font-bold text-emerald-400 text-right">-</span></div>
-                                <div class="flex justify-between"><span>청산가</span><span id="rec-merger-high-gen-liq" class="font-bold text-white">-</span></div>
-                            </div>
-                        </div>
-                        <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
-                            <div>
-                                <span class="text-[10px] font-bold text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded">0%~예금미만 (ISA)</span>
-                                <h3 id="rec-merger-mid-isa-name" class="text-sm font-bold mt-2 mb-2 truncate">-</h3>
-                            </div>
-                            <div class="space-y-1 text-xs text-slate-300">
-                                <div class="flex justify-between"><span>현재가</span><span id="rec-merger-mid-isa-price" class="font-bold text-white">-</span></div>
-                                <div class="flex justify-between items-start"><span>수익률</span><span id="rec-merger-mid-isa-yield" class="font-bold text-emerald-400 text-right">-</span></div>
-                                <div class="flex justify-between"><span>청산가</span><span id="rec-merger-mid-isa-liq" class="font-bold text-white">-</span></div>
-                            </div>
-                        </div>
-                        <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
-                            <div>
-                                <span class="text-[10px] font-bold text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded">0%~예금미만 (일반)</span>
-                                <h3 id="rec-merger-mid-gen-name" class="text-sm font-bold mt-2 mb-2 truncate">-</h3>
-                            </div>
-                            <div class="space-y-1 text-xs text-slate-300">
-                                <div class="flex justify-between"><span>현재가</span><span id="rec-merger-mid-gen-price" class="font-bold text-white">-</span></div>
-                                <div class="flex justify-between items-start"><span>수익률</span><span id="rec-merger-mid-gen-yield" class="font-bold text-emerald-400 text-right">-</span></div>
-                                <div class="flex justify-between"><span>청산가</span><span id="rec-merger-mid-gen-liq" class="font-bold text-white">-</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 2. 청산형 추천 -->
-                <div class="bg-gradient-to-br from-blue-950 via-slate-900 to-slate-900 text-white p-6 rounded-2xl shadow-lg border border-blue-500/25">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-base font-bold tracking-tight text-blue-200">🛡️ 청산형 추천</h2>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
-                            <div>
-                                <span class="text-[10px] font-bold text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded">예금 이상 (ISA)</span>
-                                <h3 id="rec-liq-high-isa-name" class="text-sm font-bold mt-2 mb-2 truncate">-</h3>
-                            </div>
-                            <div class="space-y-1 text-xs text-slate-300">
-                                <div class="flex justify-between"><span>현재가</span><span id="rec-liq-high-isa-price" class="font-bold text-white">-</span></div>
-                                <div class="flex justify-between items-start"><span>수익률</span><span id="rec-liq-high-isa-yield" class="font-bold text-emerald-400 text-right">-</span></div>
-                                <div class="flex justify-between"><span>청산가</span><span id="rec-liq-high-isa-liq" class="font-bold text-white">-</span></div>
-                            </div>
-                        </div>
-                        <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
-                            <div>
-                                <span class="text-[10px] font-bold text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded">예금 이상 (일반)</span>
-                                <h3 id="rec-liq-high-gen-name" class="text-sm font-bold mt-2 mb-2 truncate">-</h3>
-                            </div>
-                            <div class="space-y-1 text-xs text-slate-300">
-                                <div class="flex justify-between"><span>현재가</span><span id="rec-liq-high-gen-price" class="font-bold text-white">-</span></div>
-                                <div class="flex justify-between items-start"><span>수익률</span><span id="rec-liq-high-gen-yield" class="font-bold text-emerald-400 text-right">-</span></div>
-                                <div class="flex justify-between"><span>청산가</span><span id="rec-liq-high-gen-liq" class="font-bold text-white">-</span></div>
-                            </div>
-                        </div>
-                        <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
-                            <div>
-                                <span class="text-[10px] font-bold text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded">0%~예금미만 (ISA)</span>
-                                <h3 id="rec-liq-mid-isa-name" class="text-sm font-bold mt-2 mb-2 truncate">-</h3>
-                            </div>
-                            <div class="space-y-1 text-xs text-slate-300">
-                                <div class="flex justify-between"><span>현재가</span><span id="rec-liq-mid-isa-price" class="font-bold text-white">-</span></div>
-                                <div class="flex justify-between items-start"><span>수익률</span><span id="rec-liq-mid-isa-yield" class="font-bold text-emerald-400 text-right">-</span></div>
-                                <div class="flex justify-between"><span>청산가</span><span id="rec-liq-mid-isa-liq" class="font-bold text-white">-</span></div>
-                            </div>
-                        </div>
-                        <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
-                            <div>
-                                <span class="text-[10px] font-bold text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded">0%~예금미만 (일반)</span>
-                                <h3 id="rec-liq-mid-gen-name" class="text-sm font-bold mt-2 mb-2 truncate">-</h3>
-                            </div>
-                            <div class="space-y-1 text-xs text-slate-300">
-                                <div class="flex justify-between"><span>현재가</span><span id="rec-liq-mid-gen-price" class="font-bold text-white">-</span></div>
-                                <div class="flex justify-between items-start"><span>수익률</span><span id="rec-liq-mid-gen-yield" class="font-bold text-emerald-400 text-right">-</span></div>
-                                <div class="flex justify-between"><span>청산가</span><span id="rec-liq-mid-gen-liq" class="font-bold text-white">-</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Filters & Search Bar -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4 items-center">
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">투자 유형</label>
-                    <select id="filter-type" onchange="applyFilters()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
-                        <option value="all">전체</option>
-                        <option value="합병">합병</option>
-                        <option value="청산">청산</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">매수 적정</label>
-                    <select id="filter-fair" onchange="applyFilters()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
-                        <option value="all">전체</option>
-                        <option value="O">적정</option>
-                        <option value="X">부적정</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">거래 상태</label>
-                    <select id="filter-status" onchange="applyFilters()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
-                        <option value="all">전체</option>
-                        <option value="일반" selected>일반</option>
-                        <option value="정지">정지</option>
-                        <option value="합병">합병</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">투자 계좌</label>
-                    <select id="filter-account" onchange="applyFilters()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
-                        <option value="isa" selected>ISA</option>
-                        <option value="general">일반</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">청산 연도</label>
-                    <select id="filter-delisting-year" onchange="applyFilters()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
-                        <option value="all" selected>전체</option>
-                        <option value="2027">2027</option>
-                        <option value="2028">2028</option>
-                        <option value="2029">2029</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">예상 수익률</label>
-                    <select id="filter-yield-range" onchange="applyFilters()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
-                        <option value="all" selected>전체</option>
-                        <option value="above_deposit">예금 이상(세후)</option>
-                        <option value="low_positive">0% 이상 ~ 예금 미만(세후)</option>
-                        <option value="negative">0% 미만</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">종목 검색</label>
-                    <input type="text" id="search-input" onkeyup="applyFilters()" placeholder="종목명 입력..." class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700">
-                </div>
-            </div>
-
-            <!-- Data Table -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="px-5 py-2.5 bg-indigo-50/60 border-b border-slate-200/80 flex items-center justify-between flex-wrap gap-2 text-[11px] text-slate-600">
-                    <span>💡 <strong>종목명</strong>을 클릭하면 청산가·매수적정가 산출 근거 카드가 열립니다.</span>
-                    <span class="text-slate-400">산식 주석은 표 하단 참고</span>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse whitespace-nowrap">
-                        <thead>
-                            <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200 select-none">
-                                <th onclick="sortData('name')" class="py-3.5 px-5 font-bold cursor-pointer hover:bg-slate-200 transition-colors min-w-[210px]">종목명 <span id="sort-icon-name" class="text-slate-400">↕</span></th>
-                                <th onclick="sortData('current_price')" class="py-3.5 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-right">현재가 <span id="sort-icon-current_price" class="text-slate-400">↕</span></th>
-                                <th onclick="sortData('liquidation_price')" class="py-3.5 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-right">
-                                    <span class="inline-flex items-center justify-end gap-1">
-                                        청산가
-                                        <span title="청산가 산식: 만기 신탁금 ÷ 공모주식수" class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-slate-600 text-[10px] font-extrabold cursor-help">?</span>
-                                        <span id="sort-icon-liquidation_price" class="text-slate-400">↕</span>
-                                    </span>
-                                </th>
-                                <th onclick="sortData('yield')" class="py-3.5 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-right"><span id="yield-header-col">예상수익률</span> <span id="sort-icon-yield" class="text-slate-400">↕</span></th>
-                                <th onclick="sortData('delisting_date')" class="py-3.5 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-center">청산일 <span id="sort-icon-delisting_date" class="text-slate-400">↕</span></th>
-                                <th onclick="sortData('status')" class="py-3.5 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-center">상태 <span id="sort-icon-status" class="text-slate-400">↕</span></th>
-                            </tr>
-                        </thead>
-                        <tbody id="spac-table-body" class="divide-y divide-slate-100 text-sm font-medium text-slate-700">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 청산가 / 매수적정가 산식 주석 영역 -->
-            <div class="mt-4 bg-slate-100/80 border border-slate-200 rounded-2xl p-4 sm:p-5 text-xs text-slate-600 space-y-2.5 leading-relaxed">
-                <div class="flex items-start gap-2">
-                    <span class="shrink-0 font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded text-[11px]">※ 청산가 · 신탁금 산식</span>
-                    <div>
-                        <code class="font-mono text-slate-800 bg-white px-1.5 py-0.5 rounded border border-slate-200">청산단가 = 만기 신탁금 ÷ 공모주식수</code>
-                        <span class="mx-1 text-slate-400">/</span>
-                        <code class="font-mono text-slate-800 bg-white px-1.5 py-0.5 rounded border border-slate-200">신탁금 = 직전 신탁금 + (직전 신탁금 × 예치 이자율 × 기간비율 × (1 − 이자소득세 15.4%)) − (직전 신탁금 × 신탁수수료 0.1% × 기간비율)</code>
-                        <span class="block text-slate-500 mt-0.5">· 공시에서 확인된 연차별·6개월 단위 예치 이자율과 이자소득세(15.4%)·신탁수수료(0.1%)를 반영하며, 공시 미확인 구간은 임의 추정치로 채우지 않고 공시 미확인으로 표기합니다.</span>
-                    </div>
-                </div>
-                <div class="flex items-start gap-2">
-                    <span class="shrink-0 font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded text-[11px]">※ 매수적정가 및 적정 판정 산식</span>
-                    <div>
-                        <code class="font-mono text-slate-800 bg-white px-1.5 py-0.5 rounded border border-slate-200">매수적정가 = 공모가 + (청산가 − 공모가) × (오늘 − 상장일) ÷ (상장폐지일 − 상장일)</code>
-                        <span class="block text-slate-500 mt-0.5">· 테이블의 ‘적정/부적정/판정불가’ 배지와 상세 카드의 ‘매수적정’ 모두 동일한 산식(정확한 데이터가 모두 있을 때 현재가 ≤ 매수적정가이면 적정)으로 판정하며, 데이터가 없으면 임의 기재 없이 미확인/판정불가로 처리합니다.</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ========================================================= -->
-        <!-- TAB 2: 보유 종목 뷰                                        -->
-        <!-- ========================================================= -->
-        <div id="view-holdings" class="hidden">
-            <div id="holdings-lock-screen" class="bg-white p-10 rounded-2xl shadow-sm border border-slate-200 text-center max-w-md mx-auto my-20">
-                <div class="text-4xl mb-4">🔒</div>
-                <h2 class="text-xl font-extrabold text-slate-800 mb-2">보유 종목 탭 보호</h2>
-                <p class="text-xs text-slate-500 mb-6">보유 종목에 접근하려면 비밀번호를 입력해주세요.</p>
-                <form onsubmit="unlockPrivateTabs(event, 'holdings')" class="space-y-4">
-                    <input type="password" id="holdings-password-input" placeholder="비밀번호 4자리 입력" maxlength="4" class="w-full px-4 py-3 text-center text-lg tracking-widest border border-slate-300 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
-                    <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors shadow-sm">잠금 해제</button>
-                </form>
-            </div>
-
-            <div id="holdings-content" class="hidden">
-                <div class="space-y-3 mb-6">
-                    <div class="grid grid-cols-2 gap-3 sm:gap-4">
-                        <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
-                            <span class="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">매수금</span>
-                            <div id="hold-total-buy" class="text-2xl sm:text-4xl font-black text-slate-800 truncate">- 원</div>
-                        </div>
-                        <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
-                            <span class="text-[11px] sm:text-xs font-bold text-indigo-600 uppercase tracking-wider block mb-1">평가금액</span>
-                            <div id="hold-total-eval" class="text-2xl sm:text-4xl font-black text-indigo-600 truncate">- 원</div>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 sm:gap-4">
-                        <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
-                            <span class="text-[11px] sm:text-xs font-bold text-emerald-600 uppercase tracking-wider block mb-1">단순 수익률</span>
-                            <div id="hold-total-simple" class="text-2xl sm:text-4xl font-black text-emerald-600 truncate">- %</div>
-                        </div>
-                        <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
-                            <span class="text-[11px] sm:text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">연환산 수익률</span>
-                            <div id="hold-total-annual" class="text-2xl sm:text-4xl font-black text-blue-600 truncate">- %</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h2 class="text-base font-bold text-slate-800">📥 등록하기</h2>
-                            <p class="text-xs text-slate-400 mt-0.5">수수료 등이 모두 포함된 총 매수금액과 매수량을 입력하면 평단가 기준으로 평가손익이 자동 계산됩니다.</p>
-                        </div>
-                        <button onclick="lockPrivateTabs()" class="text-xs text-rose-500 hover:underline font-semibold">🔒 잠금</button>
-                    </div>
-                    <form onsubmit="addHoldingItem(event)" class="space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">계좌 명의</label>
-                                <select id="hold-input-holder" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
-                                    <option value="남편" selected>남편</option>
-                                    <option value="아내">아내</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">계좌 구분</label>
-                                <select id="hold-input-account" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
-                                    <option value="ISA" selected>ISA</option>
-                                    <option value="일반">일반</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">종목명</label>
-                                <input type="text" id="hold-input-name" list="spac-name-list" placeholder="종목명 입력 또는 선택" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
-                                <datalist id="spac-name-list"></datalist>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매수금</label>
-                                <input type="number" id="hold-input-amount" placeholder="예: 2005000" min="1" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매수량</label>
-                                <input type="number" id="hold-input-quantity" placeholder="예: 1000" min="1" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매수일</label>
-                                <input type="date" id="hold-input-date" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
-                            </div>
-                        </div>
-                        <div>
-                            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-colors shadow-sm">➕ 보유 종목</button>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-center">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">계좌 명의</label>
-                        <select id="hold-filter-holder" onchange="renderHoldings()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
-                            <option value="all" selected>전체</option>
-                            <option value="남편">남편</option>
-                            <option value="아내">아내</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">계좌 구분</label>
-                        <select id="hold-filter-account" onchange="renderHoldings()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
-                            <option value="all" selected>전체</option>
-                            <option value="ISA">ISA</option>
-                            <option value="일반">일반</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">청산 연도</label>
-                        <select id="hold-filter-delisting-year" onchange="renderHoldings()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
-                            <option value="all" selected>전체</option>
-                            <option value="2027">2027</option>
-                            <option value="2028">2028</option>
-                            <option value="2029">2029</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">예금 이상</label>
-                        <select id="hold-filter-benchmark" onchange="renderHoldings()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
-                            <option value="all" selected>전체</option>
-                            <option value="beat">달성</option>
-                            <option value="miss">미달</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">거래 상태</label>
-                        <select id="hold-filter-status" onchange="renderHoldings()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
-                            <option value="all" selected>전체</option>
-                            <option value="일반">일반</option>
-                            <option value="정지">정지</option>
-                            <option value="합병">합병</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">종목 검색</label>
-                        <input type="text" id="hold-search-input" onkeyup="renderHoldings()" placeholder="종목명 검색..." class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700">
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200 select-none">
-                                    <th onclick="sortHoldingData('holder')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-center">명의 <span id="hold-sort-icon-holder" class="text-slate-400">↕</span></th>
-                                    <th onclick="sortHoldingData('acct')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-center">계좌 <span id="hold-sort-icon-acct" class="text-slate-400">↕</span></th>
-                                    <th onclick="sortHoldingData('name')" class="py-4 px-5 font-bold cursor-pointer hover:bg-slate-200 transition-colors">종목명 <span id="hold-sort-icon-name" class="text-slate-400">↕</span></th>
-                                    <th onclick="sortHoldingData('buy_amount')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors">매수금 <span id="hold-sort-icon-buy_amount" class="text-slate-400">↕</span></th>
-                                    <th onclick="sortHoldingData('eval_amount')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors">평가금(손익) <span id="hold-sort-icon-eval_amount" class="text-slate-400">↕</span></th>
-                                    <th onclick="sortHoldingData('annualYield')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors">수익률(연환산/단순) <span id="hold-sort-icon-annualYield" class="text-slate-400">↕</span></th>
-                                    <th onclick="sortHoldingData('spacStatus')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-center">상태 <span id="hold-sort-icon-spacStatus" class="text-slate-400">↕</span></th>
-                                    <th class="py-4 px-4 font-bold text-center">관리</th>
-                                </tr>
-                            </thead>
-                            <tbody id="holdings-table-body" class="divide-y divide-slate-100 text-sm font-medium text-slate-700">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ========================================================= -->
+<!-- ========================================================= -->
         <!-- TAB 3: 성과 관리 뷰                                        -->
         <!-- ========================================================= -->
         <div id="view-performance" class="hidden">
@@ -632,7 +168,7 @@
 
                 <!-- 청산가 계산 요소 -->
                 <div class="bg-indigo-50/40 border border-indigo-200/70 rounded-xl p-4 space-y-3 text-center">
-                    <h4 class="text-xs font-extrabold text-indigo-900 uppercase tracking-wider text-center">📐 청산가 계산 요소</h4>
+                    <h4 class="text-xs font-extrabold text-indigo-900 uppercase tracking-wider text-center">📐 청산가 계산 요소 (DART 공시 반영)</h4>
                     <div class="grid grid-cols-3 gap-2.5">
                         <div class="bg-white border border-indigo-100 rounded-lg p-2.5 text-center">
                             <span class="text-[11px] font-bold text-slate-400 block">공모금</span>
@@ -760,8 +296,8 @@
 
         const DEPOSIT_NET_FACTOR = 0.845;
         const GENERAL_TAX_RATE = 0.154;
-        const DEFAULT_INCOME_TAX_RATE = 0.154; // 이자소득세 15.4%
-        const DEFAULT_TRUST_FEE_RATE = 0.001;  // 신탁수수료 연 0.1%
+        const DEFAULT_INCOME_TAX_RATE = 0.154;
+        const DEFAULT_TRUST_FEE_RATE = 0.001;
         const MERGER_THRESHOLD_DAYS = 365;
         const SEED_KEY = 'spac_seed_applied_v3';
         const EXCLUDED_SPAC_CODES = new Set(['206400']);
@@ -985,6 +521,70 @@
             return Number.isFinite(num) ? num : null;
         }
 
+        function parseKoreanCurrencyAmount(val) {
+            if (val === null || val === undefined || val === '') return null;
+            if (typeof val === 'number') return Number.isFinite(val) && val > 0 ? val : null;
+            let str = String(val).replace(/,/g, '').trim();
+            if (!str || str === '-' || str === '미확인') return null;
+
+            if (/^\d+(?:\.\d+)?\s*원?$/.test(str)) {
+                const direct = Number(str.replace(/원$/g, '').trim());
+                return Number.isFinite(direct) && direct > 0 ? Math.round(direct) : null;
+            }
+
+            let total = 0;
+            let matched = false;
+            const unitPatterns = [
+                { regex: /(\d+(?:\.\d+)?)\s*조/g, mult: 1e12 },
+                { regex: /(\d+(?:\.\d+)?)\s*억/g, mult: 1e8 },
+                { regex: /(\d+(?:\.\d+)?)\s*만(?!\s*주)/g, mult: 1e4 },
+                { regex: /(\d+(?:\.\d+)?)\s*원/g, mult: 1 }
+            ];
+
+            for (const { regex, mult } of unitPatterns) {
+                let m;
+                while ((m = regex.exec(str)) !== null) {
+                    total += Number(m[1]) * mult;
+                    matched = true;
+                }
+                str = str.replace(regex, ' ');
+            }
+
+            return matched && total > 0 ? Math.round(total) : null;
+        }
+
+        function parseKoreanShareCount(val) {
+            if (val === null || val === undefined || val === '') return null;
+            if (typeof val === 'number') return Number.isFinite(val) && val > 0 ? Math.round(val) : null;
+            let str = String(val).replace(/,/g, '').trim();
+            if (!str || str === '-' || str === '미확인') return null;
+
+            if (/^\d+(?:\.\d+)?\s*주?$/.test(str)) {
+                const num = Number(str.replace(/주$/g, '').trim());
+                return Number.isFinite(num) && num > 0 ? Math.round(num) : null;
+            }
+
+            let total = 0;
+            let matched = false;
+            const unitPatterns = [
+                { regex: /(\d+(?:\.\d+)?)\s*억\s*주?/g, mult: 1e8 },
+                { regex: /(\d+(?:\.\d+)?)\s*만\s*주?/g, mult: 1e4 },
+                { regex: /(\d+(?:\.\d+)?)\s*천\s*주?/g, mult: 1e3 },
+                { regex: /(\d+(?:\.\d+)?)\s*주/g, mult: 1 }
+            ];
+
+            for (const { regex, mult } of unitPatterns) {
+                let m;
+                while ((m = regex.exec(str)) !== null) {
+                    total += Number(m[1]) * mult;
+                    matched = true;
+                }
+                str = str.replace(regex, ' ');
+            }
+
+            return matched && total > 0 ? Math.round(total) : null;
+        }
+
         function parseRateFraction(val) {
             const num = toFiniteNumber(val);
             if (num === null) return null;
@@ -1018,16 +618,67 @@
             return dateStr ? String(dateStr).trim() : '';
         }
 
+        function collectDartTexts(item) {
+            const texts = [];
+            const candidates = [
+                item.dart_summary,
+                item.dart_text,
+                item.disclosure_text,
+                item.prospectus_summary,
+                item.trust_note,
+                item.deposit_note
+            ];
+            for (const c of candidates) {
+                if (typeof c === 'string' && c.trim()) texts.push(c.trim());
+            }
+            const listKeys = ['recent_disclosures', 'disclosures', 'dart_disclosures', 'filings'];
+            for (const lk of listKeys) {
+                if (Array.isArray(item[lk])) {
+                    for (const d of item[lk]) {
+                        if (typeof d === 'string') {
+                            texts.push(d);
+                        } else if (d && typeof d === 'object') {
+                            const combined = [d.report_nm, d.title, d.summary, d.content, d.note, d.desc]
+                                .filter(Boolean).join(' ');
+                            if (combined) texts.push(combined);
+                        }
+                    }
+                }
+            }
+            return texts;
+        }
+
         function getDelistingDateValue(item) {
             if (!item || typeof item !== 'object') return '';
-            const raw = item.delisting_date || item.liquidation_date || item.maturity_date || item.maturityDate || '';
-            return normalizeDateStr(raw);
+            const raw = item.delisting_date || item.liquidation_date || item.maturity_date || item.maturityDate || item.dart_delisting_date || '';
+            const norm = normalizeDateStr(raw);
+            if (norm) return norm;
+
+            for (const txt of collectDartTexts(item)) {
+                const m = txt.match(/(?:상장폐지일|해산청구일|청산예정일|만기일)[^\d]{0,10}(\d{4}[-./]?\d{2}[-./]?\d{2})/);
+                if (m) {
+                    const parsed = normalizeDateStr(m[1]);
+                    if (parsed) return parsed;
+                }
+            }
+            return '';
         }
 
         function getListingDateValue(item) {
             if (!item || typeof item !== 'object') return '';
-            const direct = item.listing_date || item.listingDate || item.ipo_date || item.ipoDate || item.listed_date || '';
-            return direct ? normalizeDateStr(direct) : '';
+            const direct = item.listing_date || item.listingDate || item.ipo_date || item.ipoDate || item.listed_date || item.dart_listing_date || '';
+            if (direct) {
+                const norm = normalizeDateStr(direct);
+                if (norm) return norm;
+            }
+            for (const txt of collectDartTexts(item)) {
+                const m = txt.match(/(?:신규상장일|상장일|코스닥상장일)[^\d]{0,10}(\d{4}[-./]?\d{2}[-./]?\d{2})/);
+                if (m) {
+                    const parsed = normalizeDateStr(m[1]);
+                    if (parsed) return parsed;
+                }
+            }
+            return '';
         }
 
         function getDaysUntilDelisting(dateStr) {
@@ -1085,9 +736,79 @@
             return '청산';
         }
 
+        function resolveIpoMetrics(item) {
+            if (!item || typeof item !== 'object') {
+                return { parPrice: null, ipoAmount: null, ipoShares: null };
+            }
+
+            const sources = [
+                item,
+                item.ipo_info,
+                item.dart_parsed,
+                item.disclosure_info,
+                item.trust_info
+            ].filter(o => o && typeof o === 'object');
+
+            let parPrice = null;
+            for (const src of sources) {
+                const v = toFiniteNumber(src.ipo_price ?? src.public_offering_price ?? src.offer_price ?? src.par_price ?? src.issue_price);
+                if (v !== null && v > 0) { parPrice = v; break; }
+            }
+
+            let ipoShares = null;
+            for (const src of sources) {
+                const rawS = src.ipo_shares ?? src.offering_shares ?? src.public_shares ?? src.shares ?? src.dart_ipo_shares ?? src.total_ipo_shares;
+                const v = parseKoreanShareCount(rawS);
+                if (v !== null && v > 0) { ipoShares = v; break; }
+            }
+
+            let ipoAmount = null;
+            for (const src of sources) {
+                const rawA = src.ipo_amount ?? src.offering_amount ?? src.public_amount ?? src.deposit_principal ?? src.trust_principal ?? src.dart_ipo_amount ?? src.offering_total_amount;
+                const v = parseKoreanCurrencyAmount(rawA);
+                if (v !== null && v > 0) { ipoAmount = v; break; }
+            }
+
+            if (ipoAmount === null || ipoShares === null || parPrice === null) {
+                for (const txt of collectDartTexts(item)) {
+                    if (ipoAmount === null) {
+                        const mAmt = txt.match(/(?:공모금액|모집총액|공모총액|예치원금|신탁원금)[^\d]{0,15}(\d[\d,.]*(?:\s*(?:조|억|만|원))+)/);
+                        if (mAmt) {
+                            const parsedAmt = parseKoreanCurrencyAmount(mAmt[1]);
+                            if (parsedAmt !== null) ipoAmount = parsedAmt;
+                        }
+                    }
+                    if (ipoShares === null) {
+                        const mShr = txt.match(/(?:공모주식수|모집주식수|공모주수|발행주식수)[^\d]{0,15}(\d[\d,.]*(?:\s*(?:억|만|천|주))+)/);
+                        if (mShr) {
+                            const parsedShr = parseKoreanShareCount(mShr[1]);
+                            if (parsedShr !== null) ipoShares = parsedShr;
+                        }
+                    }
+                    if (parPrice === null) {
+                        const mPrc = txt.match(/(?:공모가|확정공모가|발행가액|주당발행가)[^\d]{0,12}(\d[\d,.]*)\s*원/);
+                        if (mPrc) {
+                            const parsedPrc = toFiniteNumber(mPrc[1]);
+                            if (parsedPrc !== null && parsedPrc > 0) parPrice = parsedPrc;
+                        }
+                    }
+                }
+            }
+
+            if (ipoAmount !== null && ipoShares === null && parPrice !== null && parPrice > 0) {
+                ipoShares = Math.round(ipoAmount / parPrice);
+            } else if (ipoShares !== null && ipoAmount === null && parPrice !== null && parPrice > 0) {
+                ipoAmount = Math.round(ipoShares * parPrice);
+            } else if (parPrice === null && ipoAmount !== null && ipoShares !== null && ipoShares > 0) {
+                parPrice = ipoAmount / ipoShares;
+            }
+
+            return { parPrice, ipoAmount, ipoShares };
+        }
+
         function computeAccruedFairPriceDetails(item) {
             if (!item) return { fairPrice: null, complete: false };
-            const parPrice = toFiniteNumber(item.ipo_price ?? item.public_offering_price ?? item.offer_price);
+            const { parPrice } = resolveIpoMetrics(item);
             const liqPrice = toFiniteNumber(item.liquidation_price);
             const listingDateStr = getListingDateValue(item);
             const delistingDateStr = getDelistingDateValue(item);
@@ -1211,7 +932,8 @@
 
         function extractDisclosedDepositSchedule(item) {
             const schedules = [];
-            const rawSchedules = item.deposit_schedule || item.trust_schedule || item.schedule || item.half_year_rates || item.six_month_rates;
+            const rawSchedules = item.deposit_schedule || item.trust_schedule || item.schedule || item.half_year_rates || item.six_month_rates
+                || item.dart_parsed?.deposit_schedule || item.trust_info?.deposit_schedule || item.deposit_info?.deposit_schedule;
 
             if (Array.isArray(rawSchedules) && rawSchedules.length > 0) {
                 rawSchedules.forEach((entry, idx) => {
@@ -1221,7 +943,7 @@
                         const months = toFiniteNumber(entry.months ?? entry.month_count);
                         const yearFraction = toFiniteNumber(entry.year_fraction ?? entry.fraction)
                             ?? (months !== null && months > 0 ? months / 12 : (String(label).includes('6개월') || String(label).includes('반기') ? 0.5 : 1.0));
-                        const trust = toFiniteNumber(entry.trust_amount ?? entry.amount ?? entry.trust);
+                        const trust = parseKoreanCurrencyAmount(entry.trust_amount ?? entry.amount ?? entry.trust);
                         schedules.push({ label, rate, yearFraction, trust });
                     } else {
                         const rate = toFiniteNumber(entry);
@@ -1237,6 +959,7 @@
                 item.trust_info,
                 item.disclosure_info,
                 item.ipo_info,
+                item.dart_parsed,
                 item.rates
             ].filter(o => o && typeof o === 'object');
 
@@ -1272,7 +995,8 @@
                 item.trust_interest_rates,
                 item.deposit_interest_rates,
                 item.interest_rates,
-                item.yearly_rates
+                item.yearly_rates,
+                item.dart_parsed?.yearly_deposit_rates
             ];
             const yearRates = [null, null, null];
             for (const arr of arrCandidates) {
@@ -1307,6 +1031,15 @@
                 }
             }
 
+            for (const txt of collectDartTexts(item)) {
+                const y1 = txt.match(/(?:1년차|1차년도|최초\s*6개월|1~6개월)[^\d]{0,12}(\d+(?:\.\d+)?)\s*%/);
+                const y2 = txt.match(/(?:2년차|2차년도|13~18개월)[^\d]{0,12}(\d+(?:\.\d+)?)\s*%/);
+                const y3 = txt.match(/(?:3년차|3차년도|25~30개월)[^\d]{0,12}(\d+(?:\.\d+)?)\s*%/);
+                if (y1 && yearRates[0] === null) yearRates[0] = toFiniteNumber(y1[1]);
+                if (y2 && yearRates[1] === null) yearRates[1] = toFiniteNumber(y2[1]);
+                if (y3 && yearRates[2] === null) yearRates[2] = toFiniteNumber(y3[1]);
+            }
+
             if (yearRates[0] === null) {
                 const singleCandidates = [
                     item.spac_deposit_rate,
@@ -1328,10 +1061,9 @@
                 }
             }
 
-            if (yearRates[0] === null && Array.isArray(item.recent_disclosures)) {
-                for (const d of item.recent_disclosures) {
-                    const txt = `${d?.report_nm || ''} ${d?.summary || ''} ${d?.note || ''}`;
-                    const m = txt.match(/(?:예치이자율|예치이율|이자율|금리)[^\d]{0,12}(\d+(?:\.\d+)?)\s*%/);
+            if (yearRates[0] === null) {
+                for (const txt of collectDartTexts(item)) {
+                    const m = txt.match(/(?:예치이자율|예치이율|신탁이자율|이자율|금리)[^\d]{0,12}(\d+(?:\.\d+)?)\s*%/);
                     if (m) {
                         const parsedRate = toFiniteNumber(m[1]);
                         if (parsedRate !== null && parsedRate > 0 && parsedRate < 15) {
@@ -1353,6 +1085,57 @@
             return schedules;
         }
 
+        function enrichSpacItemFromDart(item, idx) {
+            const { parPrice, ipoAmount, ipoShares } = resolveIpoMetrics(item);
+            const resolvedDelistingDate = getDelistingDateValue(item);
+            const resolvedListingDate = getListingDateValue(item);
+            const incomeTaxRate = parseRateFraction(item.interest_tax_rate ?? item.income_tax_rate ?? item.tax_rate) ?? DEFAULT_INCOME_TAX_RATE;
+            const trustFeeRate = parseRateFraction(item.trust_fee_rate ?? item.custody_fee_rate ?? item.management_fee_rate) ?? DEFAULT_TRUST_FEE_RATE;
+
+            let liqPrice = toFiniteNumber(item.liquidation_price ?? item.liquidationPrice);
+            if (liqPrice === null && ipoAmount !== null && ipoShares !== null && ipoShares > 0) {
+                const schedules = extractDisclosedDepositSchedule(item);
+                let runningTrust = ipoAmount;
+                let hasAnyRate = false;
+                for (const sc of schedules) {
+                    if (sc.trust !== null) {
+                        runningTrust = sc.trust;
+                        hasAnyRate = true;
+                    } else if (sc.rate !== null && runningTrust !== null) {
+                        const frac = sc.yearFraction ?? 1.0;
+                        const afterTaxInterest = runningTrust * (sc.rate / 100) * frac * (1 - incomeTaxRate);
+                        const trustFee = runningTrust * trustFeeRate * frac;
+                        runningTrust = runningTrust + afterTaxInterest - trustFee;
+                        hasAnyRate = true;
+                    }
+                }
+                if (hasAnyRate && runningTrust > 0) {
+                    liqPrice = Math.round(runningTrust / ipoShares);
+                }
+            }
+
+            const normalizedItem = {
+                ...item,
+                _idx: idx,
+                ipo_price: parPrice,
+                ipo_amount: ipoAmount,
+                ipo_shares: ipoShares,
+                listing_date: resolvedListingDate,
+                current_price: toFiniteNumber(item.current_price ?? item.currentPrice),
+                liquidation_price: liqPrice,
+                delisting_date: resolvedDelistingDate,
+                status: normalizeStatus(item.status)
+            };
+
+            const fairEval = evaluateFairBuyStatus(normalizedItem);
+            return {
+                ...normalizedItem,
+                fair_eval_status: fairEval.status,
+                fair_price_calc: fairEval.fairPrice,
+                invest_type: normalizeInvestType(normalizedItem)
+            };
+        }
+
         function openSpacDetailModal(index) {
             const item = allItems[index];
             if (!item) return;
@@ -1369,15 +1152,7 @@
             const yIsa = resolveAccountYield(item, 'isa');
             const yGen = resolveAccountYield(item, 'general');
 
-            const parPrice = toFiniteNumber(item.ipo_price ?? item.public_offering_price ?? item.offer_price);
-            let ipoShares = toFiniteNumber(item.ipo_shares ?? item.offering_shares ?? item.public_shares ?? item.shares);
-            let ipoAmount = toFiniteNumber(item.ipo_amount ?? item.offering_amount ?? item.public_amount ?? item.deposit_principal ?? item.trust_principal);
-
-            if (ipoAmount !== null && ipoShares === null && parPrice !== null && parPrice > 0) {
-                ipoShares = Math.round(ipoAmount / parPrice);
-            } else if (ipoShares !== null && ipoAmount === null && parPrice !== null && parPrice > 0) {
-                ipoAmount = Math.round(ipoShares * parPrice);
-            }
+            const { ipoAmount, ipoShares } = resolveIpoMetrics(item);
 
             const incomeTaxRate = parseRateFraction(item.interest_tax_rate ?? item.income_tax_rate ?? item.tax_rate) ?? DEFAULT_INCOME_TAX_RATE;
             const trustFeeRate = parseRateFraction(item.trust_fee_rate ?? item.custody_fee_rate ?? item.management_fee_rate) ?? DEFAULT_TRUST_FEE_RATE;
@@ -1434,8 +1209,8 @@
             document.getElementById('detail-invest-type').innerText = investType;
             document.getElementById('detail-status').innerText = status;
 
-            document.getElementById('detail-ipo-amount').innerText = ipoAmount !== null ? `${ipoAmount.toLocaleString()}원` : '공시 미확인';
-            document.getElementById('detail-ipo-shares').innerText = ipoShares !== null ? `${ipoShares.toLocaleString()}주` : '공시 미확인';
+            document.getElementById('detail-ipo-amount').innerText = ipoAmount !== null ? `${Math.round(ipoAmount).toLocaleString()}원` : '공시 미확인';
+            document.getElementById('detail-ipo-shares').innerText = ipoShares !== null ? `${Math.round(ipoShares).toLocaleString()}주` : '공시 미확인';
             document.getElementById('detail-liquidation-price').innerText = liqPrice !== null ? `${liqPrice.toLocaleString()}원` : '공시 미확인';
 
             document.getElementById('detail-yearly-trust-body').innerHTML = rowsHtml;
@@ -2114,24 +1889,7 @@
                     return true;
                 });
 
-                allItems = activeItems.map((item, idx) => {
-                    const resolvedDelistingDate = getDelistingDateValue(item);
-                    const normalizedItem = {
-                        ...item,
-                        _idx: idx,
-                        current_price: toFiniteNumber(item.current_price ?? item.currentPrice),
-                        liquidation_price: toFiniteNumber(item.liquidation_price ?? item.liquidationPrice),
-                        delisting_date: resolvedDelistingDate,
-                        status: normalizeStatus(item.status)
-                    };
-                    const fairEval = evaluateFairBuyStatus(normalizedItem);
-                    return {
-                        ...normalizedItem,
-                        fair_eval_status: fairEval.status,
-                        fair_price_calc: fairEval.fairPrice,
-                        invest_type: normalizeInvestType(normalizedItem)
-                    };
-                });
+                allItems = activeItems.map((item, idx) => enrichSpacItemFromDart(item, idx));
 
                 const datalist = document.getElementById('spac-name-list');
                 if (datalist) {
@@ -2226,16 +1984,20 @@
         let currentSortDirection = 'asc';
 
         function updateSummaryStats(items) {
-            document.getElementById('stat-total-count').innerText = items.length + ' 개';
-            const mergerFairCount = items.filter(i => {
-                if (i.invest_type !== '합병' || i.fair_eval_status !== 'O') return false;
-                const yIsa = resolveAccountYield(i, 'isa');
-                const yGen = resolveAccountYield(i, 'general');
-                return (yIsa !== null && yIsa > 0) || (yGen !== null && yGen > 0);
-            }).length;
-            const liqFairCount = items.filter(i => i.invest_type === '청산' && i.fair_eval_status === 'O').length;
-            document.getElementById('stat-merger-count').innerText = mergerFairCount + ' 개';
-            document.getElementById('stat-liq-count').innerText = liqFairCount + ' 개';
+            const totalCount = items.length;
+            const mergerItems = items.filter(i => i.invest_type === '합병');
+            const liqItems = items.filter(i => i.invest_type === '청산');
+            const mergerFairCount = mergerItems.filter(i => i.fair_eval_status === 'O').length;
+            const liqFairCount = liqItems.filter(i => i.fair_eval_status === 'O').length;
+
+            const totalEl = document.getElementById('stat-total-count');
+            const mergerEl = document.getElementById('stat-merger-count');
+            const liqEl = document.getElementById('stat-liq-count');
+
+            if (totalEl) totalEl.innerText = `${totalCount} 개`;
+            if (mergerEl) mergerEl.innerText = `${mergerItems.length} 개 (적정 ${mergerFairCount})`;
+            if (liqEl) liqEl.innerText = `${liqItems.length} 개 (적정 ${liqFairCount})`;
+
             updateRecommendations(items);
         }
 
