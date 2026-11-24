@@ -253,7 +253,7 @@
                 </div>
             </div>
 
-            <!-- Data Table -->
+            <!-- Data Table (매수적정 여부 및 투자 유형을 종목명 아래 배지로 반영하고 열에서 삭제) -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="px-6 py-2.5 bg-indigo-50/60 border-b border-slate-200/80 flex items-center justify-between flex-wrap gap-2 text-[11px] text-slate-600">
                     <span>💡 <strong>종목명</strong>을 클릭하면 청산가·매수적정가 산출 근거 카드가 열립니다.</span>
@@ -272,14 +272,6 @@
                                         <span id="sort-icon-liquidation_price" class="text-slate-400">↕</span>
                                     </span>
                                 </th>
-                                <th onclick="sortData('is_fair_buy')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors">
-                                    <span class="inline-flex items-center gap-1">
-                                        매수
-                                        <span title="매수적정가 산식: ISA = 청산가 ÷ (1 + 목표수익률)^(잔존일/365), 일반 = {청산가×(1-0.154)} ÷ {(1 + 목표수익률)^(잔존일/365) - 0.154}" class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-slate-600 text-[10px] font-extrabold cursor-help">?</span>
-                                        <span id="sort-icon-is_fair_buy" class="text-slate-400">↕</span>
-                                    </span>
-                                </th>
-                                <th onclick="sortData('invest_type')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors">유형 <span id="sort-icon-invest_type" class="text-slate-400">↕</span></th>
                                 <th onclick="sortData('yield')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors"><span id="yield-header-col">예상수익률</span> <span id="sort-icon-yield" class="text-slate-400">↕</span></th>
                                 <th onclick="sortData('delisting_date')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors">청산일 <span id="sort-icon-delisting_date" class="text-slate-400">↕</span></th>
                                 <th onclick="sortData('status')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors">상태 <span id="sort-icon-status" class="text-slate-400">↕</span></th>
@@ -291,21 +283,20 @@
                 </div>
             </div>
 
-            <!-- 1 & 2. 청산가 / 매수적정가 산식 주석 영역 -->
+            <!-- 청산가 / 매수적정가 산식 주석 영역 -->
             <div class="mt-4 bg-slate-100/80 border border-slate-200 rounded-2xl p-4 sm:p-5 text-xs text-slate-600 space-y-2.5 leading-relaxed">
                 <div class="flex items-start gap-2">
                     <span class="shrink-0 font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded text-[11px]">※ 청산가 산식</span>
                     <div>
                         <code class="font-mono text-slate-800 bg-white px-1.5 py-0.5 rounded border border-slate-200">청산단가 = (공모금 + Σ 연차별 신탁이자) ÷ 공모주식수</code>
-                        <span class="block sm:inline sm:ml-1.5 text-slate-500">· 공모금(예치원금)에 예치기간(통상 3년, 1·2·3년차) 동안의 약정 예치이율을 복리/연차별로 합산한 총 신탁금을 공모주식수로 나눈 주당 예상 반환가액입니다.</span>
+                        <span class="block sm:inline sm:ml-1.5 text-slate-500">· 공모금(예치원금)에 예치기간 동안의 약정 예치이율을 연차별로 합산한 최종 신탁금을 공모주식수로 나눈 주당 예상 반환가액입니다.</span>
                     </div>
                 </div>
                 <div class="flex items-start gap-2">
                     <span class="shrink-0 font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded text-[11px]">※ 매수적정가 산식</span>
                     <div>
-                        <code class="font-mono text-slate-800 bg-white px-1.5 py-0.5 rounded border border-slate-200">ISA = 청산단가 ÷ (1 + r)<sup>(잔존일/365)</sup></code>
-                        <code class="font-mono text-slate-800 bg-white px-1.5 py-0.5 rounded border border-slate-200 ml-1">일반 = {청산단가 × (1 - 0.154)} ÷ {(1 + r)<sup>(잔존일/365)</sup> - 0.154}</code>
-                        <span class="block text-slate-500 mt-0.5">· 청산형(잔존 365일 미만)은 목표연수익률 <code class="font-mono">r = 기준 예금금리(세후)</code> 이상, 합병형(잔존 365일 이상)은 <code class="font-mono">r = 0%</code> 초과(청산단가 미만) 시 매수적정(O)으로 판정합니다.</span>
+                        <code class="font-mono text-slate-800 bg-white px-1.5 py-0.5 rounded border border-slate-200">매수적정가 = 공모가 + (청산가 − 공모가) × (오늘 − 상장일) ÷ (상장폐지일 − 상장일)</code>
+                        <span class="block text-slate-500 mt-0.5">· 청산가에서 공모가를 뺀 만기 이자 수익분에 전체 예치기간 대비 경과일수 비율을 곱해 현재 시점 적정가치를 산출합니다.</span>
                     </div>
                 </div>
             </div>
@@ -603,113 +594,121 @@
         </div>
     </div>
 
-    <!-- 3. 종목 상세 산출 근거 카드 모달 -->
+    <!-- 종목 상세 산출 근거 카드 모달 -->
     <div id="spac-detail-modal" onclick="if(event.target === this) closeSpacDetailModal()" class="fixed inset-0 bg-slate-900/55 backdrop-blur-sm hidden flex items-center justify-center z-50 px-4 py-6 overflow-y-auto">
-        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-2xl w-full p-5 sm:p-6 my-auto max-h-[90vh] overflow-y-auto">
-            <!-- 카드 헤더 -->
-            <div class="flex items-start justify-between gap-3 pb-4 border-b border-slate-200">
-                <div>
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <h3 id="detail-modal-name" class="text-xl font-extrabold text-slate-900">-</h3>
-                        <span id="detail-modal-code" class="text-xs font-mono text-slate-400"></span>
-                    </div>
-                    <div id="detail-modal-badges" class="flex items-center gap-1.5 flex-wrap mt-2"></div>
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-2xl w-full p-5 sm:p-6 my-auto max-h-[90vh] overflow-y-auto text-center">
+            <!-- 카드 헤더 (헤더 배지 삭제, 종목명 가운데 정렬) -->
+            <div class="relative pb-4 border-b border-slate-200 flex items-center justify-center">
+                <div class="text-center">
+                    <h3 id="detail-modal-name" class="text-xl font-extrabold text-slate-900">-</h3>
+                    <span id="detail-modal-code" class="text-xs font-mono text-slate-400 block mt-0.5"></span>
                 </div>
-                <button type="button" onclick="closeSpacDetailModal()" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-sm flex items-center justify-center transition-colors">✕</button>
+                <button type="button" onclick="closeSpacDetailModal()" class="absolute right-0 top-0 w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-sm flex items-center justify-center transition-colors">✕</button>
             </div>
 
-            <!-- 카드 본문 그리드 -->
-            <div class="mt-4 space-y-4">
+            <!-- 카드 본문 그리드 (전체 가운데 정렬) -->
+            <div class="mt-4 space-y-4 text-center">
                 <!-- 기본 일정 및 상태 -->
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                    <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3">
+                    <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-center">
                         <span class="text-[11px] font-bold text-slate-400 block">상장일</span>
                         <span id="detail-listing-date" class="text-sm font-extrabold text-slate-800 mt-0.5 block">-</span>
                     </div>
-                    <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3">
-                        <span class="text-[11px] font-bold text-slate-400 block">상장폐지일(청산일)</span>
+                    <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-center">
+                        <span class="text-[11px] font-bold text-slate-400 block">상장폐지일</span>
                         <span id="detail-delisting-date" class="text-sm font-extrabold text-slate-800 mt-0.5 block">-</span>
                     </div>
-                    <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3">
+                    <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-center">
                         <span class="text-[11px] font-bold text-slate-400 block">투자유형</span>
                         <span id="detail-invest-type" class="text-sm font-extrabold text-indigo-700 mt-0.5 block">-</span>
                     </div>
-                    <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3">
+                    <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-center">
                         <span class="text-[11px] font-bold text-slate-400 block">거래상태</span>
                         <span id="detail-status" class="text-sm font-extrabold text-slate-800 mt-0.5 block">-</span>
                     </div>
                 </div>
 
-                <!-- 청산가 산출 요소 -->
-                <div class="bg-indigo-50/40 border border-indigo-200/70 rounded-xl p-4 space-y-3">
-                    <div class="flex items-center justify-between">
-                        <h4 class="text-xs font-extrabold text-indigo-900 uppercase tracking-wider">📐 청산가 계산 요소</h4>
-                        <span id="detail-calc-note" class="text-[11px] text-indigo-600 font-semibold"></span>
-                    </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                        <div class="bg-white border border-indigo-100 rounded-lg p-2.5">
-                            <span class="text-[10px] font-bold text-slate-400 block">예치이율 (평균/약정)</span>
-                            <span id="detail-deposit-rate" class="text-sm font-extrabold text-slate-800 mt-0.5 block">-</span>
+                <!-- 청산가 계산 요소 (한 줄 정렬: 공모금 / 공모주식수 / 청산단가) -->
+                <div class="bg-indigo-50/40 border border-indigo-200/70 rounded-xl p-4 space-y-3 text-center">
+                    <h4 class="text-xs font-extrabold text-indigo-900 uppercase tracking-wider text-center">📐 청산가 계산 요소</h4>
+                    <div class="grid grid-cols-3 gap-2.5">
+                        <div class="bg-white border border-indigo-100 rounded-lg p-2.5 text-center">
+                            <span class="text-[11px] font-bold text-slate-400 block">공모금</span>
+                            <span id="detail-ipo-amount" class="text-xs sm:text-sm font-extrabold text-slate-800 mt-0.5 block break-all">-</span>
                         </div>
-                        <div class="bg-white border border-indigo-100 rounded-lg p-2.5">
-                            <span class="text-[10px] font-bold text-slate-400 block">공모금 (예치원금)</span>
-                            <span id="detail-ipo-amount" class="text-sm font-extrabold text-slate-800 mt-0.5 block">-</span>
+                        <div class="bg-white border border-indigo-100 rounded-lg p-2.5 text-center">
+                            <span class="text-[11px] font-bold text-slate-400 block">공모주식수</span>
+                            <span id="detail-ipo-shares" class="text-xs sm:text-sm font-extrabold text-slate-800 mt-0.5 block break-all">-</span>
                         </div>
-                        <div class="bg-white border border-indigo-100 rounded-lg p-2.5">
-                            <span class="text-[10px] font-bold text-slate-400 block">공모주식수</span>
-                            <span id="detail-ipo-shares" class="text-sm font-extrabold text-slate-800 mt-0.5 block">-</span>
-                        </div>
-                        <div class="bg-indigo-600 text-white rounded-lg p-2.5">
-                            <span class="text-[10px] font-bold text-indigo-200 block">청산단가 (1주당)</span>
-                            <span id="detail-liquidation-price" class="text-sm font-black mt-0.5 block">-</span>
+                        <div class="bg-indigo-600 text-white rounded-lg p-2.5 text-center">
+                            <span class="text-[11px] font-bold text-indigo-200 block">청산단가</span>
+                            <span id="detail-liquidation-price" class="text-xs sm:text-sm font-black mt-0.5 block">-</span>
                         </div>
                     </div>
 
-                    <!-- 연차별 예치이율 & 연차별 신탁금 -->
+                    <!-- 청산단가 산식 및 신탁금 산식 표시 -->
+                    <div class="bg-white/90 border border-indigo-100 rounded-lg px-3 py-2 text-[11px] text-slate-600 space-y-1 text-center">
+                        <div>
+                            <span class="font-bold text-indigo-700">청산단가 산식:</span>
+                            <code class="font-mono text-slate-800">만기(3년차) 신탁금 ÷ 공모주식수</code>
+                        </div>
+                        <div>
+                            <span class="font-bold text-indigo-700">신탁금 산식:</span>
+                            <code class="font-mono text-slate-800">전년도 신탁금 × (1 + 해당 연차 예치 이자율)</code>
+                        </div>
+                    </div>
+
+                    <!-- 연차별 예치이율 및 신탁금 추이 -->
                     <div class="bg-white border border-indigo-100 rounded-lg overflow-hidden">
-                        <div class="px-3 py-2 bg-indigo-50/70 border-b border-indigo-100 text-[11px] font-bold text-indigo-900 flex justify-between">
-                            <span>연차별 예치이율 및 신탁금 추이</span>
-                            <span id="detail-final-trust" class="text-indigo-700 font-extrabold">-</span>
+                        <div class="px-3 py-2 bg-indigo-50/70 border-b border-indigo-100 text-[11px] font-bold text-indigo-900 text-center">
+                            연차별 예치이율 및 신탁금 추이
                         </div>
                         <div class="overflow-x-auto">
-                            <table class="w-full text-xs text-left">
+                            <table class="w-full text-xs text-center">
                                 <thead>
                                     <tr class="border-b border-slate-100 text-slate-400">
-                                        <th class="py-2 px-3 font-bold">구분</th>
-                                        <th class="py-2 px-3 font-bold">적용 예치이율</th>
-                                        <th class="py-2 px-3 font-bold text-right">연간 이자액</th>
-                                        <th class="py-2 px-3 font-bold text-right">연차별 신탁금(누적)</th>
+                                        <th class="py-2 px-3 font-bold text-center">구분</th>
+                                        <th class="py-2 px-3 font-bold text-center">예치 이자율</th>
+                                        <th class="py-2 px-3 font-bold text-center">신탁금</th>
                                     </tr>
                                 </thead>
                                 <tbody id="detail-yearly-trust-body" class="divide-y divide-slate-100 text-slate-700 font-medium">
                                 </tbody>
                             </table>
                         </div>
+                        <div id="detail-unannounced-note" class="hidden px-3 py-2 bg-amber-50/80 border-t border-amber-200/70 text-[11px] text-amber-800 font-medium text-center">
+                            ※ 예치 이자율 <span class="font-bold underline">미정</span> 표시 연도는 직전(전년도) 예치 이자율을 동일하게 적용하여 신탁금을 산출했습니다.
+                        </div>
                     </div>
                 </div>
 
-                <!-- 수익률 및 매수적정가 평가 -->
-                <div class="bg-emerald-50/40 border border-emerald-200/80 rounded-xl p-4 space-y-3">
-                    <h4 class="text-xs font-extrabold text-emerald-900 uppercase tracking-wider">🎯 예상수익률 및 매수적정가 평가</h4>
+                <!-- 수익률 및 매수적정 평가 -->
+                <div class="bg-emerald-50/40 border border-emerald-200/80 rounded-xl p-4 space-y-3 text-center">
+                    <h4 class="text-xs font-extrabold text-emerald-900 uppercase tracking-wider text-center">🎯 예상 수익률 및 매수적정 평가</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                        <div class="bg-white border border-emerald-100 rounded-lg p-3">
+                        <div class="bg-white border border-emerald-100 rounded-lg p-3 text-center flex flex-col justify-center">
                             <span class="text-[11px] font-bold text-slate-400 block">현재가</span>
-                            <span id="detail-current-price" class="text-base font-black text-slate-900 mt-0.5 block">-</span>
+                            <span id="detail-current-price" class="text-base font-black text-slate-900 mt-1 block">-</span>
                         </div>
-                        <div class="bg-white border border-emerald-100 rounded-lg p-3">
-                            <span class="text-[11px] font-bold text-slate-400 block">예상수익률 (ISA / 일반)</span>
-                            <div id="detail-yields" class="text-sm font-extrabold text-emerald-700 mt-0.5">-</div>
+                        <div class="bg-white border border-emerald-100 rounded-lg p-3 text-center flex flex-col justify-center">
+                            <span class="text-[11px] font-bold text-slate-400 block">예상 수익률</span>
+                            <div id="detail-yields" class="text-xs sm:text-sm font-extrabold text-emerald-700 mt-1 space-y-0.5">-</div>
                         </div>
-                        <div class="bg-white border border-emerald-100 rounded-lg p-3">
-                            <span class="text-[11px] font-bold text-slate-400 block">매수적정여부 및 매수적정가</span>
-                            <div id="detail-fair-buy" class="text-sm font-extrabold text-slate-800 mt-0.5">-</div>
+                        <div class="bg-white border border-emerald-100 rounded-lg p-3 text-center flex flex-col justify-center">
+                            <span class="text-[11px] font-bold text-slate-400 block">매수적정</span>
+                            <div id="detail-fair-buy" class="text-sm font-extrabold text-slate-800 mt-1">-</div>
                         </div>
+                    </div>
+                    <!-- 매수적정가 산식 표시 -->
+                    <div class="bg-white/90 border border-emerald-100 rounded-lg px-3 py-2 text-[11px] text-slate-600 text-center">
+                        <span class="font-bold text-emerald-700">매수적정가 산식:</span>
+                        <code class="font-mono text-slate-800">공모가 + (청산가 − 공모가) × (오늘 − 상장일) ÷ (상장폐지일 − 상장일)</code>
                     </div>
                 </div>
             </div>
 
-            <div class="mt-5 flex justify-end">
-                <button type="button" onclick="closeSpacDetailModal()" class="px-5 py-2.5 text-xs font-bold text-white bg-slate-800 hover:bg-slate-900 rounded-xl transition-colors">닫기</button>
+            <div class="mt-5 flex justify-center">
+                <button type="button" onclick="closeSpacDetailModal()" class="px-6 py-2.5 text-xs font-bold text-white bg-slate-800 hover:bg-slate-900 rounded-xl transition-colors">닫기</button>
             </div>
         </div>
     </div>
@@ -985,7 +984,7 @@
         function parseDateOnly(dateStr) {
             if (!dateStr) return null;
             const cleaned = String(dateStr).trim();
-            const match = cleaned.match(/^(\d{4})-?(\d{2})-?(\d{2})/);
+            const match = cleaned.match(/^(\d{4})[-./]?(\d{2})[-./]?(\d{2})/);
             if (match) {
                 const dt = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
                 return Number.isNaN(dt.getTime()) ? null : dt;
@@ -1003,15 +1002,22 @@
             return `${yyyy}-${mm}-${dd}`;
         }
 
+        function normalizeDateStr(dateStr) {
+            const dt = parseDateOnly(dateStr);
+            if (dt) return formatDateISO(dt);
+            return dateStr ? String(dateStr).trim() : '';
+        }
+
         function getDelistingDateValue(item) {
             if (!item || typeof item !== 'object') return '';
-            return item.delisting_date || item.liquidation_date || item.maturity_date || item.maturityDate || '';
+            const raw = item.delisting_date || item.liquidation_date || item.maturity_date || item.maturityDate || '';
+            return normalizeDateStr(raw);
         }
 
         function getListingDateValue(item) {
             if (!item || typeof item !== 'object') return '';
             const direct = item.listing_date || item.listingDate || item.ipo_date || item.ipoDate || item.listed_date || '';
-            if (direct) return String(direct).trim();
+            if (direct) return normalizeDateStr(direct);
             const delist = getDelistingDateValue(item);
             const dt = parseDateOnly(delist);
             if (dt) {
@@ -1168,18 +1174,21 @@
             return `(${sign}${Math.abs(diff).toFixed(1)}%p)`;
         }
 
-        function computeFairBuyPrice(liqPrice, daysLeft, targetAnnualPct, accountType) {
+        // 매수적정가 = 공모가 + (청산가 - 공모가) * (오늘 - 상장일) / (상장폐지일 - 상장일)
+        function computeAccruedFairPrice(parPrice, liqPrice, listingDateStr, delistingDateStr) {
+            const P = toFiniteNumber(parPrice) ?? 2000;
             const L = toFiniteNumber(liqPrice);
             if (L === null || L <= 0) return null;
-            const r = Math.max(0, Number(targetAnnualPct || 0)) / 100;
-            const years = daysLeft && daysLeft > 0 ? (daysLeft / 365.0) : 0;
-            const growth = years > 0 ? Math.pow(1 + r, years) : 1;
-            if (accountType === 'general') {
-                const denom = growth - GENERAL_TAX_RATE;
-                if (denom <= 0) return null;
-                return Math.floor((L * (1 - GENERAL_TAX_RATE)) / denom);
-            }
-            return Math.floor(L / growth);
+            const listDt = parseDateOnly(listingDateStr);
+            const delistDt = parseDateOnly(delistingDateStr);
+            const todayDt = parseDateOnly(getTodayStr());
+            if (!listDt || !delistDt || !todayDt) return null;
+
+            const totalDays = (delistDt.getTime() - listDt.getTime()) / (1000 * 60 * 60 * 24);
+            if (totalDays <= 0) return Math.round(L);
+
+            const elapsedDays = Math.max(0, Math.min(totalDays, (todayDt.getTime() - listDt.getTime()) / (1000 * 60 * 60 * 24)));
+            return Math.round(P + (L - P) * (elapsedDays / totalDays));
         }
 
         function openSpacDetailModal(index) {
@@ -1191,7 +1200,6 @@
             const liqPrice = toFiniteNumber(item.liquidation_price);
             const listingDate = getListingDateValue(item);
             const delistingDate = getDelistingDateValue(item);
-            const daysLeft = getDaysUntilDelisting(delistingDate);
             const investType = item.invest_type || normalizeInvestType(item);
             const status = item.status || normalizeStatus(item.status);
             const fairBuy = item.is_fair_buy || normalizeFairBuy(item);
@@ -1199,7 +1207,7 @@
             const yIsa = resolveAccountYield(item, 'isa');
             const yGen = resolveAccountYield(item, 'general');
 
-            // 원천 데이터 파싱 (공모가/공모금/공모주식수/예치이율/연차별 내역)
+            // 원천 데이터 파싱 (공모가/공모금/공모주식수/연차별 내역)
             const parPrice = toFiniteNumber(item.ipo_price ?? item.public_offering_price ?? item.offer_price) ?? 2000;
             let ipoShares = toFiniteNumber(item.ipo_shares ?? item.offering_shares ?? item.public_shares ?? item.shares);
             let ipoAmount = toFiniteNumber(item.ipo_amount ?? item.offering_amount ?? item.public_amount ?? item.deposit_principal ?? item.trust_principal);
@@ -1210,9 +1218,7 @@
                 ipoAmount = Math.round(ipoShares * parPrice);
             }
 
-            let isEstimatedFields = false;
             if (ipoAmount === null || ipoShares === null) {
-                isEstimatedFields = true;
                 ipoShares = ipoShares ?? 5000000;
                 ipoAmount = ipoAmount ?? (ipoShares * parPrice);
             }
@@ -1222,124 +1228,120 @@
             const rawYearlyTrusts = Array.isArray(item.yearly_trust_amounts) ? item.yearly_trust_amounts
                 : (Array.isArray(item.trust_by_year) ? item.trust_by_year : null);
 
-            let avgDepositRate = toFiniteNumber(item.spac_deposit_rate ?? item.trust_rate ?? item.interest_rate ?? item.deposit_interest_rate);
-            if (avgDepositRate === null && rawYearlyRates && rawYearlyRates.length > 0) {
+            let fallbackRate = toFiniteNumber(item.spac_deposit_rate ?? item.trust_rate ?? item.interest_rate ?? item.deposit_interest_rate);
+            if (fallbackRate === null && rawYearlyRates && rawYearlyRates.length > 0) {
                 const nums = rawYearlyRates.map(r => toFiniteNumber(typeof r === 'object' ? (r.rate ?? r.interest_rate) : r)).filter(n => n !== null);
-                if (nums.length > 0) avgDepositRate = nums.reduce((a, b) => a + b, 0) / nums.length;
+                if (nums.length > 0) fallbackRate = nums[0];
             }
-            if (avgDepositRate === null && liqPrice !== null && parPrice > 0 && liqPrice > parPrice) {
-                avgDepositRate = (Math.pow(liqPrice / parPrice, 1 / 3) - 1) * 100;
-                isEstimatedFields = true;
+            if (fallbackRate === null && liqPrice !== null && parPrice > 0 && liqPrice > parPrice) {
+                fallbackRate = (Math.pow(liqPrice / parPrice, 1 / 3) - 1) * 100;
             }
 
-            // 연차별 테이블 구성 (1~3년차)
+            // 연차별 테이블 구성 (1~3년차) — 미공시 연도는 전년도 예치 이자율 가정 & 별도 색상 표시
             const yearRows = [];
             let runningTrust = ipoAmount;
+            let lastKnownRate = fallbackRate;
+            let hasUnannouncedYear = false;
             const yearsCount = Math.max(3, rawYearlyRates ? rawYearlyRates.length : 0, rawYearlyTrusts ? rawYearlyTrusts.length : 0);
 
             for (let y = 1; y <= yearsCount; y++) {
                 const rateEntry = rawYearlyRates && rawYearlyRates[y - 1] !== undefined ? rawYearlyRates[y - 1] : null;
                 const trustEntry = rawYearlyTrusts && rawYearlyTrusts[y - 1] !== undefined ? rawYearlyTrusts[y - 1] : null;
 
-                let yrRate = rateEntry !== null
+                const explicitRate = rateEntry !== null
                     ? toFiniteNumber(typeof rateEntry === 'object' ? (rateEntry.rate ?? rateEntry.interest_rate) : rateEntry)
-                    : avgDepositRate;
+                    : null;
+
+                let isUnannounced = false;
+                let appliedRate = explicitRate;
+                if (appliedRate !== null) {
+                    lastKnownRate = appliedRate;
+                } else {
+                    isUnannounced = true;
+                    hasUnannouncedYear = true;
+                    appliedRate = lastKnownRate;
+                }
 
                 let yrTrust = trustEntry !== null
                     ? toFiniteNumber(typeof trustEntry === 'object' ? (trustEntry.amount ?? trustEntry.trust_amount ?? trustEntry.balance) : trustEntry)
                     : null;
 
-                let yrInterest = null;
                 if (yrTrust !== null) {
-                    yrInterest = Math.round(yrTrust - runningTrust);
                     runningTrust = yrTrust;
-                } else if (yrRate !== null) {
-                    yrInterest = Math.round(runningTrust * (yrRate / 100));
-                    runningTrust = runningTrust + yrInterest;
+                } else if (appliedRate !== null) {
+                    runningTrust = Math.round(runningTrust * (1 + appliedRate / 100));
                     yrTrust = runningTrust;
                 }
 
-                if (yrRate !== null || yrTrust !== null) {
-                    yearRows.push({
-                        label: `${y}년차`,
-                        rate: yrRate,
-                        interest: yrInterest,
-                        trust: yrTrust
-                    });
-                }
+                yearRows.push({
+                    label: `${y}년차`,
+                    rate: appliedRate,
+                    isUnannounced,
+                    trust: yrTrust
+                });
             }
 
-            const finalTrustTotal = liqPrice !== null && ipoShares !== null
-                ? Math.round(liqPrice * ipoShares)
-                : (yearRows.length > 0 ? yearRows[yearRows.length - 1].trust : ipoAmount);
-
-            // 매수적정가 계산 (청산형: 기준 예금금리 세후 이상, 합병형: 0% 초과)
-            const targetRate = investType === '청산' ? baseAfterTaxRate : 0;
-            const fairPriceIsa = toFiniteNumber(item.fair_buy_price_isa ?? item.fair_price_isa) ?? computeFairBuyPrice(liqPrice, daysLeft, targetRate, 'isa');
-            const fairPriceGen = toFiniteNumber(item.fair_buy_price_general ?? item.fair_price_general) ?? computeFairBuyPrice(liqPrice, daysLeft, targetRate, 'general');
+            // 매수적정가 = 공모가 + (청산가 - 공모가) * (오늘 - 상장일) / (상장폐지일 - 상장일)
+            const accruedFairPrice = computeAccruedFairPrice(parPrice, liqPrice, listingDate, delistingDate);
 
             // DOM 바인딩
             document.getElementById('detail-modal-name').innerText = item.name || '-';
             document.getElementById('detail-modal-code').innerText = item.code ? `(${String(item.code).padStart(6, '0')})` : '';
-
-            const badgesHtml = [
-                investType === '청산'
-                    ? `<span class="bg-blue-50 text-blue-700 border border-blue-200 text-xs px-2.5 py-0.5 rounded-full font-bold">청산형</span>`
-                    : `<span class="bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs px-2.5 py-0.5 rounded-full font-bold">합병형</span>`,
-                fairBuy === 'O'
-                    ? `<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2.5 py-0.5 rounded-full font-bold">매수적정 O</span>`
-                    : `<span class="bg-slate-100 text-slate-600 border border-slate-200 text-xs px-2.5 py-0.5 rounded-full font-bold">매수적정 ${fairBuy || 'X'}</span>`,
-                status === '일반'
-                    ? `<span class="bg-slate-100 text-slate-700 text-xs px-2.5 py-0.5 rounded-full font-semibold">거래상태: 일반</span>`
-                    : `<span class="bg-rose-50 text-rose-600 border border-rose-200 text-xs px-2.5 py-0.5 rounded-full font-bold">거래상태: ${status}</span>`,
-                daysLeft !== null
-                    ? `<span class="bg-amber-50 text-amber-700 border border-amber-200 text-xs px-2.5 py-0.5 rounded-full font-semibold">잔존 ${daysLeft.toLocaleString()}일</span>`
-                    : ''
-            ].join('');
-            document.getElementById('detail-modal-badges').innerHTML = badgesHtml;
 
             document.getElementById('detail-listing-date').innerText = listingDate || '미확인';
             document.getElementById('detail-delisting-date').innerText = delistingDate || '미확인';
             document.getElementById('detail-invest-type').innerText = investType;
             document.getElementById('detail-status').innerText = status;
 
-            document.getElementById('detail-calc-note').innerText = isEstimatedFields ? '* 일부 공시 원천값은 청산단가 기반 역산 추정치' : '공시 예치조건 기준';
-            document.getElementById('detail-deposit-rate').innerText = avgDepositRate !== null ? `연 ${avgDepositRate.toFixed(2)}%` : '미확인';
-            document.getElementById('detail-ipo-amount').innerText = ipoAmount !== null ? `${Math.round(ipoAmount / 100000000).toLocaleString()}억원 (${ipoAmount.toLocaleString()}원)` : '미확인';
+            document.getElementById('detail-ipo-amount').innerText = ipoAmount !== null ? `${ipoAmount.toLocaleString()}원` : '미확인';
             document.getElementById('detail-ipo-shares').innerText = ipoShares !== null ? `${ipoShares.toLocaleString()}주` : '미확인';
             document.getElementById('detail-liquidation-price').innerText = liqPrice !== null ? `${liqPrice.toLocaleString()}원` : '미확인';
-            document.getElementById('detail-final-trust').innerText = finalTrustTotal !== null ? `만기 신탁금 합계: ${finalTrustTotal.toLocaleString()}원` : '';
 
             const yearlyBody = document.getElementById('detail-yearly-trust-body');
             if (yearRows.length === 0) {
-                yearlyBody.innerHTML = `<tr><td colspan="4" class="py-3 px-3 text-center text-slate-400">연차별 예치이율 데이터가 없습니다.</td></tr>`;
+                yearlyBody.innerHTML = `<tr><td colspan="3" class="py-3 px-3 text-center text-slate-400">연차별 예치이율 데이터가 없습니다.</td></tr>`;
             } else {
-                yearlyBody.innerHTML = yearRows.map(r => `
-                    <tr>
-                        <td class="py-2 px-3 font-bold text-slate-800">${r.label}</td>
-                        <td class="py-2 px-3 text-indigo-700 font-semibold">${r.rate !== null ? `연 ${r.rate.toFixed(2)}%` : '-'}</td>
-                        <td class="py-2 px-3 text-right text-slate-600">${r.interest !== null ? `+${r.interest.toLocaleString()}원` : '-'}</td>
-                        <td class="py-2 px-3 text-right font-bold text-slate-900">${r.trust !== null ? `${r.trust.toLocaleString()}원` : '-'}</td>
-                    </tr>
-                `).join('');
+                yearlyBody.innerHTML = yearRows.map(r => {
+                    const rateHtml = r.isUnannounced
+                        ? `<span class="inline-block bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded font-bold text-[11px]">미정${r.rate !== null ? ` (연 ${r.rate.toFixed(2)}% 가정)` : ''}</span>`
+                        : `<span class="text-indigo-700 font-bold">${r.rate !== null ? `연 ${r.rate.toFixed(2)}%` : '-'}</span>`;
+                    return `
+                        <tr class="${r.isUnannounced ? 'bg-amber-50/40' : ''}">
+                            <td class="py-2 px-3 font-bold text-slate-800 text-center">${r.label}</td>
+                            <td class="py-2 px-3 text-center">${rateHtml}</td>
+                            <td class="py-2 px-3 font-bold text-slate-900 text-center">${r.trust !== null ? `${r.trust.toLocaleString()}원` : '-'}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            const unannouncedNoteEl = document.getElementById('detail-unannounced-note');
+            if (unannouncedNoteEl) {
+                if (hasUnannouncedYear) unannouncedNoteEl.classList.remove('hidden');
+                else unannouncedNoteEl.classList.add('hidden');
             }
 
             document.getElementById('detail-current-price').innerText = curPrice !== null ? `${curPrice.toLocaleString()}원` : '-';
 
-            const isaText = yIsa !== null ? `ISA: ${yIsa.toFixed(2)}%` : 'ISA: -';
-            const genText = yGen !== null ? `일반: ${yGen.toFixed(2)}%` : '일반: -';
+            // 예상 수익률: ISA / 일반 각각 괄호로 세후 예금 이자율 대비 +/-%p 표시
+            const isaPp = yIsa !== null ? formatSpreadPp(yIsa, baseAfterTaxRate) : null;
+            const genPp = yGen !== null ? formatSpreadPp(yGen, baseAfterTaxRate) : null;
+            const isaColor = yIsa !== null && yIsa >= baseAfterTaxRate ? 'text-emerald-700' : (yIsa !== null && yIsa >= 0 ? 'text-slate-800' : 'text-rose-600');
+            const genColor = yGen !== null && yGen >= baseAfterTaxRate ? 'text-emerald-700' : (yGen !== null && yGen >= 0 ? 'text-slate-800' : 'text-rose-600');
+
             document.getElementById('detail-yields').innerHTML = `
-                <div class="${yIsa !== null && yIsa >= 0 ? 'text-emerald-700' : 'text-rose-600'}">${isaText}</div>
-                <div class="text-xs font-semibold text-slate-600 mt-0.5">${genText}</div>
+                <div class="${isaColor}">ISA ${yIsa !== null ? `${yIsa.toFixed(2)}% ${isaPp || ''}` : '-'}</div>
+                <div class="${genColor}">일반 ${yGen !== null ? `${yGen.toFixed(2)}% ${genPp || ''}` : '-'}</div>
             `;
 
-            const fairBadgeText = fairBuy === 'O'
+            // 매수적정 및 단일 매수적정가
+            const fairStatusText = fairBuy === 'O'
                 ? `<span class="text-emerald-700 font-black">적정 (O)</span>`
                 : `<span class="text-rose-600 font-black">부적정 (${fairBuy || 'X'})</span>`;
-            const fairPriceText = (fairPriceIsa !== null || fairPriceGen !== null)
-                ? `<div class="text-xs font-semibold text-slate-600 mt-0.5">ISA ${fairPriceIsa !== null ? fairPriceIsa.toLocaleString() + '원' : '-'} / 일반 ${fairPriceGen !== null ? fairPriceGen.toLocaleString() + '원' : '-'}</div>`
-                : '';
-            document.getElementById('detail-fair-buy').innerHTML = `${fairBadgeText}${fairPriceText}`;
+            const fairPriceHtml = accruedFairPrice !== null
+                ? `<div class="text-xs font-bold text-slate-700 mt-0.5">매수적정가 ${accruedFairPrice.toLocaleString()}원</div>`
+                : `<div class="text-xs font-semibold text-slate-400 mt-0.5">매수적정가 -</div>`;
+            document.getElementById('detail-fair-buy').innerHTML = `${fairStatusText}${fairPriceHtml}`;
 
             document.getElementById('spac-detail-modal').classList.remove('hidden');
         }
@@ -2191,13 +2193,13 @@
                 currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
             } else {
                 currentSortColumn = column;
-                currentSortDirection = (column === 'name' || column === 'invest_type' || column === 'delisting_date' || column === 'status') ? 'asc' : 'desc';
+                currentSortDirection = (column === 'name' || column === 'delisting_date' || column === 'status') ? 'asc' : 'desc';
             }
             applyFilters();
         }
 
         function updateSortIcons() {
-            const columns = ['name', 'current_price', 'liquidation_price', 'is_fair_buy', 'invest_type', 'yield', 'delisting_date', 'status'];
+            const columns = ['name', 'current_price', 'liquidation_price', 'yield', 'delisting_date', 'status'];
             columns.forEach(col => {
                 const iconEl = document.getElementById(`sort-icon-${col}`);
                 if (iconEl) {
@@ -2278,7 +2280,7 @@
             tbody.innerHTML = '';
 
             if (items.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="py-12 text-center text-slate-400 font-normal">조건에 일치하는 스팩 종목이 없습니다.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="py-12 text-center text-slate-400 font-normal">조건에 일치하는 스팩 종목이 없습니다.</td></tr>`;
                 return;
             }
 
@@ -2288,15 +2290,16 @@
                 const yVal = hasYield ? Number(resolvedYield) : null;
                 const ppText = hasYield ? formatSpreadPp(yVal, baseAfterTaxRate) : null;
 
-                const fairBadge = item.is_fair_buy === 'O'
-                    ? `<span class="bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded text-xs">O</span>`
+                // 종목명 아래에 표시할 매수적정 여부 및 투자 유형 배지
+                const fairSubBadge = item.is_fair_buy === 'O'
+                    ? `<span class="bg-emerald-50 text-emerald-700 border border-emerald-200/80 font-bold px-1.5 py-0.5 rounded text-[10px]">매수적정 O</span>`
                     : item.is_fair_buy === 'X'
-                        ? `<span class="bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-xs">X</span>`
-                        : `<span class="bg-amber-50 text-amber-700 px-2 py-0.5 rounded text-xs">미확인</span>`;
+                        ? `<span class="bg-slate-100 text-slate-500 border border-slate-200/80 px-1.5 py-0.5 rounded text-[10px]">매수적정 X</span>`
+                        : `<span class="bg-amber-50 text-amber-700 border border-amber-200/80 px-1.5 py-0.5 rounded text-[10px]">매수적정 미확인</span>`;
 
-                const typeBadge = item.invest_type === '청산'
-                    ? `<span class="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded font-semibold">청산</span>`
-                    : `<span class="bg-indigo-50 text-indigo-700 text-xs px-2 py-0.5 rounded font-semibold">합병</span>`;
+                const typeSubBadge = item.invest_type === '청산'
+                    ? `<span class="bg-blue-50 text-blue-700 border border-blue-200/80 text-[10px] px-1.5 py-0.5 rounded font-semibold">청산형</span>`
+                    : `<span class="bg-indigo-50 text-indigo-700 border border-indigo-200/80 text-[10px] px-1.5 py-0.5 rounded font-semibold">합병형</span>`;
 
                 const statusBadge = item.status === '일반'
                     ? `<span class="text-slate-700 font-normal">일반</span>`
@@ -2316,11 +2319,13 @@
                         <button type="button" onclick="openSpacDetailModal(${item._idx})" class="text-left font-bold text-slate-900 hover:text-indigo-600 underline decoration-slate-300 hover:decoration-indigo-500 underline-offset-4 transition-colors cursor-pointer">
                             ${item.name || '-'}
                         </button>
+                        <div class="flex items-center gap-1 flex-wrap mt-1">
+                            ${fairSubBadge}
+                            ${typeSubBadge}
+                        </div>
                     </td>
                     <td class="py-4 px-6 text-slate-700 font-semibold">${curPrice !== null ? curPrice.toLocaleString() + '원' : '-'}</td>
                     <td class="py-4 px-6 text-slate-600">${liqText}</td>
-                    <td class="py-4 px-6 text-center">${fairBadge}</td>
-                    <td class="py-4 px-6">${typeBadge}</td>
                     <td class="py-4 px-6">
                         <div class="${yieldColor}">${hasYield ? yVal.toFixed(2) + '%' : '-'}</div>
                         ${ppText ? `<div class="text-[11px] mt-0.5 ${ppColor}">${ppText}</div>` : `<div class="text-[11px] mt-0.5 text-slate-400">-</div>`}
