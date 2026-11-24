@@ -255,14 +255,30 @@
 
             <!-- Data Table -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-6 py-2.5 bg-indigo-50/60 border-b border-slate-200/80 flex items-center justify-between flex-wrap gap-2 text-[11px] text-slate-600">
+                    <span>💡 <strong>종목명</strong>을 클릭하면 청산가·매수적정가 산출 근거 카드가 열립니다.</span>
+                    <span class="text-slate-400">산식 주석은 표 하단 참고</span>
+                </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200 select-none">
                                 <th onclick="sortData('name')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors">종목명 <span id="sort-icon-name" class="text-slate-400">↕</span></th>
                                 <th onclick="sortData('current_price')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors">현재가 <span id="sort-icon-current_price" class="text-slate-400">↕</span></th>
-                                <th onclick="sortData('liquidation_price')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors">청산가 <span id="sort-icon-liquidation_price" class="text-slate-400">↕</span></th>
-                                <th onclick="sortData('is_fair_buy')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors">매수 <span id="sort-icon-is_fair_buy" class="text-slate-400">↕</span></th>
+                                <th onclick="sortData('liquidation_price')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors">
+                                    <span class="inline-flex items-center gap-1">
+                                        청산가
+                                        <span title="청산가 산식: (공모금 + 연차별 예치이자 누적액) ÷ 공모주식수" class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-slate-600 text-[10px] font-extrabold cursor-help">?</span>
+                                        <span id="sort-icon-liquidation_price" class="text-slate-400">↕</span>
+                                    </span>
+                                </th>
+                                <th onclick="sortData('is_fair_buy')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors">
+                                    <span class="inline-flex items-center gap-1">
+                                        매수
+                                        <span title="매수적정가 산식: ISA = 청산가 ÷ (1 + 목표수익률)^(잔존일/365), 일반 = {청산가×(1-0.154)} ÷ {(1 + 목표수익률)^(잔존일/365) - 0.154}" class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-slate-600 text-[10px] font-extrabold cursor-help">?</span>
+                                        <span id="sort-icon-is_fair_buy" class="text-slate-400">↕</span>
+                                    </span>
+                                </th>
                                 <th onclick="sortData('invest_type')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors">유형 <span id="sort-icon-invest_type" class="text-slate-400">↕</span></th>
                                 <th onclick="sortData('yield')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors"><span id="yield-header-col">예상수익률</span> <span id="sort-icon-yield" class="text-slate-400">↕</span></th>
                                 <th onclick="sortData('delisting_date')" class="py-4 px-6 font-bold cursor-pointer hover:bg-slate-200 transition-colors">청산일 <span id="sort-icon-delisting_date" class="text-slate-400">↕</span></th>
@@ -272,6 +288,25 @@
                         <tbody id="spac-table-body" class="divide-y divide-slate-100 text-sm font-medium text-slate-700">
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- 1 & 2. 청산가 / 매수적정가 산식 주석 영역 -->
+            <div class="mt-4 bg-slate-100/80 border border-slate-200 rounded-2xl p-4 sm:p-5 text-xs text-slate-600 space-y-2.5 leading-relaxed">
+                <div class="flex items-start gap-2">
+                    <span class="shrink-0 font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded text-[11px]">※ 청산가 산식</span>
+                    <div>
+                        <code class="font-mono text-slate-800 bg-white px-1.5 py-0.5 rounded border border-slate-200">청산단가 = (공모금 + Σ 연차별 신탁이자) ÷ 공모주식수</code>
+                        <span class="block sm:inline sm:ml-1.5 text-slate-500">· 공모금(예치원금)에 예치기간(통상 3년, 1·2·3년차) 동안의 약정 예치이율을 복리/연차별로 합산한 총 신탁금을 공모주식수로 나눈 주당 예상 반환가액입니다.</span>
+                    </div>
+                </div>
+                <div class="flex items-start gap-2">
+                    <span class="shrink-0 font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded text-[11px]">※ 매수적정가 산식</span>
+                    <div>
+                        <code class="font-mono text-slate-800 bg-white px-1.5 py-0.5 rounded border border-slate-200">ISA = 청산단가 ÷ (1 + r)<sup>(잔존일/365)</sup></code>
+                        <code class="font-mono text-slate-800 bg-white px-1.5 py-0.5 rounded border border-slate-200 ml-1">일반 = {청산단가 × (1 - 0.154)} ÷ {(1 + r)<sup>(잔존일/365)</sup> - 0.154}</code>
+                        <span class="block text-slate-500 mt-0.5">· 청산형(잔존 365일 미만)은 목표연수익률 <code class="font-mono">r = 기준 예금금리(세후)</code> 이상, 합병형(잔존 365일 이상)은 <code class="font-mono">r = 0%</code> 초과(청산단가 미만) 시 매수적정(O)으로 판정합니다.</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -568,6 +603,117 @@
         </div>
     </div>
 
+    <!-- 3. 종목 상세 산출 근거 카드 모달 -->
+    <div id="spac-detail-modal" onclick="if(event.target === this) closeSpacDetailModal()" class="fixed inset-0 bg-slate-900/55 backdrop-blur-sm hidden flex items-center justify-center z-50 px-4 py-6 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-2xl w-full p-5 sm:p-6 my-auto max-h-[90vh] overflow-y-auto">
+            <!-- 카드 헤더 -->
+            <div class="flex items-start justify-between gap-3 pb-4 border-b border-slate-200">
+                <div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h3 id="detail-modal-name" class="text-xl font-extrabold text-slate-900">-</h3>
+                        <span id="detail-modal-code" class="text-xs font-mono text-slate-400"></span>
+                    </div>
+                    <div id="detail-modal-badges" class="flex items-center gap-1.5 flex-wrap mt-2"></div>
+                </div>
+                <button type="button" onclick="closeSpacDetailModal()" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-sm flex items-center justify-center transition-colors">✕</button>
+            </div>
+
+            <!-- 카드 본문 그리드 -->
+            <div class="mt-4 space-y-4">
+                <!-- 기본 일정 및 상태 -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3">
+                        <span class="text-[11px] font-bold text-slate-400 block">상장일</span>
+                        <span id="detail-listing-date" class="text-sm font-extrabold text-slate-800 mt-0.5 block">-</span>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3">
+                        <span class="text-[11px] font-bold text-slate-400 block">상장폐지일(청산일)</span>
+                        <span id="detail-delisting-date" class="text-sm font-extrabold text-slate-800 mt-0.5 block">-</span>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3">
+                        <span class="text-[11px] font-bold text-slate-400 block">투자유형</span>
+                        <span id="detail-invest-type" class="text-sm font-extrabold text-indigo-700 mt-0.5 block">-</span>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3">
+                        <span class="text-[11px] font-bold text-slate-400 block">거래상태</span>
+                        <span id="detail-status" class="text-sm font-extrabold text-slate-800 mt-0.5 block">-</span>
+                    </div>
+                </div>
+
+                <!-- 청산가 산출 요소 -->
+                <div class="bg-indigo-50/40 border border-indigo-200/70 rounded-xl p-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-xs font-extrabold text-indigo-900 uppercase tracking-wider">📐 청산가 계산 요소</h4>
+                        <span id="detail-calc-note" class="text-[11px] text-indigo-600 font-semibold"></span>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                        <div class="bg-white border border-indigo-100 rounded-lg p-2.5">
+                            <span class="text-[10px] font-bold text-slate-400 block">예치이율 (평균/약정)</span>
+                            <span id="detail-deposit-rate" class="text-sm font-extrabold text-slate-800 mt-0.5 block">-</span>
+                        </div>
+                        <div class="bg-white border border-indigo-100 rounded-lg p-2.5">
+                            <span class="text-[10px] font-bold text-slate-400 block">공모금 (예치원금)</span>
+                            <span id="detail-ipo-amount" class="text-sm font-extrabold text-slate-800 mt-0.5 block">-</span>
+                        </div>
+                        <div class="bg-white border border-indigo-100 rounded-lg p-2.5">
+                            <span class="text-[10px] font-bold text-slate-400 block">공모주식수</span>
+                            <span id="detail-ipo-shares" class="text-sm font-extrabold text-slate-800 mt-0.5 block">-</span>
+                        </div>
+                        <div class="bg-indigo-600 text-white rounded-lg p-2.5">
+                            <span class="text-[10px] font-bold text-indigo-200 block">청산단가 (1주당)</span>
+                            <span id="detail-liquidation-price" class="text-sm font-black mt-0.5 block">-</span>
+                        </div>
+                    </div>
+
+                    <!-- 연차별 예치이율 & 연차별 신탁금 -->
+                    <div class="bg-white border border-indigo-100 rounded-lg overflow-hidden">
+                        <div class="px-3 py-2 bg-indigo-50/70 border-b border-indigo-100 text-[11px] font-bold text-indigo-900 flex justify-between">
+                            <span>연차별 예치이율 및 신탁금 추이</span>
+                            <span id="detail-final-trust" class="text-indigo-700 font-extrabold">-</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-xs text-left">
+                                <thead>
+                                    <tr class="border-b border-slate-100 text-slate-400">
+                                        <th class="py-2 px-3 font-bold">구분</th>
+                                        <th class="py-2 px-3 font-bold">적용 예치이율</th>
+                                        <th class="py-2 px-3 font-bold text-right">연간 이자액</th>
+                                        <th class="py-2 px-3 font-bold text-right">연차별 신탁금(누적)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detail-yearly-trust-body" class="divide-y divide-slate-100 text-slate-700 font-medium">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 수익률 및 매수적정가 평가 -->
+                <div class="bg-emerald-50/40 border border-emerald-200/80 rounded-xl p-4 space-y-3">
+                    <h4 class="text-xs font-extrabold text-emerald-900 uppercase tracking-wider">🎯 예상수익률 및 매수적정가 평가</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        <div class="bg-white border border-emerald-100 rounded-lg p-3">
+                            <span class="text-[11px] font-bold text-slate-400 block">현재가</span>
+                            <span id="detail-current-price" class="text-base font-black text-slate-900 mt-0.5 block">-</span>
+                        </div>
+                        <div class="bg-white border border-emerald-100 rounded-lg p-3">
+                            <span class="text-[11px] font-bold text-slate-400 block">예상수익률 (ISA / 일반)</span>
+                            <div id="detail-yields" class="text-sm font-extrabold text-emerald-700 mt-0.5">-</div>
+                        </div>
+                        <div class="bg-white border border-emerald-100 rounded-lg p-3">
+                            <span class="text-[11px] font-bold text-slate-400 block">매수적정여부 및 매수적정가</span>
+                            <div id="detail-fair-buy" class="text-sm font-extrabold text-slate-800 mt-0.5">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-5 flex justify-end">
+                <button type="button" onclick="closeSpacDetailModal()" class="px-5 py-2.5 text-xs font-bold text-white bg-slate-800 hover:bg-slate-900 rounded-xl transition-colors">닫기</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 매도/청산 기록 모달 -->
     <div id="sell-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center z-50 px-4">
         <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-md w-full p-6">
@@ -849,9 +995,30 @@
             return new Date(Date.UTC(parsed.getUTCFullYear(), parsed.getUTCMonth(), parsed.getUTCDate()));
         }
 
+        function formatDateISO(dt) {
+            if (!dt || Number.isNaN(dt.getTime())) return '-';
+            const yyyy = dt.getUTCFullYear();
+            const mm = String(dt.getUTCMonth() + 1).padStart(2, '0');
+            const dd = String(dt.getUTCDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
         function getDelistingDateValue(item) {
             if (!item || typeof item !== 'object') return '';
             return item.delisting_date || item.liquidation_date || item.maturity_date || item.maturityDate || '';
+        }
+
+        function getListingDateValue(item) {
+            if (!item || typeof item !== 'object') return '';
+            const direct = item.listing_date || item.listingDate || item.ipo_date || item.ipoDate || item.listed_date || '';
+            if (direct) return String(direct).trim();
+            const delist = getDelistingDateValue(item);
+            const dt = parseDateOnly(delist);
+            if (dt) {
+                const est = new Date(Date.UTC(dt.getUTCFullYear() - 3, dt.getUTCMonth(), dt.getUTCDate()));
+                return formatDateISO(est);
+            }
+            return '';
         }
 
         function getDaysUntilDelisting(dateStr) {
@@ -999,6 +1166,186 @@
             const diff = y - b;
             const sign = diff > 0.05 ? '+' : (diff < -0.05 ? '-' : '');
             return `(${sign}${Math.abs(diff).toFixed(1)}%p)`;
+        }
+
+        function computeFairBuyPrice(liqPrice, daysLeft, targetAnnualPct, accountType) {
+            const L = toFiniteNumber(liqPrice);
+            if (L === null || L <= 0) return null;
+            const r = Math.max(0, Number(targetAnnualPct || 0)) / 100;
+            const years = daysLeft && daysLeft > 0 ? (daysLeft / 365.0) : 0;
+            const growth = years > 0 ? Math.pow(1 + r, years) : 1;
+            if (accountType === 'general') {
+                const denom = growth - GENERAL_TAX_RATE;
+                if (denom <= 0) return null;
+                return Math.floor((L * (1 - GENERAL_TAX_RATE)) / denom);
+            }
+            return Math.floor(L / growth);
+        }
+
+        function openSpacDetailModal(index) {
+            const item = allItems[index];
+            if (!item) return;
+
+            const baseAfterTaxRate = getCurrentBaseDepositRate() ?? 2.0;
+            const curPrice = toFiniteNumber(item.current_price);
+            const liqPrice = toFiniteNumber(item.liquidation_price);
+            const listingDate = getListingDateValue(item);
+            const delistingDate = getDelistingDateValue(item);
+            const daysLeft = getDaysUntilDelisting(delistingDate);
+            const investType = item.invest_type || normalizeInvestType(item);
+            const status = item.status || normalizeStatus(item.status);
+            const fairBuy = item.is_fair_buy || normalizeFairBuy(item);
+
+            const yIsa = resolveAccountYield(item, 'isa');
+            const yGen = resolveAccountYield(item, 'general');
+
+            // 원천 데이터 파싱 (공모가/공모금/공모주식수/예치이율/연차별 내역)
+            const parPrice = toFiniteNumber(item.ipo_price ?? item.public_offering_price ?? item.offer_price) ?? 2000;
+            let ipoShares = toFiniteNumber(item.ipo_shares ?? item.offering_shares ?? item.public_shares ?? item.shares);
+            let ipoAmount = toFiniteNumber(item.ipo_amount ?? item.offering_amount ?? item.public_amount ?? item.deposit_principal ?? item.trust_principal);
+
+            if (ipoAmount !== null && (ipoShares === null || ipoShares <= 0) && parPrice > 0) {
+                ipoShares = Math.round(ipoAmount / parPrice);
+            } else if (ipoShares !== null && (ipoAmount === null || ipoAmount <= 0) && parPrice > 0) {
+                ipoAmount = Math.round(ipoShares * parPrice);
+            }
+
+            let isEstimatedFields = false;
+            if (ipoAmount === null || ipoShares === null) {
+                isEstimatedFields = true;
+                ipoShares = ipoShares ?? 5000000;
+                ipoAmount = ipoAmount ?? (ipoShares * parPrice);
+            }
+
+            const rawYearlyRates = Array.isArray(item.yearly_deposit_rates) ? item.yearly_deposit_rates
+                : (Array.isArray(item.deposit_rates_by_year) ? item.deposit_rates_by_year : null);
+            const rawYearlyTrusts = Array.isArray(item.yearly_trust_amounts) ? item.yearly_trust_amounts
+                : (Array.isArray(item.trust_by_year) ? item.trust_by_year : null);
+
+            let avgDepositRate = toFiniteNumber(item.spac_deposit_rate ?? item.trust_rate ?? item.interest_rate ?? item.deposit_interest_rate);
+            if (avgDepositRate === null && rawYearlyRates && rawYearlyRates.length > 0) {
+                const nums = rawYearlyRates.map(r => toFiniteNumber(typeof r === 'object' ? (r.rate ?? r.interest_rate) : r)).filter(n => n !== null);
+                if (nums.length > 0) avgDepositRate = nums.reduce((a, b) => a + b, 0) / nums.length;
+            }
+            if (avgDepositRate === null && liqPrice !== null && parPrice > 0 && liqPrice > parPrice) {
+                avgDepositRate = (Math.pow(liqPrice / parPrice, 1 / 3) - 1) * 100;
+                isEstimatedFields = true;
+            }
+
+            // 연차별 테이블 구성 (1~3년차)
+            const yearRows = [];
+            let runningTrust = ipoAmount;
+            const yearsCount = Math.max(3, rawYearlyRates ? rawYearlyRates.length : 0, rawYearlyTrusts ? rawYearlyTrusts.length : 0);
+
+            for (let y = 1; y <= yearsCount; y++) {
+                const rateEntry = rawYearlyRates && rawYearlyRates[y - 1] !== undefined ? rawYearlyRates[y - 1] : null;
+                const trustEntry = rawYearlyTrusts && rawYearlyTrusts[y - 1] !== undefined ? rawYearlyTrusts[y - 1] : null;
+
+                let yrRate = rateEntry !== null
+                    ? toFiniteNumber(typeof rateEntry === 'object' ? (rateEntry.rate ?? rateEntry.interest_rate) : rateEntry)
+                    : avgDepositRate;
+
+                let yrTrust = trustEntry !== null
+                    ? toFiniteNumber(typeof trustEntry === 'object' ? (trustEntry.amount ?? trustEntry.trust_amount ?? trustEntry.balance) : trustEntry)
+                    : null;
+
+                let yrInterest = null;
+                if (yrTrust !== null) {
+                    yrInterest = Math.round(yrTrust - runningTrust);
+                    runningTrust = yrTrust;
+                } else if (yrRate !== null) {
+                    yrInterest = Math.round(runningTrust * (yrRate / 100));
+                    runningTrust = runningTrust + yrInterest;
+                    yrTrust = runningTrust;
+                }
+
+                if (yrRate !== null || yrTrust !== null) {
+                    yearRows.push({
+                        label: `${y}년차`,
+                        rate: yrRate,
+                        interest: yrInterest,
+                        trust: yrTrust
+                    });
+                }
+            }
+
+            const finalTrustTotal = liqPrice !== null && ipoShares !== null
+                ? Math.round(liqPrice * ipoShares)
+                : (yearRows.length > 0 ? yearRows[yearRows.length - 1].trust : ipoAmount);
+
+            // 매수적정가 계산 (청산형: 기준 예금금리 세후 이상, 합병형: 0% 초과)
+            const targetRate = investType === '청산' ? baseAfterTaxRate : 0;
+            const fairPriceIsa = toFiniteNumber(item.fair_buy_price_isa ?? item.fair_price_isa) ?? computeFairBuyPrice(liqPrice, daysLeft, targetRate, 'isa');
+            const fairPriceGen = toFiniteNumber(item.fair_buy_price_general ?? item.fair_price_general) ?? computeFairBuyPrice(liqPrice, daysLeft, targetRate, 'general');
+
+            // DOM 바인딩
+            document.getElementById('detail-modal-name').innerText = item.name || '-';
+            document.getElementById('detail-modal-code').innerText = item.code ? `(${String(item.code).padStart(6, '0')})` : '';
+
+            const badgesHtml = [
+                investType === '청산'
+                    ? `<span class="bg-blue-50 text-blue-700 border border-blue-200 text-xs px-2.5 py-0.5 rounded-full font-bold">청산형</span>`
+                    : `<span class="bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs px-2.5 py-0.5 rounded-full font-bold">합병형</span>`,
+                fairBuy === 'O'
+                    ? `<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2.5 py-0.5 rounded-full font-bold">매수적정 O</span>`
+                    : `<span class="bg-slate-100 text-slate-600 border border-slate-200 text-xs px-2.5 py-0.5 rounded-full font-bold">매수적정 ${fairBuy || 'X'}</span>`,
+                status === '일반'
+                    ? `<span class="bg-slate-100 text-slate-700 text-xs px-2.5 py-0.5 rounded-full font-semibold">거래상태: 일반</span>`
+                    : `<span class="bg-rose-50 text-rose-600 border border-rose-200 text-xs px-2.5 py-0.5 rounded-full font-bold">거래상태: ${status}</span>`,
+                daysLeft !== null
+                    ? `<span class="bg-amber-50 text-amber-700 border border-amber-200 text-xs px-2.5 py-0.5 rounded-full font-semibold">잔존 ${daysLeft.toLocaleString()}일</span>`
+                    : ''
+            ].join('');
+            document.getElementById('detail-modal-badges').innerHTML = badgesHtml;
+
+            document.getElementById('detail-listing-date').innerText = listingDate || '미확인';
+            document.getElementById('detail-delisting-date').innerText = delistingDate || '미확인';
+            document.getElementById('detail-invest-type').innerText = investType;
+            document.getElementById('detail-status').innerText = status;
+
+            document.getElementById('detail-calc-note').innerText = isEstimatedFields ? '* 일부 공시 원천값은 청산단가 기반 역산 추정치' : '공시 예치조건 기준';
+            document.getElementById('detail-deposit-rate').innerText = avgDepositRate !== null ? `연 ${avgDepositRate.toFixed(2)}%` : '미확인';
+            document.getElementById('detail-ipo-amount').innerText = ipoAmount !== null ? `${Math.round(ipoAmount / 100000000).toLocaleString()}억원 (${ipoAmount.toLocaleString()}원)` : '미확인';
+            document.getElementById('detail-ipo-shares').innerText = ipoShares !== null ? `${ipoShares.toLocaleString()}주` : '미확인';
+            document.getElementById('detail-liquidation-price').innerText = liqPrice !== null ? `${liqPrice.toLocaleString()}원` : '미확인';
+            document.getElementById('detail-final-trust').innerText = finalTrustTotal !== null ? `만기 신탁금 합계: ${finalTrustTotal.toLocaleString()}원` : '';
+
+            const yearlyBody = document.getElementById('detail-yearly-trust-body');
+            if (yearRows.length === 0) {
+                yearlyBody.innerHTML = `<tr><td colspan="4" class="py-3 px-3 text-center text-slate-400">연차별 예치이율 데이터가 없습니다.</td></tr>`;
+            } else {
+                yearlyBody.innerHTML = yearRows.map(r => `
+                    <tr>
+                        <td class="py-2 px-3 font-bold text-slate-800">${r.label}</td>
+                        <td class="py-2 px-3 text-indigo-700 font-semibold">${r.rate !== null ? `연 ${r.rate.toFixed(2)}%` : '-'}</td>
+                        <td class="py-2 px-3 text-right text-slate-600">${r.interest !== null ? `+${r.interest.toLocaleString()}원` : '-'}</td>
+                        <td class="py-2 px-3 text-right font-bold text-slate-900">${r.trust !== null ? `${r.trust.toLocaleString()}원` : '-'}</td>
+                    </tr>
+                `).join('');
+            }
+
+            document.getElementById('detail-current-price').innerText = curPrice !== null ? `${curPrice.toLocaleString()}원` : '-';
+
+            const isaText = yIsa !== null ? `ISA: ${yIsa.toFixed(2)}%` : 'ISA: -';
+            const genText = yGen !== null ? `일반: ${yGen.toFixed(2)}%` : '일반: -';
+            document.getElementById('detail-yields').innerHTML = `
+                <div class="${yIsa !== null && yIsa >= 0 ? 'text-emerald-700' : 'text-rose-600'}">${isaText}</div>
+                <div class="text-xs font-semibold text-slate-600 mt-0.5">${genText}</div>
+            `;
+
+            const fairBadgeText = fairBuy === 'O'
+                ? `<span class="text-emerald-700 font-black">적정 (O)</span>`
+                : `<span class="text-rose-600 font-black">부적정 (${fairBuy || 'X'})</span>`;
+            const fairPriceText = (fairPriceIsa !== null || fairPriceGen !== null)
+                ? `<div class="text-xs font-semibold text-slate-600 mt-0.5">ISA ${fairPriceIsa !== null ? fairPriceIsa.toLocaleString() + '원' : '-'} / 일반 ${fairPriceGen !== null ? fairPriceGen.toLocaleString() + '원' : '-'}</div>`
+                : '';
+            document.getElementById('detail-fair-buy').innerHTML = `${fairBadgeText}${fairPriceText}`;
+
+            document.getElementById('spac-detail-modal').classList.remove('hidden');
+        }
+
+        function closeSpacDetailModal() {
+            document.getElementById('spac-detail-modal').classList.add('hidden');
         }
 
         async function processLiquidations() {
@@ -1640,10 +1987,11 @@
                     return true;
                 });
 
-                allItems = activeItems.map(item => {
+                allItems = activeItems.map((item, idx) => {
                     const resolvedDelistingDate = getDelistingDateValue(item);
                     const normalizedItem = {
                         ...item,
+                        _idx: idx,
                         current_price: toFiniteNumber(item.current_price ?? item.currentPrice),
                         liquidation_price: toFiniteNumber(item.liquidation_price ?? item.liquidationPrice),
                         delisting_date: resolvedDelistingDate,
@@ -1964,7 +2312,11 @@
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80 transition-colors";
                 tr.innerHTML = `
-                    <td class="py-4 px-6 font-bold text-slate-900">${item.name || '-'}</td>
+                    <td class="py-4 px-6 font-bold text-slate-900">
+                        <button type="button" onclick="openSpacDetailModal(${item._idx})" class="text-left font-bold text-slate-900 hover:text-indigo-600 underline decoration-slate-300 hover:decoration-indigo-500 underline-offset-4 transition-colors cursor-pointer">
+                            ${item.name || '-'}
+                        </button>
+                    </td>
                     <td class="py-4 px-6 text-slate-700 font-semibold">${curPrice !== null ? curPrice.toLocaleString() + '원' : '-'}</td>
                     <td class="py-4 px-6 text-slate-600">${liqText}</td>
                     <td class="py-4 px-6 text-center">${fairBadge}</td>
@@ -1979,6 +2331,13 @@
                 tbody.appendChild(tr);
             });
         }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeSpacDetailModal();
+                closeSellModal();
+            }
+        });
 
         window.onload = loadSpacData;
     </script>
