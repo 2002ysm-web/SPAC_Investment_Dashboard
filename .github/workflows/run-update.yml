@@ -24,6 +24,9 @@ jobs:
       - name: Install dependencies
         run: pip install --upgrade pip && pip install requests
 
+      - name: Verify Python syntax
+        run: python -m py_compile main_run.py
+
       - name: Run SPAC updater script
         env:
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
@@ -43,4 +46,3 @@ jobs:
             git commit -m "chore: update spacs, liquidations, and deposit rates data"
             git push
           fi
-```[cite: 6]
