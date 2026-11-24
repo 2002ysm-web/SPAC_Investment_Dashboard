@@ -1,5 +1,6 @@
 import io
 import json
+import math
 import os
 import re
 import time
@@ -12,12 +13,17 @@ from typing import Any
 
 import requests
 
+# =========================
+# 환경변수 및 기본 설정
+# =========================
 DART_API_KEY = os.environ.get("DART_API_KEY", "").strip()
 KRX_OPENAPI_KEY = os.environ.get("KRX_OPENAPI_KEY", "").strip()
 ECOS_API_KEY = os.environ.get("ECOS_API_KEY", "").strip()
+
 OUTPUT_PATH = Path(os.environ.get("SPACS_OUTPUT_PATH", "data/spacs.json"))
 LIQUIDATIONS_PATH = Path(os.environ.get("LIQUIDATIONS_OUTPUT_PATH", "data/liquidations.json"))
 DEPOSIT_RATE_PATH = Path(os.environ.get("DEPOSIT_RATE_PATH", "data/deposit_rates.json"))
+
 EXCLUDE_DELISTING_NOTICE = os.environ.get("EXCLUDE_DELISTING_NOTICE", "true").strip().lower() in {
     "1",
     "true",
@@ -39,13 +45,31 @@ HEADERS = {
     "Referer": "https://data.krx.co.kr/contents/MDC/MDI/outerLoader/index.cmd",
     "Origin": "https://data.krx.co.kr",
 }
+
 GENERAL_TAX_RATE = 0.154
 DEPOSIT_INTEREST_TAX_RATE = 0.154
 DEPOSIT_AFTER_TAX_FACTOR = 1.0 - DEPOSIT_INTEREST_TAX_RATE
 FINAL_YEAR_TAX_FACTOR = 0.845
 FINAL_YEAR_MONTH_RATIO = 6.0 / 12.0
+MERGER_THRESHOLD_DAYS = 365
+
+# 2024~2026년 한국은행 정기예금 금리(연 %, 월별 폴백 테이블)
+DEFAULT_DEPOSIT_RATES: dict[str, float] = {
+    "2024-01": 3.67, "2024-02": 3.63, "2024-03": 3.58, "2024-04": 3.53,
+    "2024-05": 3.55, "2024-06": 3.51, "2024-07": 3.41, "2024-08": 3.35,
+    "2024-09": 3.40, "2024-10": 3.37, "2024-11": 3.35, "2024-12": 3.22,
+    "2025-01": 3.07, "2025-02": 2.97, "2025-03": 2.84, "2025-04": 2.71,
+    "2025-05": 2.63, "2025-06": 2.58, "2025-07": 2.55, "2025-08": 2.52,
+    "2025-09": 2.50, "2025-10": 2.48, "2025-11": 2.45, "2025-12": 2.45,
+    "2026-01": 2.42, "2026-02": 2.40, "2026-03": 2.40, "2026-04": 2.38,
+    "2026-05": 2.38, "2026-06": 2.35, "2026-07": 2.35, "2026-08": 2.35,
+    "2026-09": 2.35, "2026-10": 2.35, "2026-11": 2.35,
+}
 
 
+# =========================
+# 공통 유틸리티
+# =========================
 def load_existing_items(path: Path) -> list[dict]:
     if not path.exists():
         return []
@@ -61,111 +85,6 @@ def load_existing_items(path: Path) -> list[dict]:
     return []
 
 
-def to_after_tax_rate(gross_rate: float) -> float:
-    return round(float(gross_rate) * DEPOSIT_AFTER_TAX_FACTOR, 4)
-
-
-def fetch_ecos_deposit_rate(ref_dt: datetime) -> tuple[str | None, float | None]:
-    """한국은행 ECOS API에서 최신 정기예금 금리(세전 %) 조회 -> (YYYY-MM, 금리)"""
-    if not ECOS_API_KEY:
-        return None, None
-
-    start_ym = (ref_dt.replace(day=1) - timedelta(days=180)).strftime("%Y%m")
-    end_ym = ref_dt.strftime("%Y%m")
-    url = (
-        f"https://ecos.bok.or.kr/api/StatisticSearch/"
-        f"{ECOS_API_KEY}/json/kr/1/30/121Y002/M/{start_ym}/{end_ym}/010200000"
-    )
-    try:
-        res = requests.get(url, timeout=15)
-        res.raise_for_status()
-        payload = res.json()
-        rows = (payload.get("StatisticSearch") or {}).get("row") or []
-        valid_rows: list[tuple[str, float]] = []
-        for r in rows:
-            ym_raw = str(r.get("TIME") or "").strip()
-            val = parse_krw_float(r.get("DATA_VALUE"))
-            if len(ym_raw) == 6 and val is not None and val > 0:
-                valid_rows.append((f"{ym_raw[:4]}-{ym_raw[4:6]}", float(val)))
-        if valid_rows:
-            valid_rows.sort(key=lambda x: x[0])
-            return valid_rows[-1]
-    except Exception as exc:
-        print(f"[WARN] ECOS 금리 조회 실패: {exc}")
-    return None, None
-
-
-def get_base_deposit_rate(ref_dt: datetime | None = None) -> tuple[float, float]:
-    """(세후 기준 예금금리, 세전 기준 예금금리) 반환"""
-    now_ref = ref_dt or datetime.now(KST)
-    fallback_gross = 3.21
-    gross_rate = fallback_gross
-
-    rates_map: dict[str, float] = {}
-    if DEPOSIT_RATE_PATH.exists():
-        try:
-            with DEPOSIT_RATE_PATH.open("r", encoding="utf-8") as f:
-                saved = json.load(f)
-            if isinstance(saved, dict) and isinstance(saved.get("rates"), dict):
-                for k, v in saved["rates"].items():
-                    parsed = parse_krw_float(v)
-                    if parsed is not None and parsed > 0:
-                        rates_map[str(k)] = float(parsed)
-        except Exception as exc:
-            print(f"[WARN] 기준 예금금리 읽기 실패: {exc}")
-
-    ecos_ym, ecos_rate = fetch_ecos_deposit_rate(now_ref)
-    if ecos_ym and ecos_rate is not None:
-        rates_map[ecos_ym] = ecos_rate
-        gross_rate = ecos_rate
-        try:
-            DEPOSIT_RATE_PATH.parent.mkdir(parents=True, exist_ok=True)
-            with DEPOSIT_RATE_PATH.open("w", encoding="utf-8") as f:
-                json.dump(
-                    {
-                        "updated_at": now_ref.strftime("%Y-%m-%d %H:%M:%S KST"),
-                        "source": "BOK_ECOS_121Y002_010200000",
-                        "rates": dict(sorted(rates_map.items())),
-                    },
-                    f,
-                    ensure_ascii=False,
-                    indent=2,
-                )
-        except Exception as exc:
-            print(f"[WARN] deposit_rates.json 저장 실패: {exc}")
-    elif rates_map:
-        latest_ym = sorted(rates_map.keys())[-1]
-        gross_rate = rates_map[latest_ym]
-
-    after_tax_rate = to_after_tax_rate(gross_rate)
-    return after_tax_rate, round(gross_rate, 4)
-
-
-def get_dart_corp_codes() -> dict[str, str]:
-    mapping: dict[str, str] = {}
-    if not DART_API_KEY:
-        print("[INFO] DART_API_KEY 미설정 — 공시 조회 생략")
-        return mapping
-
-    url = f"https://opendart.fss.or.kr/api/corpCode.xml?crtfc_key={DART_API_KEY}"
-    try:
-        res = requests.get(url, headers={"User-Agent": HEADERS["User-Agent"]}, timeout=25)
-        res.raise_for_status()
-        with zipfile.ZipFile(io.BytesIO(res.content)) as zf:
-            xml_name = zf.namelist()[0]
-            with zf.open(xml_name) as xml_file:
-                root = ET.parse(xml_file).getroot()
-                for item in root.findall("list"):
-                    stock_code = (item.findtext("stock_code") or "").strip()
-                    corp_code = (item.findtext("corp_code") or "").strip()
-                    if stock_code and corp_code:
-                        mapping[stock_code.zfill(6)] = corp_code
-        print(f"[INFO] DART 고유번호 {len(mapping)}개 로드")
-    except Exception as exc:
-        print(f"[WARN] DART corpCode 조회 실패: {exc}")
-    return mapping
-
-
 def normalize_code(val: Any) -> str:
     raw = str(val or "").strip()
     if raw.endswith(".0"):
@@ -176,16 +95,24 @@ def normalize_code(val: Any) -> str:
     return digits.zfill(6) if digits else ""
 
 
+def normalize_name(name: Any) -> str:
+    s = re.sub(r"\s+", "", str(name or ""))
+    s = re.sub(r"^KB", "케이비", s, flags=re.IGNORECASE)
+    s = re.sub(r"^IBKS", "아이비케이에스", s, flags=re.IGNORECASE)
+    return s.lower()
+
+
 def parse_krw_int(val: Any) -> int:
     if val is None or isinstance(val, bool):
         return 0
     if isinstance(val, (int, float)):
-        return int(round(val))
+        return int(round(val)) if math.isfinite(float(val)) else 0
     s = str(val).replace(",", "").strip()
-    if not s or s == "-":
+    if not s or s in {"-", "미확인", "N/A", "null", "None"}:
         return 0
     try:
-        return int(round(float(s)))
+        num = float(s)
+        return int(round(num)) if math.isfinite(num) else 0
     except ValueError:
         digits = re.sub(r"[^0-9\-]", "", s)
         if not digits or digits == "-":
@@ -200,22 +127,141 @@ def parse_krw_float(val: Any) -> float | None:
     if val is None or isinstance(val, bool):
         return None
     if isinstance(val, (int, float)):
-        return float(val)
-    s = str(val).replace(",", "").replace("%", "").strip()
-    if not s or s == "-":
+        return float(val) if math.isfinite(float(val)) else None
+    s = re.sub(r"[,%\s원억만]|%p", "", str(val)).strip()
+    if not s or s in {"-", "미확인", "N/A", "null", "None"}:
         return None
     try:
-        return float(s)
+        num = float(s)
+        return num if math.isfinite(num) else None
     except ValueError:
         return None
 
 
-def is_spac_affiliation(dept_val: Any) -> bool:
-    """KRX 소속부(krx_dept)에 'SPAC'이 포함되는지만 판별"""
+def parse_date_yyyymmdd(date_str: Any) -> datetime | None:
+    if date_str is None:
+        return None
+    s = str(date_str).strip()
+    if not s or s in {"-", "미확인", "N/A", "null", "None"}:
+        return None
+    m = re.match(r"^(\d{4})[./-]?(\d{2})[./-]?(\d{2})", s)
+    if m:
+        try:
+            return datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+        except ValueError:
+            return None
+    digits = re.sub(r"[^0-9]", "", s)
+    if len(digits) >= 8:
+        try:
+            return datetime.strptime(digits[:8], "%Y%m%d")
+        except ValueError:
+            return None
+    return None
+
+
+def add_years_safe(dt: datetime, years: int) -> datetime:
+    try:
+        return dt.replace(year=dt.year + years)
+    except ValueError:
+        return dt.replace(year=dt.year + years, month=2, day=28)
+
+
+def is_spac_entity(name: Any, dept_val: Any) -> bool:
+    """KRX 소속부(SPAC) 또는 종목명(스팩/SPAC/기업인수목적) 기준 판별"""
     dept = str(dept_val or "").strip().upper()
-    return "SPAC" in dept
+    if "SPAC" in dept:
+        return True
+    nm = str(name or "").strip()
+    return bool(re.search(r"(스팩|SPAC|기업인수목적)", nm, re.IGNORECASE))
 
 
+# =========================
+# 1. 한국은행(ECOS) 기준 예금금리
+# =========================
+def to_after_tax_rate(gross_rate: float) -> float:
+    return round(float(gross_rate) * DEPOSIT_AFTER_TAX_FACTOR, 4)
+
+
+def fetch_ecos_deposit_rate(ref_dt: datetime) -> tuple[str | None, float | None, dict[str, float]]:
+    """한국은행 ECOS API에서 최신 정기예금 금리(세전 %) 조회 -> (최신 YYYY-MM, 최신 금리, 월별 맵)"""
+    fetched_map: dict[str, float] = {}
+    if not ECOS_API_KEY:
+        return None, None, fetched_map
+
+    start_ym = "202401"
+    end_ym = ref_dt.strftime("%Y%m")
+    url = (
+        f"https://ecos.bok.or.kr/api/StatisticSearch/"
+        f"{ECOS_API_KEY}/json/kr/1/200/121Y002/M/{start_ym}/{end_ym}/010200000"
+    )
+    try:
+        res = requests.get(url, timeout=15)
+        res.raise_for_status()
+        payload = res.json()
+        rows = (payload.get("StatisticSearch") or {}).get("row") or []
+        valid_rows: list[tuple[str, float]] = []
+        for r in rows:
+            ym_raw = str(r.get("TIME") or "").strip()
+            val = parse_krw_float(r.get("DATA_VALUE"))
+            if len(ym_raw) == 6 and val is not None and val > 0:
+                ym_fmt = f"{ym_raw[:4]}-{ym_raw[4:6]}"
+                fetched_map[ym_fmt] = round(float(val), 4)
+                valid_rows.append((ym_fmt, float(val)))
+        if valid_rows:
+            valid_rows.sort(key=lambda x: x[0])
+            return valid_rows[-1][0], valid_rows[-1][1], fetched_map
+    except Exception as exc:
+        print(f"[WARN] ECOS 금리 조회 실패(폴백 사용): {exc}")
+    return None, None, fetched_map
+
+
+def get_base_deposit_rate(ref_dt: datetime | None = None) -> tuple[float, float, dict[str, float]]:
+    """(세후 기준 예금금리, 세전 기준 예금금리, 월별 금리맵) 반환"""
+    now_ref = ref_dt or datetime.now(KST)
+    rates_map: dict[str, float] = dict(DEFAULT_DEPOSIT_RATES)
+
+    if DEPOSIT_RATE_PATH.exists():
+        try:
+            with DEPOSIT_RATE_PATH.open("r", encoding="utf-8") as f:
+                saved = json.load(f)
+            if isinstance(saved, dict) and isinstance(saved.get("rates"), dict):
+                for k, v in saved["rates"].items():
+                    parsed = parse_krw_float(v)
+                    if parsed is not None and parsed > 0:
+                        rates_map[str(k)] = float(parsed)
+        except Exception as exc:
+            print(f"[WARN] 기준 예금금리 읽기 실패: {exc}")
+
+    ecos_ym, ecos_rate, ecos_map = fetch_ecos_deposit_rate(now_ref)
+    if ecos_map:
+        rates_map.update(ecos_map)
+
+    latest_ym = sorted(rates_map.keys())[-1]
+    gross_rate = ecos_rate if (ecos_ym and ecos_rate is not None) else rates_map[latest_ym]
+
+    try:
+        DEPOSIT_RATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with DEPOSIT_RATE_PATH.open("w", encoding="utf-8") as f:
+            json.dump(
+                {
+                    "updated_at": now_ref.strftime("%Y-%m-%d %H:%M:%S KST"),
+                    "source": "BOK_ECOS_121Y002_010200000",
+                    "rates": dict(sorted(rates_map.items())),
+                },
+                f,
+                ensure_ascii=False,
+                indent=2,
+            )
+    except Exception as exc:
+        print(f"[WARN] deposit_rates.json 저장 실패: {exc}")
+
+    after_tax_rate = to_after_tax_rate(gross_rate)
+    return after_tax_rate, round(gross_rate, 4), dict(sorted(rates_map.items()))
+
+
+# =========================
+# 2. KRX 종목/시세/상장일 조회
+# =========================
 def _extract_rows(payload: Any) -> list[dict[str, Any]]:
     if isinstance(payload, list):
         return [r for r in payload if isinstance(r, dict)]
@@ -257,13 +303,18 @@ def _fetch_krx_openapi_rows(endpoint: str, bas_dd: str) -> list[dict[str, Any]]:
     return []
 
 
-def _fetch_krx_web_market_quotes(session: requests.Session, bas_dd: str, mkt_id: str = "KSQ") -> list[dict[str, Any]]:
+def _fetch_krx_web_bld_rows(
+    session: requests.Session,
+    bld: str,
+    bas_dd: str,
+    mkt_id: str = "KSQ",
+) -> list[dict[str, Any]]:
     endpoints = (
-        "https://data.krx.co.kr/contents/MDC/MDI/outerLoader/index.cmd",
         "https://data.krx.co.kr/comm/bldAttendant/getJsonData.cmd",
+        "https://data.krx.co.kr/contents/MDC/MDI/outerLoader/index.cmd",
     )
     payload = {
-        "bld": "dbms/MDC/STAT/standard/MDCSTAT01501",
+        "bld": bld,
         "locale": "ko_KR",
         "mktId": mkt_id,
         "trdDd": bas_dd,
@@ -289,6 +340,7 @@ def _merge_quote_rows(
     info_by_code: dict[str, dict[str, Any]],
     quote_by_code: dict[str, dict[str, Any]],
     fallback_date: str,
+    market_label: str = "",
     overwrite: bool = False,
 ) -> None:
     for r in rows:
@@ -332,10 +384,12 @@ def _merge_quote_rows(
         list_dd = str(
             info.get("LIST_DD") or r.get("LIST_DD") or r.get("상장일") or ""
         ).strip()
+        mkt = market_label or str(r.get("MKT_NM") or info.get("MKT_NM") or "KOSDAQ").strip()
 
         quote_by_code[code] = {
             "name": name,
             "dept": dept,
+            "market": mkt,
             "close_price": close_price,
             "open_price": open_price,
             "high_price": high_price,
@@ -350,7 +404,10 @@ def _merge_quote_rows(
         }
 
 
-def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, dict[str, Any]], str]:
+def get_krx_spac_market_data(
+    ref_dt: datetime,
+    prev_by_code: dict[str, dict[str, Any]],
+) -> tuple[list[dict], dict[str, dict[str, Any]], str]:
     candidate_dates = [
         (ref_dt - timedelta(days=offset)).strftime("%Y%m%d")
         for offset in range(0, 12)
@@ -358,7 +415,8 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
 
     info_rows: list[dict[str, Any]] = []
     trade_rows: list[dict[str, Any]] = []
-    web_rows: list[dict[str, Any]] = []
+    web_ksq_rows: list[dict[str, Any]] = []
+    web_stk_rows: list[dict[str, Any]] = []
     used_date = ""
 
     if KRX_OPENAPI_KEY:
@@ -388,14 +446,27 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
         d for d in candidate_dates if d != used_date
     ]
     for d_str in target_web_dates:
-        ksq_rows = _fetch_krx_web_market_quotes(session, d_str, "KSQ")
-        stk_rows = _fetch_krx_web_market_quotes(session, d_str, "STK")
-        merged_web = ksq_rows + stk_rows
-        if merged_web:
-            web_rows = merged_web
+        ksq_rows = _fetch_krx_web_bld_rows(session, "dbms/MDC/STAT/standard/MDCSTAT01501", d_str, "KSQ")
+        stk_rows = _fetch_krx_web_bld_rows(session, "dbms/MDC/STAT/standard/MDCSTAT01501", d_str, "STK")
+        if ksq_rows or stk_rows:
+            web_ksq_rows = ksq_rows
+            web_stk_rows = stk_rows
             if not used_date:
                 used_date = d_str
             break
+
+    # 상장일(LIST_DD) 보완을 위해 종목기본정보(MDCSTAT01901) 추가 조회
+    listing_map: dict[str, str] = {}
+    if used_date:
+        for mkt_id in ("KSQ", "STK"):
+            base_rows = _fetch_krx_web_bld_rows(
+                session, "dbms/MDC/STAT/standard/MDCSTAT01901", used_date, mkt_id
+            )
+            for r in base_rows:
+                c = normalize_code(r.get("ISU_SRT_CD") or r.get("종목코드"))
+                ld = str(r.get("LIST_DD") or r.get("상장일") or "").strip()
+                if c and ld:
+                    listing_map[c] = ld
 
     info_by_code: dict[str, dict[str, Any]] = {}
     for r in info_rows:
@@ -404,12 +475,13 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
             info_by_code[code] = r
 
     quote_by_code: dict[str, dict[str, Any]] = {}
-    _merge_quote_rows(trade_rows, info_by_code, quote_by_code, used_date, overwrite=True)
-    _merge_quote_rows(web_rows, info_by_code, quote_by_code, used_date, overwrite=False)
+    _merge_quote_rows(trade_rows, info_by_code, quote_by_code, used_date, market_label="KOSDAQ", overwrite=True)
+    _merge_quote_rows(web_ksq_rows, info_by_code, quote_by_code, used_date, market_label="KOSDAQ", overwrite=False)
+    _merge_quote_rows(web_stk_rows, info_by_code, quote_by_code, used_date, market_label="KOSPI", overwrite=False)
 
     all_codes: list[str] = []
     seen_all_codes: set[str] = set()
-    for src in (info_rows, trade_rows, web_rows):
+    for src in (info_rows, trade_rows, web_ksq_rows, web_stk_rows):
         for r in src:
             c = normalize_code(
                 r.get("ISU_SRT_CD") or r.get("종목코드") or r.get("ISU_CD") or r.get("code")
@@ -422,21 +494,19 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
     seen_codes: set[str] = set()
 
     for code in all_codes:
-        if code in seen_codes:
+        if code in seen_codes or code in EXCLUDED_SPAC_CODES:
             continue
         info = info_by_code.get(code, {})
         q_info = quote_by_code.get(code, {})
+        prev_rec = prev_by_code.get(code, {})
 
         dept = str(
             info.get("SECT_TP_NM")
             or info.get("소속부")
             or q_info.get("dept")
+            or prev_rec.get("krx_dept")
             or ""
         ).strip()
-
-        # KRX 소속부에 'SPAC' 포함 여부만 단순 판별
-        if not is_spac_affiliation(dept):
-            continue
 
         name = str(
             info.get("ISU_ABBRV")
@@ -444,26 +514,35 @@ def get_krx_spac_market_data(ref_dt: datetime) -> tuple[list[dict], dict[str, di
             or info.get("종목명")
             or info.get("회사명")
             or q_info.get("name")
+            or prev_rec.get("name")
             or ""
         ).strip()
-        if not name:
+
+        if not name or not is_spac_entity(name, dept):
             continue
 
-        listing_date = str(
-            info.get("LIST_DD") or q_info.get("listing_date") or ""
+        raw_list_dd = str(
+            info.get("LIST_DD")
+            or q_info.get("listing_date")
+            or listing_map.get(code)
+            or prev_rec.get("listing_date")
+            or ""
         ).strip()
+        dt_list = parse_date_yyyymmdd(raw_list_dd)
+        listing_date = dt_list.strftime("%Y-%m-%d") if dt_list else raw_list_dd
 
         seen_codes.add(code)
         spacs.append({
             "code": code,
             "name": name,
+            "market": q_info.get("market") or prev_rec.get("market") or "KOSDAQ",
             "listing_date": listing_date,
             "krx_dept": dept,
         })
 
     print(
         f"[INFO] KRX 기준일={used_date or '미확인'}, info={len(info_rows)}건, "
-        f"trade={len(trade_rows)}건, web={len(web_rows)}건, SPAC종목={len(spacs)}개"
+        f"trade={len(trade_rows)}건, web={len(web_ksq_rows) + len(web_stk_rows)}건, SPAC후보={len(spacs)}개"
     )
     return spacs, quote_by_code, used_date
 
@@ -495,7 +574,35 @@ def get_krx_quote_and_base(
     return current_price, is_suspended, par_base_price, market_meta
 
 
-def get_recent_dart_disclosures(corp_code: str, days: int = 365) -> list[dict]:
+# =========================
+# 3. OpenDART 공시/합병/청산 조회
+# =========================
+def get_dart_corp_codes() -> dict[str, str]:
+    mapping: dict[str, str] = {}
+    if not DART_API_KEY:
+        print("[INFO] DART_API_KEY 미설정 — 공시 조회 생략")
+        return mapping
+
+    url = f"https://opendart.fss.or.kr/api/corpCode.xml?crtfc_key={DART_API_KEY}"
+    try:
+        res = requests.get(url, headers={"User-Agent": HEADERS["User-Agent"]}, timeout=25)
+        res.raise_for_status()
+        with zipfile.ZipFile(io.BytesIO(res.content)) as zf:
+            xml_name = zf.namelist()[0]
+            with zf.open(xml_name) as xml_file:
+                root = ET.parse(xml_file).getroot()
+                for item in root.findall("list"):
+                    stock_code = (item.findtext("stock_code") or "").strip()
+                    corp_code = (item.findtext("corp_code") or "").strip()
+                    if stock_code and corp_code:
+                        mapping[stock_code.zfill(6)] = corp_code
+        print(f"[INFO] DART 고유번호 {len(mapping)}개 로드")
+    except Exception as exc:
+        print(f"[WARN] DART corpCode 조회 실패: {exc}")
+    return mapping
+
+
+def get_recent_dart_disclosures(corp_code: str, days: int = 730) -> list[dict]:
     if not DART_API_KEY or not corp_code:
         return []
     now_kst = datetime.now(KST)
@@ -603,25 +710,56 @@ def extract_pay_date(text: str, fallback_rcept_dt: str = "") -> str:
                 except ValueError:
                     continue
 
-    digits = re.sub(r"[^0-9]", "", fallback_rcept_dt or "")
-    if len(digits) >= 8:
-        try:
-            return datetime.strptime(digits[:8], "%Y%m%d").strftime("%Y-%m-%d")
-        except ValueError:
-            pass
-    return ""
+    dt_fb = parse_date_yyyymmdd(fallback_rcept_dt)
+    return dt_fb.strftime("%Y-%m-%d") if dt_fb else ""
 
 
-def parse_date_yyyymmdd(date_str: str) -> datetime | None:
-    digits = re.sub(r"[^0-9]", "", date_str or "")
-    if len(digits) >= 8:
-        try:
-            return datetime.strptime(digits[:8], "%Y%m%d")
-        except ValueError:
-            return None
-    return None
+def extract_merger_meta(disclosures: list[dict]) -> dict[str, str | None]:
+    meta: dict[str, str | None] = {
+        "merger_status": None,
+        "merger_target": None,
+        "merger_approved_at": None,
+    }
+    for d in disclosures:
+        rep = str(d.get("report_nm") or "")
+        if any(k in rep for k in ("합병", "주식교환", "영업양수도", "주요사항보고서(회사합병결정)")):
+            if "철회" in rep or "취소" in rep:
+                continue
+            if "승인" in rep or "결의" in rep:
+                meta["merger_status"] = "합병승인"
+            elif "신고서" in rep or "결정" in rep:
+                meta["merger_status"] = "합병추진"
+            else:
+                meta["merger_status"] = "합병관련공시"
+            dt_rcept = parse_date_yyyymmdd(d.get("rcept_dt"))
+            meta["merger_approved_at"] = dt_rcept.strftime("%Y-%m-%d") if dt_rcept else None
+            m_target = re.search(r"합병\s*\(([^)]+)\)", rep)
+            if m_target:
+                meta["merger_target"] = m_target.group(1).strip()
+            break
+    return meta
 
 
+def get_risk_disclosure_titles(disclosures: list[dict]) -> list[str]:
+    """일반 안내 문구 오탐을 줄이기 위해 확정·사유발생·실행 성격의 상폐/해산 공시 패턴 판별"""
+    risk_patterns = (
+        r"상장폐지\s*(결정|사유\s*발생|통지|실행)",
+        r"주권\s*매매거래\s*정지",
+        r"기업인수목적회사\s*해산",
+        r"해산\s*(사유\s*발생|결정|등기)",
+        r"청산\s*(종결|결정|절차\s*개시)",
+    )
+    matched: list[str] = []
+    for d in disclosures:
+        title = str(d.get("report_nm") or "").strip()
+        if title and any(re.search(pat, title) for pat in risk_patterns):
+            matched.append(title)
+    return matched
+
+
+# =========================
+# 4. 청산가 / 연환산 수익률 / 매수적정 / 필터링
+# =========================
 def calc_sheet_liquidation_unit_price(
     base_price: int,
     r1: float,
@@ -649,7 +787,6 @@ def calc_sheet_liquidation_unit_price(
 
 
 def resolve_liquidation_price(
-    spac: dict,
     disclosures: list[dict],
     current_price: int,
     par_base_price: int | None,
@@ -666,7 +803,7 @@ def resolve_liquidation_price(
     liq_docs = [
         d for d in disclosures
         if d.get("rcept_no") and any(k in (d.get("report_nm") or "") for k in ("청산", "해산", "분배금", "예치"))
-    ][:1]
+    ][:2]
     for d in liq_docs:
         doc_text = fetch_document_text(d["rcept_no"])
         price = extract_unit_price(doc_text)
@@ -689,7 +826,7 @@ def resolve_liquidation_price(
 
 def extract_liquidation_record(spac: dict, disclosures: list[dict]) -> dict | None:
     keywords = ("청산", "해산", "분배금", "예치금 반환")
-    candidates = [d for d in disclosures if any(k in (d.get("report_nm") or "") for k in keywords)][:1]
+    candidates = [d for d in disclosures if any(k in (d.get("report_nm") or "") for k in keywords)][:2]
 
     for d in candidates:
         title = d.get("report_nm", "")
@@ -719,10 +856,7 @@ def extract_liquidation_record(spac: dict, disclosures: list[dict]) -> dict | No
 def infer_delisting_date(listing_date: str) -> str:
     dt = parse_date_yyyymmdd(listing_date)
     if dt:
-        try:
-            return dt.replace(year=dt.year + 3).strftime("%Y-%m-%d")
-        except ValueError:
-            pass
+        return add_years_safe(dt, 3).strftime("%Y-%m-%d")
     return ""
 
 
@@ -739,10 +873,7 @@ def calc_annualized_yields(
     dt_delist = parse_date_yyyymmdd(delisting_date_str)
     dt_list = parse_date_yyyymmdd(listing_date_str)
     if not dt_delist and dt_list:
-        try:
-            dt_delist = dt_list.replace(year=dt_list.year + 3)
-        except ValueError:
-            dt_delist = None
+        dt_delist = add_years_safe(dt_list, 3)
 
     if not dt_delist:
         return None, None, None
@@ -784,104 +915,212 @@ def calc_fair_buy_status(
     return status_yn, round(fair_price, 2)
 
 
-def is_valid_spac_record(record: dict[str, Any]) -> bool:
+def evaluate_spac_eligibility(record: dict[str, Any]) -> tuple[bool, list[str]]:
+    """상장폐지·해산·거래정지·만기경과 종목을 제외하기 위한 검증"""
+    reasons: list[str] = []
+
     code = normalize_code(record.get("code"))
+    name = str(record.get("name") or "").strip()
+    dept = str(record.get("krx_dept") or "").strip()
+
     if not code or code in EXCLUDED_SPAC_CODES:
-        return False
-    return is_spac_affiliation(record.get("krx_dept"))
+        reasons.append("excluded_code")
+    if not name:
+        reasons.append("missing_name")
+    if not is_spac_entity(name, dept):
+        reasons.append("not_spac")
+
+    delisting_date = str(record.get("delisting_date") or "").strip()
+    rem_days = record.get("remaining_days")
+    if not delisting_date or rem_days is None:
+        reasons.append("missing_delisting_date")
+    elif rem_days <= 0:
+        reasons.append("expired_maturity")
+
+    status = str(record.get("status") or "").strip()
+    if any(k in status for k in ("상장폐지", "폐지", "해산", "청산", "합병완료")):
+        reasons.append(f"status:{status}")
+
+    current_price = record.get("current_price") or 0
+    if bool(record.get("is_suspended")) or current_price <= 0:
+        reasons.append("suspended_or_invalid_price")
+
+    liq_price = record.get("liquidation_price") or 0
+    if liq_price <= 0:
+        reasons.append("invalid_liquidation_price")
+
+    if record.get("yield_isa") is None or record.get("yield_general") is None:
+        reasons.append("missing_yield")
+
+    if EXCLUDE_DELISTING_NOTICE:
+        if "관리종목" in dept:
+            reasons.append("administrative_issue")
+        if bool(record.get("has_liquidation_notice")):
+            reasons.append("liquidation_notice_flag")
+        risk_titles = get_risk_disclosure_titles(record.get("recent_disclosures") or [])
+        if risk_titles:
+            reasons.append(f"risk_disclosure:{risk_titles[0]}")
+
+    return (len(reasons) == 0), reasons
+
+
+def deduplicate_spacs(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    seen_keys: set[str] = set()
+    unique_items: list[dict[str, Any]] = []
+
+    for item in items:
+        code = normalize_code(item.get("code"))
+        norm = normalize_name(item.get("name"))
+        dedup_key = code if code else norm
+        if not dedup_key:
+            continue
+        if dedup_key in seen_keys or (norm and norm in seen_keys):
+            continue
+        seen_keys.add(dedup_key)
+        if norm:
+            seen_keys.add(norm)
+        unique_items.append(item)
+
+    return unique_items
 
 
 def build_spac_record(
     spac: dict,
     corp_codes: dict[str, str],
     quote_by_code: dict[str, dict[str, Any]],
+    prev_rec: dict[str, Any],
     deposit_rate_after_tax: float,
     deposit_rate_gross: float,
     ref_dt: datetime,
 ) -> tuple[dict | None, dict | None]:
     code = spac["code"]
-    corp_code = corp_codes.get(code, "")
+    corp_code = corp_codes.get(code, "") or str(prev_rec.get("corp_code") or "")
     current_price, is_suspended, par_base_price, market_meta = get_krx_quote_and_base(code, quote_by_code)
 
-    disclosures = get_recent_dart_disclosures(corp_code, days=365)
+    disclosures = get_recent_dart_disclosures(corp_code, days=730)
+    if not disclosures and isinstance(prev_rec.get("recent_disclosures"), list):
+        disclosures = prev_rec["recent_disclosures"]
 
-    has_merger = any("합병" in (d.get("report_nm") or "") for d in disclosures[:15])
-    has_liq = any(
+    merger_meta = extract_merger_meta(disclosures)
+    has_merger = bool(merger_meta["merger_status"]) or any(
+        "합병" in (d.get("report_nm") or "") and "철회" not in (d.get("report_nm") or "")
+        for d in disclosures[:15]
+    )
+    risk_titles = get_risk_disclosure_titles(disclosures[:20])
+    has_liq = bool(risk_titles) or any(
         any(k in (d.get("report_nm") or "") for k in ("해산", "청산", "상장폐지"))
         for d in disclosures[:15]
     )
 
-    status = "정지" if is_suspended else ("합병" if has_merger else "일반")
-    invest_type = "합병" if has_merger else "청산"
+    listing_date = spac.get("listing_date") or str(prev_rec.get("listing_date") or "")
+    delisting_date = infer_delisting_date(listing_date) or str(prev_rec.get("delisting_date") or "")
 
-    delisting_date = infer_delisting_date(spac.get("listing_date", ""))
     s_liq_price, c_base_price, liq_source = resolve_liquidation_price(
-        spac, disclosures, current_price, par_base_price, deposit_rate_after_tax
+        disclosures, current_price, par_base_price, deposit_rate_after_tax
     )
     liq_record = extract_liquidation_record(spac, disclosures)
 
     yield_isa, yield_general, rem_days = calc_annualized_yields(
         s_liq_price=s_liq_price,
         d_current_price=current_price,
-        listing_date_str=spac.get("listing_date", ""),
+        listing_date_str=listing_date,
         delisting_date_str=delisting_date,
         ref_dt=ref_dt,
     )
+
+    if rem_days is not None and rem_days <= 0:
+        status = "상장폐지"
+    elif is_suspended:
+        status = "정지"
+    elif has_merger:
+        status = "합병"
+    else:
+        status = "일반"
+
+    # 잔존일수 365일 이상이면 합병, 미만이면 청산
+    if rem_days is not None:
+        invest_type = "합병" if rem_days >= MERGER_THRESHOLD_DAYS else "청산"
+    else:
+        invest_type = "합병" if has_merger else "청산"
+
     is_fair_buy, fair_buy_price = calc_fair_buy_status(
         c_base_price=c_base_price,
         s_liq_price=s_liq_price,
         d_current_price=current_price,
-        e_listing_date_str=spac.get("listing_date", ""),
+        e_listing_date_str=listing_date,
         ref_dt=ref_dt,
         is_suspended=is_suspended,
     )
 
-    liq_display = int(round(s_liq_price)) if s_liq_price.is_integer() else s_liq_price
+    liq_display = int(round(s_liq_price)) if float(s_liq_price).is_integer() else s_liq_price
+    simple_yield = round(((s_liq_price - current_price) / current_price) * 100.0, 2) if current_price > 0 else 0.0
 
     record = {
         "code": code,
         "name": spac["name"],
+        "market": spac.get("market", "KOSDAQ"),
         "krx_dept": spac.get("krx_dept", ""),
-        "listing_date": spac["listing_date"],
+        "listing_date": listing_date,
         "delisting_date": delisting_date,
+        "maturity_date": delisting_date,
         "remaining_days": rem_days,
         "corp_code": corp_code,
         "base_price": c_base_price,
+        "ipo_price": c_base_price,
         "current_price": current_price,
         "open_price": market_meta["open_price"],
         "high_price": market_meta["high_price"],
         "low_price": market_meta["low_price"],
         "prev_diff": market_meta["prev_diff"],
         "chg_rate": market_meta["chg_rate"],
+        "change_rate": market_meta["chg_rate"] if market_meta["chg_rate"] is not None else 0.0,
         "volume": market_meta["volume"],
         "trading_value": market_meta["trading_value"],
         "market_cap": market_meta["market_cap"],
         "trade_date": market_meta["trade_date"],
         "liquidation_price": liq_display,
         "liquidation_price_source": liq_source,
+        "liquidation_source": liq_source,
         "fair_buy_price": fair_buy_price,
         "is_fair_buy": is_fair_buy,
         "invest_type": invest_type,
         "yield_isa": yield_isa,
         "yield_general": yield_general,
+        "simple_yield": simple_yield,
         "deposit_rate": deposit_rate_after_tax,
         "deposit_rate_after_tax": deposit_rate_after_tax,
         "deposit_rate_gross": deposit_rate_gross,
         "is_suspended": is_suspended,
+        "trading_on_krx": not is_suspended,
         "has_liquidation_notice": has_liq,
+        "merger_status": merger_meta["merger_status"],
+        "merger_target": merger_meta["merger_target"],
+        "merger_approved_at": merger_meta["merger_approved_at"],
+        "latest_report": disclosures[0].get("report_nm") if disclosures else None,
+        "latest_report_date": (
+            parse_date_yyyymmdd(disclosures[0].get("rcept_dt")).strftime("%Y-%m-%d")
+            if disclosures and parse_date_yyyymmdd(disclosures[0].get("rcept_dt"))
+            else None
+        ),
         "status": status,
         "recent_disclosures": disclosures[:15],
     }
 
-    if not is_valid_spac_record(record):
+    ok, reasons = evaluate_spac_eligibility(record)
+    if not ok:
+        print(f"[FILTER] [{code}] {spac['name']} 제외 -> {', '.join(reasons)}")
         return None, liq_record
 
     return record, liq_record
 
 
-def save_json(items: list[dict], path: Path, updated_at: str) -> None:
+def save_json(items: list[dict], path: Path, updated_at: str, extra_meta: dict[str, Any] | None = None) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    payload = {"updated_at": updated_at, "count": len(items), "items": items}
+    payload: dict[str, Any] = {"updated_at": updated_at}
+    if extra_meta:
+        payload.update(extra_meta)
+    payload["count"] = len(items)
+    payload["items"] = items
     with path.open("w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
     print(f"[INFO] {path} 저장 완료 (updated_at={updated_at}, count={len(items)})")
@@ -890,15 +1129,20 @@ def save_json(items: list[dict], path: Path, updated_at: str) -> None:
 def main() -> None:
     existing_spacs = load_existing_items(OUTPUT_PATH)
     existing_liqs = load_existing_items(LIQUIDATIONS_PATH)
+    prev_by_code = {
+        normalize_code(item.get("code")): item
+        for item in existing_spacs
+        if normalize_code(item.get("code"))
+    }
 
     now_kst = datetime.now(KST)
     ref_dt = datetime(now_kst.year, now_kst.month, now_kst.day)
     updated_at = now_kst.strftime("%Y-%m-%d %H:%M:%S KST")
 
     try:
-        deposit_rate_after_tax, deposit_rate_gross = get_base_deposit_rate(now_kst)
+        deposit_rate_after_tax, deposit_rate_gross, deposit_rates = get_base_deposit_rate(now_kst)
         corp_codes = get_dart_corp_codes()
-        spac_list, quote_by_code, trade_date = get_krx_spac_market_data(ref_dt)
+        spac_list, quote_by_code, trade_date = get_krx_spac_market_data(ref_dt, prev_by_code)
 
         if not spac_list:
             print("[WARN] KRX SPAC 종목이 비어 있음 — 기존 데이터 유지")
@@ -916,6 +1160,7 @@ def main() -> None:
                     spac,
                     corp_codes,
                     quote_by_code,
+                    prev_by_code.get(code, {}),
                     deposit_rate_after_tax,
                     deposit_rate_gross,
                     ref_dt,
@@ -930,16 +1175,25 @@ def main() -> None:
                 print(f"[PROGRESS] {idx}/{len(spac_list)} 완료")
             time.sleep(0.02)
 
+        spac_results = deduplicate_spacs(spac_results)
+        spac_results.sort(key=lambda x: (x.get("name") or ""))
+
         valid_prices = sum(1 for r in spac_results if (r.get("current_price") or 0) > 0)
         resolved_liq_cnt = sum(1 for r in spac_results if r.get("liquidation_price") is not None)
         fair_o_cnt = sum(1 for r in spac_results if r.get("is_fair_buy") == "O")
         print(
-            f"[SUMMARY] KRX기준일={trade_date or '-'}, SPAC종목={len(spac_results)}개, "
+            f"[SUMMARY] KRX기준일={trade_date or '-'}, 유효SPAC종목={len(spac_results)}개, "
             f"종가확보={valid_prices}개, 청산가확보={resolved_liq_cnt}개, "
             f"매수적정(O)={fair_o_cnt}개, 청산내역={len(liq_results)}건"
         )
 
-        save_json(spac_results, OUTPUT_PATH, updated_at)
+        spacs_meta = {
+            "date": now_kst.strftime("%Y-%m-%d"),
+            "deposit_rate_gross": round(deposit_rate_gross, 2),
+            "deposit_rate_after_tax": round(deposit_rate_after_tax, 2),
+            "deposit_rates": deposit_rates,
+        }
+        save_json(spac_results, OUTPUT_PATH, updated_at, extra_meta=spacs_meta)
         save_json(liq_results, LIQUIDATIONS_PATH, updated_at)
 
     except Exception as exc:
@@ -951,3 +1205,56 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+```[cite: 7]
+
+---
+
+### 2. `run-update.yml` 전체 코드
+
+```yaml
+name: Update SPAC Data
+
+on:
+  schedule:
+    - cron: "0 9 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-spacs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install --upgrade pip && pip install requests
+
+      - name: Run SPAC updater script
+        env:
+          DART_API_KEY: ${{ secrets.DART_API_KEY }}
+          KRX_OPENAPI_KEY: ${{ secrets.KRX_OPENAPI_KEY }}
+          ECOS_API_KEY: ${{ secrets.ECOS_API_KEY }}
+          EXCLUDE_DELISTING_NOTICE: "true"
+        run: python -u main_run.py
+
+      - name: Commit and push updated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f data/spacs.json data/liquidations.json data/deposit_rates.json || true
+          if git diff --staged --quiet; then
+            echo "변경된 데이터가 없습니다."
+          else
+            git commit -m "chore: update spacs, liquidations, and deposit rates data"
+            git push
+          fi
+```[cite: 6]
