@@ -22,13 +22,14 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install --upgrade pip && pip install pandas requests lxml html5lib beautifulsoup4
+        run: pip install --upgrade pip && pip install requests
 
       - name: Run SPAC updater script
         env:
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
           KRX_OPENAPI_KEY: ${{ secrets.KRX_OPENAPI_KEY }}
           ECOS_API_KEY: ${{ secrets.ECOS_API_KEY }}
+          EXCLUDE_DELISTING_NOTICE: "true"
         run: python -u main_run.py
 
       - name: Commit and push updated data
@@ -42,3 +43,4 @@ jobs:
             git commit -m "chore: update spacs, liquidations, and deposit rates data"
             git push
           fi
+```[cite: 6]
