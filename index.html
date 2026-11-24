@@ -253,17 +253,16 @@
                 </div>
             </div>
 
-            <!-- Data Table (옆으로 정돈된 가로 레이아웃) -->
+            <!-- Data Table -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="px-5 py-2.5 bg-indigo-50/60 border-b border-slate-200/80 flex items-center justify-between flex-wrap gap-2 text-[11px] text-slate-600">
-                    <span>💡 <strong>종목명</strong>을 클릭하면 청산가·매수적정가 산출 근거 카드가 열립니다.</span>
-                    <span class="text-slate-400">산식 주석은 표 하단 참고</span>
+                    <span>💡 <strong>종목명</strong>을 클릭하면 상세 정보 카드가 열립니다.</span>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse whitespace-nowrap">
                         <thead>
                             <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200 select-none">
-                                <th onclick="sortData('name')" class="py-3.5 px-5 font-bold cursor-pointer hover:bg-slate-200 transition-colors min-w-[210px]">종목명 <span id="sort-icon-name" class="text-slate-400">↕</span></th>
+                                <th onclick="sortData('name')" class="py-3.5 px-5 font-bold cursor-pointer hover:bg-slate-200 transition-colors min-w-[210px] text-center">종목명 <span id="sort-icon-name" class="text-slate-400">↕</span></th>
                                 <th onclick="sortData('current_price')" class="py-3.5 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-right">현재가 <span id="sort-icon-current_price" class="text-slate-400">↕</span></th>
                                 <th onclick="sortData('liquidation_price')" class="py-3.5 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-right">
                                     <span class="inline-flex items-center justify-end gap-1">
@@ -280,26 +279,6 @@
                         <tbody id="spac-table-body" class="divide-y divide-slate-100 text-sm font-medium text-slate-700">
                         </tbody>
                     </table>
-                </div>
-            </div>
-
-            <!-- 청산가 / 매수적정가 산식 주석 영역 -->
-            <div class="mt-4 bg-slate-100/80 border border-slate-200 rounded-2xl p-4 sm:p-5 text-xs text-slate-600 space-y-2.5 leading-relaxed">
-                <div class="flex items-start gap-2">
-                    <span class="shrink-0 font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded text-[11px]">※ 청산가 · 신탁금 산식</span>
-                    <div>
-                        <code class="font-mono text-slate-800 bg-white px-1.5 py-0.5 rounded border border-slate-200">청산단가 = 만기(3년차) 신탁금 ÷ 공모주식수</code>
-                        <span class="mx-1 text-slate-400">/</span>
-                        <code class="font-mono text-slate-800 bg-white px-1.5 py-0.5 rounded border border-slate-200">연차별 신탁금 = 전년도 신탁금 + 세후 이자 (전년도 신탁금 × 예치 이자율 × (1 − 법인세율))</code>
-                        <span class="block text-slate-500 mt-0.5">· 공모금(예치원금)에 연차별 예치이자에서 스팩 법인세 등 세금을 제외한 세후 이자를 누적 합산한 만기 신탁금을 공모주식수로 나눈 주당 예상 반환가액입니다.</span>
-                    </div>
-                </div>
-                <div class="flex items-start gap-2">
-                    <span class="shrink-0 font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded text-[11px]">※ 매수적정가 산식</span>
-                    <div>
-                        <code class="font-mono text-slate-800 bg-white px-1.5 py-0.5 rounded border border-slate-200">매수적정가 = 공모가 + (청산가 − 공모가) × (오늘 − 상장일) ÷ (상장폐지일 − 상장일)</code>
-                        <span class="block text-slate-500 mt-0.5">· 청산가에서 공모가를 뺀 만기 이자 수익분에 전체 예치기간 대비 경과일수 비율을 곱해 현재 시점 적정가치를 산출합니다.</span>
-                    </div>
                 </div>
             </div>
         </div>
@@ -648,7 +627,7 @@
                         </div>
                     </div>
 
-                    <!-- 청산단가 산식 및 신탁금 산식 표시 (세금 제외 명시) -->
+                    <!-- 청산단가 산식 및 신탁금 산식 표시 -->
                     <div class="bg-white/90 border border-indigo-100 rounded-lg px-3 py-2 text-[11px] text-slate-600 space-y-1 text-center">
                         <div>
                             <span class="font-bold text-indigo-700">청산단가 산식:</span>
@@ -656,14 +635,14 @@
                         </div>
                         <div>
                             <span class="font-bold text-indigo-700">신탁금 산식:</span>
-                            <code id="detail-trust-formula-code" class="font-mono text-slate-800">전년도 신탁금 + 세후 이자 (전년도 신탁금 × 예치 이자율 × (1 − 법인세율 9.9%))</code>
+                            <code id="detail-trust-formula-code" class="font-mono text-slate-800">전년도 신탁금 + 세후 이자 (전년도 신탁금 × 예치 이자율 × (1 − 신탁수수료 0.1%) × (1 − 소득세 15.4%))</code>
                         </div>
                     </div>
 
                     <!-- 연차별 예치이율 및 신탁금 추이 -->
                     <div class="bg-white border border-indigo-100 rounded-lg overflow-hidden">
                         <div class="px-3 py-2 bg-indigo-50/70 border-b border-indigo-100 text-[11px] font-bold text-indigo-900 text-center">
-                            연차별 예치이율 및 신탁금 추이
+                            연차별 예치이율 및 신탁금 추이 (DART 공시 반영)
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-xs text-center">
@@ -671,15 +650,12 @@
                                     <tr class="border-b border-slate-100 text-slate-400">
                                         <th class="py-2 px-3 font-bold text-center">구분</th>
                                         <th class="py-2 px-3 font-bold text-center">예치 이자율</th>
-                                        <th class="py-2 px-3 font-bold text-center">신탁금 (세후 이자 반영)</th>
+                                        <th class="py-2 px-3 font-bold text-center">신탁금 (수수료·소득세 차감 후)</th>
                                     </tr>
                                 </thead>
                                 <tbody id="detail-yearly-trust-body" class="divide-y divide-slate-100 text-slate-700 font-medium">
                                 </tbody>
                             </table>
-                        </div>
-                        <div id="detail-unannounced-note" class="hidden px-3 py-2 bg-amber-50/80 border-t border-amber-200/70 text-[11px] text-amber-800 font-medium text-center">
-                            ※ 예치 이자율 <span class="font-bold underline">미정</span> 표시 연도는 직전(전년도) 예치 이자율을 동일하게 적용하여 세후 신탁금을 산출했습니다.
                         </div>
                     </div>
                 </div>
@@ -760,7 +736,8 @@
 
         const DEPOSIT_NET_FACTOR = 0.845;
         const GENERAL_TAX_RATE = 0.154;
-        const DEFAULT_SPAC_CORP_TAX_RATE = 0.099; // 스팩 신탁이자 법인세+지방소득세 (과세표준 2억 이하 9.9%)
+        const TRUST_FEE_RATE = 0.001; // 신탁 수수료 0.1%
+        const TRUST_NET_INTEREST_FACTOR = (1 - TRUST_FEE_RATE) * (1 - GENERAL_TAX_RATE); // (1 - 0.001) * (1 - 0.154)
         const MERGER_THRESHOLD_DAYS = 365;
         const SEED_KEY = 'spac_seed_applied_v3';
         const EXCLUDED_SPAC_CODES = new Set(['206400']);
@@ -979,9 +956,28 @@
             if (val === null || val === undefined || val === '') return null;
             if (typeof val === 'number') return Number.isFinite(val) ? val : null;
             const cleaned = String(val).replace(/,/g, '').replace(/%/g, '').replace(/%p/g, '').trim();
-            if (!cleaned || cleaned === '-' || cleaned === '미확인' || cleaned === 'N/A' || cleaned === 'null') return null;
+            if (!cleaned || cleaned === '-' || cleaned === '미확인' || cleaned === '미정' || cleaned === 'N/A' || cleaned === 'null') return null;
             const num = Number(cleaned);
             return Number.isFinite(num) ? num : null;
+        }
+
+        function parseKoreanAmount(raw) {
+            if (raw === null || raw === undefined || raw === '') return null;
+            if (typeof raw === 'number') return Number.isFinite(raw) ? raw : null;
+            const str = String(raw).replace(/,/g, '').trim();
+            if (!str) return null;
+            const eokMatch = str.match(/^(\d+(?:\.\d+)?)\s*억(?:\s*(\d+(?:\.\d+)?)\s*만)?/);
+            if (eokMatch) {
+                const eok = Number(eokMatch[1]) * 100000000;
+                const man = eokMatch[2] ? Number(eokMatch[2]) * 10000 : 0;
+                return Math.round(eok + man);
+            }
+            const manMatch = str.match(/^(\d+(?:\.\d+)?)\s*만/);
+            if (manMatch) {
+                return Math.round(Number(manMatch[1]) * 10000);
+            }
+            const num = Number(str.replace(/[^\d.-]/g, ''));
+            return Number.isFinite(num) && num > 0 ? num : null;
         }
 
         function parseDateOnly(dateStr) {
@@ -1020,14 +1016,7 @@
         function getListingDateValue(item) {
             if (!item || typeof item !== 'object') return '';
             const direct = item.listing_date || item.listingDate || item.ipo_date || item.ipoDate || item.listed_date || '';
-            if (direct) return normalizeDateStr(direct);
-            const delist = getDelistingDateValue(item);
-            const dt = parseDateOnly(delist);
-            if (dt) {
-                const est = new Date(Date.UTC(dt.getUTCFullYear() - 3, dt.getUTCMonth(), dt.getUTCDate()));
-                return formatDateISO(est);
-            }
-            return '';
+            return direct ? normalizeDateStr(direct) : '';
         }
 
         function getDaysUntilDelisting(dateStr) {
@@ -1085,11 +1074,325 @@
             return '청산';
         }
 
-        function normalizeFairBuy(item) {
-            const raw = item?.is_fair_buy ?? item?.fair_buy ?? item?.fairBuy ?? item?.isFairBuy;
-            if (raw === true || String(raw).trim().toUpperCase() === 'O' || String(raw).trim().toUpperCase() === 'Y') return 'O';
-            if (raw === false || String(raw).trim().toUpperCase() === 'X' || String(raw).trim().toUpperCase() === 'N') return 'X';
-            return raw ? String(raw).trim() : null;
+        // DART 투자설명서 및 예치 신탁계약 변경 공시에서 공모가/공모금/공모주식수 및 기간별 예치이자율 파싱
+        function parseSpacDisclosureData(item) {
+            const sources = [
+                item,
+                item.dart_disclosure,
+                item.dart_info,
+                item.prospectus,
+                item.deposit_info,
+                item.trust_info,
+                item.disclosure_info,
+                item.ipo_info,
+                item.rates
+            ].filter(o => o && typeof o === 'object');
+
+            // 1) 공모가 / 공모금 / 공모주식수 파싱 (임의 기본값 금지: 공시 확인 값만 추출)
+            let ipoPrice = null;
+            let ipoShares = null;
+            let ipoAmount = null;
+
+            for (const src of sources) {
+                if (ipoPrice === null) {
+                    ipoPrice = parseKoreanAmount(src.ipo_price ?? src.public_offering_price ?? src.offer_price ?? src.par_price);
+                }
+                if (ipoShares === null) {
+                    ipoShares = parseKoreanAmount(src.ipo_shares ?? src.offering_shares ?? src.public_shares ?? src.shares);
+                }
+                if (ipoAmount === null) {
+                    ipoAmount = parseKoreanAmount(src.ipo_amount ?? src.offering_amount ?? src.public_amount ?? src.deposit_principal ?? src.trust_principal ?? src.deposit_amount);
+                }
+            }
+
+            const disclosures = [
+                ...(Array.isArray(item.trust_amendments) ? item.trust_amendments : []),
+                ...(Array.isArray(item.recent_disclosures) ? item.recent_disclosures : [])
+            ];
+
+            // 공시 본문/요약 텍스트에서 공모가·공모주식수·공모금액 보완 파싱
+            for (const d of disclosures) {
+                const txt = `${d?.report_nm || ''} ${d?.summary || ''} ${d?.content || ''} ${d?.note || ''}`;
+                if (ipoPrice === null) {
+                    const mPrice = txt.match(/(?:공모가액|공모가|발행가액)\s*[:：]?\s*([\d,]+)\s*원/);
+                    if (mPrice) ipoPrice = parseKoreanAmount(mPrice[1]);
+                }
+                if (ipoShares === null) {
+                    const mShares = txt.match(/(?:공모주식수|모집주식수|발행주식수)\s*[:：]?\s*([\d,]+)\s*주/);
+                    if (mShares) ipoShares = parseKoreanAmount(mShares[1]);
+                }
+                if (ipoAmount === null) {
+                    const mAmt = txt.match(/(?:공모금액|공모총액|예치금액|신탁원금)\s*[:：]?\s*([\d,.]+\s*(?:억|만)?\s*원?)/);
+                    if (mAmt) ipoAmount = parseKoreanAmount(mAmt[1]);
+                }
+            }
+
+            // 세 값 중 두 값이 확정된 경우에만 산술 관계(공모금 = 공모가 × 공모주식수)로 나머지 한 값 도출
+            if (ipoPrice !== null && ipoPrice > 0 && ipoShares !== null && ipoShares > 0 && ipoAmount === null) {
+                ipoAmount = Math.round(ipoPrice * ipoShares);
+            } else if (ipoPrice !== null && ipoPrice > 0 && ipoAmount !== null && ipoAmount > 0 && ipoShares === null) {
+                ipoShares = Math.round(ipoAmount / ipoPrice);
+            } else if (ipoShares !== null && ipoShares > 0 && ipoAmount !== null && ipoAmount > 0 && ipoPrice === null) {
+                ipoPrice = Math.round(ipoAmount / ipoShares);
+            }
+
+            // 2) 공시에서 확인된 기간별(연차별 또는 6개월 단위 분할 예치) 예치 이자율 추출
+            // scheduleEntries: [{ label, yearIndex (1|2|3), fractionYears (1.0 or 0.5 등), rate }]
+            const scheduleEntries = [];
+
+            // A. 명시적 구간 스케줄 배열 (예: 6개월 단위 분할 예치 deposit_schedule, rate_periods, trust_periods 등)
+            const scheduleArrays = [
+                item.deposit_schedule,
+                item.trust_schedule,
+                item.rate_periods,
+                item.deposit_periods,
+                item.half_yearly_rates,
+                item.deposit_info?.schedule,
+                item.trust_info?.schedule,
+                item.dart_disclosure?.deposit_schedule
+            ];
+
+            for (const arr of scheduleArrays) {
+                if (Array.isArray(arr) && arr.length > 0) {
+                    arr.forEach((seg, idx) => {
+                        if (!seg || typeof seg !== 'object') return;
+                        const rateVal = toFiniteNumber(seg.rate ?? seg.interest_rate ?? seg.deposit_rate ?? seg.yield);
+                        if (rateVal === null || rateVal <= 0 || rateVal >= 15) return;
+                        const months = toFiniteNumber(seg.months ?? seg.period_months ?? seg.duration_months);
+                        const days = toFiniteNumber(seg.days ?? seg.period_days);
+                        let fractionYears = 1.0;
+                        if (months !== null && months > 0) fractionYears = months / 12;
+                        else if (days !== null && days > 0) fractionYears = days / 365;
+                        else if (String(seg.period || seg.label || '').includes('6개월')) fractionYears = 0.5;
+
+                        const yrIdx = toFiniteNumber(seg.year ?? seg.year_index) ?? Math.min(3, Math.floor(idx * fractionYears) + 1);
+                        const label = String(seg.label || seg.period || (fractionYears === 0.5 ? `${yrIdx}년차(${idx % 2 === 0 ? '상반기 6개월' : '하반기 6개월'})` : `${yrIdx}년차`)).trim();
+                        scheduleEntries.push({
+                            label,
+                            yearIndex: Math.min(3, Math.max(1, Math.round(yrIdx))),
+                            fractionYears,
+                            rate: rateVal
+                        });
+                    });
+                    if (scheduleEntries.length > 0) break;
+                }
+            }
+
+            // B. 연차별 배열/필드에서 공시 확정 이율 추출 (1~3년차)
+            const yearlyRates = [null, null, null];
+            const arrCandidates = [
+                item.yearly_deposit_rates,
+                item.deposit_rates_by_year,
+                item.trust_interest_rates,
+                item.deposit_interest_rates,
+                item.interest_rates,
+                item.yearly_rates,
+                item.dart_disclosure?.yearly_deposit_rates
+            ];
+            for (const arr of arrCandidates) {
+                if (Array.isArray(arr) && arr.length > 0) {
+                    for (let i = 0; i < Math.min(3, arr.length); i++) {
+                        const entry = arr[i];
+                        const val = toFiniteNumber(typeof entry === 'object' && entry !== null
+                            ? (entry.rate ?? entry.interest_rate ?? entry.deposit_rate ?? entry.yield)
+                            : entry);
+                        if (val !== null && val > 0 && val < 15 && yearlyRates[i] === null) {
+                            yearlyRates[i] = val;
+                        }
+                    }
+                }
+            }
+
+            const yearKeyGroups = [
+                ['year1_rate', 'rate_1y', 'rate_1', 'first_year_rate', 'y1_rate', '1년차', '1차년도'],
+                ['year2_rate', 'rate_2y', 'rate_2', 'second_year_rate', 'y2_rate', '2년차', '2차년도'],
+                ['year3_rate', 'rate_3y', 'rate_3', 'third_year_rate', 'y3_rate', '3년차', '3차년도']
+            ];
+            for (const src of sources) {
+                for (let idx = 0; idx < 3; idx++) {
+                    if (yearlyRates[idx] !== null) continue;
+                    for (const k of yearKeyGroups[idx]) {
+                        const val = toFiniteNumber(src[k]);
+                        if (val !== null && val > 0 && val < 15) {
+                            yearlyRates[idx] = val;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // 단일 공시 예치이자율 필드 (1년차)
+            if (yearlyRates[0] === null) {
+                const singleCandidates = [
+                    item.spac_deposit_rate,
+                    item.trust_rate,
+                    item.interest_rate,
+                    item.deposit_interest_rate,
+                    item.trust_interest_rate,
+                    item.applied_deposit_rate,
+                    item.ipo_deposit_rate,
+                    item.deposit_info?.rate,
+                    item.trust_info?.rate,
+                    item.dart_disclosure?.deposit_rate
+                ];
+                for (const c of singleCandidates) {
+                    const val = toFiniteNumber(c);
+                    if (val !== null && val > 0 && val < 15) {
+                        yearlyRates[0] = val;
+                        break;
+                    }
+                }
+            }
+
+            // C. DART 투자설명서 및 예치 신탁계약 내용 변경 공시 텍스트에서 연차별·6개월별 이율 파싱
+            // 최신 변경 공시가 우선 반영되도록 역순/날짜순 정렬 후 스캔
+            const sortedDisclosures = [...disclosures].sort((a, b) => {
+                const da = String(a?.rcept_dt || a?.date || '');
+                const db = String(b?.rcept_dt || b?.date || '');
+                return db.localeCompare(da);
+            });
+
+            for (const d of sortedDisclosures) {
+                const txt = `${d?.report_nm || ''} ${d?.summary || ''} ${d?.content || ''} ${d?.note || ''}`;
+                if (!txt.trim()) continue;
+
+                // 6개월 단위 분할 예치 패턴 (예: "최초 6개월 2.50%, 이후 6개월 2.30%" 또는 "1차 6개월: 2.45%")
+                const halfMatches = [...txt.matchAll(/(?:최초|이후|제?\s*[1-6]차)?\s*6개월[^%\d]{0,15}(\d+(?:\.\d+)?)\s*%/g)];
+                if (halfMatches.length > 0 && scheduleEntries.length === 0) {
+                    halfMatches.forEach((m, idx) => {
+                        const rVal = toFiniteNumber(m[1]);
+                        if (rVal !== null && rVal > 0 && rVal < 15 && idx < 6) {
+                            const yrIdx = Math.floor(idx / 2) + 1;
+                            const halfLabel = idx % 2 === 0 ? '전반 6개월' : '후반 6개월';
+                            scheduleEntries.push({
+                                label: `${yrIdx}년차 (${halfLabel})`,
+                                yearIndex: yrIdx,
+                                fractionYears: 0.5,
+                                rate: rVal
+                            });
+                        }
+                    });
+                }
+
+                // 연차별 명시 패턴 (1년차, 2년차, 3년차)
+                for (let y = 1; y <= 3; y++) {
+                    if (yearlyRates[y - 1] !== null) continue;
+                    const reYear = new RegExp(`(?:${y}년차|${y}차년도|제${y}차)[^%\\d]{0,18}(\\d+(?:\\.\\d+)?)\\s*%`);
+                    const mYr = txt.match(reYear);
+                    if (mYr) {
+                        const rVal = toFiniteNumber(mYr[1]);
+                        if (rVal !== null && rVal > 0 && rVal < 15) {
+                            yearlyRates[y - 1] = rVal;
+                        }
+                    }
+                }
+
+                // 일반 예치이자율 표기 (예치 신탁계약 변경 공시 등)
+                if (yearlyRates[0] === null && scheduleEntries.length === 0) {
+                    const mGen = txt.match(/(?:예치이자율|예치이율|신탁이자율|약정이자율|확정이자율)[^%\d]{0,15}(\d+(?:\.\d+)?)\s*%/);
+                    if (mGen) {
+                        const rVal = toFiniteNumber(mGen[1]);
+                        if (rVal !== null && rVal > 0 && rVal < 15) {
+                            yearlyRates[0] = rVal;
+                        }
+                    }
+                }
+            }
+
+            // scheduleEntries가 비어있다면 yearlyRates(1~3년차)를 표준 연차 항목으로 구성 (미공시 연도는 rate: null 유지)
+            const finalSchedule = scheduleEntries.length > 0
+                ? scheduleEntries
+                : [1, 2, 3].map(y => ({
+                    label: `${y}년차`,
+                    yearIndex: y,
+                    fractionYears: 1.0,
+                    rate: yearlyRates[y - 1]
+                }));
+
+            // 연차별 신탁금 계산 (신탁 수수료 0.1% 및 이자소득세 15.4% 차감 반영, 이자율 미정 구간은 신탁금 미확정)
+            let runningTrust = ipoAmount;
+            let canComputeAllYears = ipoAmount !== null && ipoAmount > 0;
+            const trustRows = finalSchedule.map(seg => {
+                if (seg.rate === null || !Number.isFinite(seg.rate)) {
+                    canComputeAllYears = false;
+                    return {
+                        label: seg.label,
+                        fractionYears: seg.fractionYears,
+                        rate: null,
+                        trust: null
+                    };
+                }
+                if (canComputeAllYears && runningTrust !== null) {
+                    const grossInterest = runningTrust * (seg.rate / 100) * seg.fractionYears;
+                    const afterFeeAndTaxInterest = grossInterest * TRUST_NET_INTEREST_FACTOR;
+                    runningTrust = Math.round(runningTrust + afterFeeAndTaxInterest);
+                    return {
+                        label: seg.label,
+                        fractionYears: seg.fractionYears,
+                        rate: seg.rate,
+                        trust: runningTrust
+                    };
+                }
+                return {
+                    label: seg.label,
+                    fractionYears: seg.fractionYears,
+                    rate: seg.rate,
+                    trust: null
+                };
+            });
+
+            // 만기(3년차) 신탁금이 전 구간 공시 이율로 확정된 경우 청산단가 산출 가능, 그렇지 않으면 공시된 청산단가만 사용
+            let resolvedLiqPrice = toFiniteNumber(item.liquidation_price ?? item.liquidationPrice);
+            if (canComputeAllYears && runningTrust !== null && ipoShares !== null && ipoShares > 0) {
+                const calculatedLiq = Math.round(runningTrust / ipoShares);
+                if (resolvedLiqPrice === null || resolvedLiqPrice <= 0) {
+                    resolvedLiqPrice = calculatedLiq;
+                }
+            }
+
+            return {
+                ipoPrice,
+                ipoShares,
+                ipoAmount,
+                trustRows,
+                liquidationPrice: resolvedLiqPrice
+            };
+        }
+
+        // 매수적정가 = 공모가 + (청산가 - 공모가) * (오늘 - 상장일) / (상장폐지일 - 상장일)
+        // 정확한 데이터(공모가, 청산가, 상장일, 상장폐지일)가 하나라도 없으면 임의 기재하지 않고 null 반환
+        function computeAccruedFairPrice(parPrice, liqPrice, listingDateStr, delistingDateStr) {
+            const P = toFiniteNumber(parPrice);
+            const L = toFiniteNumber(liqPrice);
+            if (P === null || P <= 0 || L === null || L <= 0) return null;
+            const listDt = parseDateOnly(listingDateStr);
+            const delistDt = parseDateOnly(delistingDateStr);
+            const todayDt = parseDateOnly(getTodayStr());
+            if (!listDt || !delistDt || !todayDt) return null;
+
+            const totalDays = (delistDt.getTime() - listDt.getTime()) / (1000 * 60 * 60 * 24);
+            if (totalDays <= 0) return null;
+
+            const elapsedDays = Math.max(0, Math.min(totalDays, (todayDt.getTime() - listDt.getTime()) / (1000 * 60 * 60 * 24)));
+            return Math.round(P + (L - P) * (elapsedDays / totalDays));
+        }
+
+        // 테이블과 상세 모달이 100% 동일한 산식으로 매수적정 여부를 판정
+        function evaluateFairBuy(item, parsedDisclosure) {
+            const curPrice = toFiniteNumber(item?.current_price ?? item?.currentPrice);
+            const listingDate = getListingDateValue(item);
+            const delistingDate = getDelistingDateValue(item);
+            const parPrice = parsedDisclosure?.ipoPrice ?? null;
+            const liqPrice = parsedDisclosure?.liquidationPrice ?? toFiniteNumber(item?.liquidation_price ?? item?.liquidationPrice);
+
+            const fairPrice = computeAccruedFairPrice(parPrice, liqPrice, listingDate, delistingDate);
+            if (fairPrice === null || curPrice === null || curPrice <= 0) {
+                return { fairPrice: null, isFairBuy: null };
+            }
+            return {
+                fairPrice,
+                isFairBuy: curPrice <= fairPrice ? 'O' : 'X'
+            };
         }
 
         function getCurrentBaseDepositRate() {
@@ -1177,221 +1480,29 @@
             return `(${sign}${Math.abs(diff).toFixed(1)}%p)`;
         }
 
-        // 매수적정가 = 공모가 + (청산가 - 공모가) * (오늘 - 상장일) / (상장폐지일 - 상장일)
-        function computeAccruedFairPrice(parPrice, liqPrice, listingDateStr, delistingDateStr) {
-            const P = toFiniteNumber(parPrice) ?? 2000;
-            const L = toFiniteNumber(liqPrice);
-            if (L === null || L <= 0) return null;
-            const listDt = parseDateOnly(listingDateStr);
-            const delistDt = parseDateOnly(delistingDateStr);
-            const todayDt = parseDateOnly(getTodayStr());
-            if (!listDt || !delistDt || !todayDt) return null;
-
-            const totalDays = (delistDt.getTime() - listDt.getTime()) / (1000 * 60 * 60 * 24);
-            if (totalDays <= 0) return Math.round(L);
-
-            const elapsedDays = Math.max(0, Math.min(totalDays, (todayDt.getTime() - listDt.getTime()) / (1000 * 60 * 60 * 24)));
-            return Math.round(P + (L - P) * (elapsedDays / totalDays));
-        }
-
-        // 공시 자료에서 연차별(1~3년차) 예치 이자율 추출 (1년차는 청약 시 확정 공시되므로 반드시 확보)
-        function extractDisclosedYearlyRates(item, parPrice, liqPrice, corpTaxRate) {
-            const rates = [null, null, null];
-
-            // 1) 배열 형태의 연차별 이자율 필드 탐색
-            const arrCandidates = [
-                item.yearly_deposit_rates,
-                item.deposit_rates_by_year,
-                item.trust_interest_rates,
-                item.deposit_interest_rates,
-                item.interest_rates,
-                item.yearly_rates
-            ];
-            for (const arr of arrCandidates) {
-                if (Array.isArray(arr) && arr.length > 0) {
-                    for (let i = 0; i < Math.min(3, arr.length); i++) {
-                        const entry = arr[i];
-                        const val = toFiniteNumber(typeof entry === 'object' && entry !== null
-                            ? (entry.rate ?? entry.interest_rate ?? entry.deposit_rate ?? entry.yield)
-                            : entry);
-                        if (val !== null && val > 0 && rates[i] === null) {
-                            rates[i] = val;
-                        }
-                    }
-                }
-            }
-
-            // 2) 객체 형태의 연차별 키 탐색 (year1_rate, rate_1y, 1년차 등)
-            const objSources = [
-                item,
-                item.deposit_info,
-                item.trust_info,
-                item.disclosure_info,
-                item.ipo_info,
-                item.rates
-            ].filter(o => o && typeof o === 'object');
-
-            const yearKeyGroups = [
-                ['year1_rate', 'rate_1y', 'rate_1', 'first_year_rate', 'y1_rate', '1년차', '1차년도'],
-                ['year2_rate', 'rate_2y', 'rate_2', 'second_year_rate', 'y2_rate', '2년차', '2차년도'],
-                ['year3_rate', 'rate_3y', 'rate_3', 'third_year_rate', 'y3_rate', '3년차', '3차년도']
-            ];
-
-            for (const src of objSources) {
-                for (let idx = 0; idx < 3; idx++) {
-                    if (rates[idx] !== null) continue;
-                    for (const k of yearKeyGroups[idx]) {
-                        const val = toFiniteNumber(src[k]);
-                        if (val !== null && val > 0) {
-                            rates[idx] = val;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            // 3) 단일 공시 이자율 필드 탐색 (1년차 확정 금리)
-            if (rates[0] === null) {
-                const singleCandidates = [
-                    item.spac_deposit_rate,
-                    item.trust_rate,
-                    item.interest_rate,
-                    item.deposit_interest_rate,
-                    item.trust_interest_rate,
-                    item.applied_deposit_rate,
-                    item.ipo_deposit_rate,
-                    item.deposit_info?.rate,
-                    item.trust_info?.rate
-                ];
-                for (const c of singleCandidates) {
-                    const val = toFiniteNumber(c);
-                    if (val !== null && val > 0) {
-                        rates[0] = val;
-                        break;
-                    }
-                }
-            }
-
-            // 4) 공시 보고서명/요약 텍스트에서 예치이자율(%) 패턴 추출
-            if (rates[0] === null && Array.isArray(item.recent_disclosures)) {
-                for (const d of item.recent_disclosures) {
-                    const txt = `${d?.report_nm || ''} ${d?.summary || ''} ${d?.note || ''}`;
-                    const m = txt.match(/(?:예치이자율|예치이율|이자율|금리)[^\d]{0,12}(\d+(?:\.\d+)?)\s*%/);
-                    if (m) {
-                        const parsedRate = toFiniteNumber(m[1]);
-                        if (parsedRate !== null && parsedRate > 0 && parsedRate < 15) {
-                            rates[0] = parsedRate;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            // 5) 1년차는 청약 시 무조건 공개되는 확정값이므로, 공시 단가(청산가)와 공모가로부터 세전 약정이율을 복원하여 1년차 확정값으로 연동
-            if (rates[0] === null) {
-                const netFactor = 1 - corpTaxRate;
-                if (liqPrice !== null && parPrice > 0 && liqPrice > parPrice && netFactor > 0) {
-                    const impliedNetAnnual = Math.pow(liqPrice / parPrice, 1 / 3) - 1;
-                    rates[0] = (impliedNetAnnual / netFactor) * 100;
-                } else {
-                    const baseGross = toFiniteNumber(item.deposit_rate_gross) ?? 2.50;
-                    rates[0] = baseGross;
-                }
-            }
-
-            return rates;
-        }
-
         function openSpacDetailModal(index) {
             const item = allItems[index];
             if (!item) return;
 
             const baseAfterTaxRate = getCurrentBaseDepositRate() ?? 2.0;
             const curPrice = toFiniteNumber(item.current_price);
-            const liqPrice = toFiniteNumber(item.liquidation_price);
             const listingDate = getListingDateValue(item);
             const delistingDate = getDelistingDateValue(item);
             const investType = item.invest_type || normalizeInvestType(item);
             const status = item.status || normalizeStatus(item.status);
-            const fairBuy = item.is_fair_buy || normalizeFairBuy(item);
+
+            const parsed = item._parsedDisclosure || parseSpacDisclosureData(item);
+            const liqPrice = parsed.liquidationPrice;
+            const ipoAmount = parsed.ipoAmount;
+            const ipoShares = parsed.ipoShares;
+            const trustRows = parsed.trustRows;
+
+            const fairEval = evaluateFairBuy(item, parsed);
+            const fairBuy = fairEval.isFairBuy;
+            const accruedFairPrice = fairEval.fairPrice;
 
             const yIsa = resolveAccountYield(item, 'isa');
             const yGen = resolveAccountYield(item, 'general');
-
-            // 원천 데이터 파싱 (공모가/공모금/공모주식수)
-            const parPrice = toFiniteNumber(item.ipo_price ?? item.public_offering_price ?? item.offer_price) ?? 2000;
-            let ipoShares = toFiniteNumber(item.ipo_shares ?? item.offering_shares ?? item.public_shares ?? item.shares);
-            let ipoAmount = toFiniteNumber(item.ipo_amount ?? item.offering_amount ?? item.public_amount ?? item.deposit_principal ?? item.trust_principal);
-
-            if (ipoAmount !== null && (ipoShares === null || ipoShares <= 0) && parPrice > 0) {
-                ipoShares = Math.round(ipoAmount / parPrice);
-            } else if (ipoShares !== null && (ipoAmount === null || ipoAmount <= 0) && parPrice > 0) {
-                ipoAmount = Math.round(ipoShares * parPrice);
-            }
-
-            if (ipoAmount === null || ipoShares === null) {
-                ipoShares = ipoShares ?? 5000000;
-                ipoAmount = ipoAmount ?? (ipoShares * parPrice);
-            }
-
-            // 스팩 이자 법인세율 (공시값 우선, 없으면 9.9%)
-            const rawTaxRate = toFiniteNumber(item.spac_tax_rate ?? item.corp_tax_rate ?? item.interest_tax_rate);
-            const corpTaxRate = rawTaxRate !== null
-                ? (rawTaxRate > 1 ? rawTaxRate / 100 : rawTaxRate)
-                : DEFAULT_SPAC_CORP_TAX_RATE;
-            const taxPctLabel = (corpTaxRate * 100).toFixed(1).replace(/\.0$/, '');
-
-            const formulaCodeEl = document.getElementById('detail-trust-formula-code');
-            if (formulaCodeEl) {
-                formulaCodeEl.innerText = `전년도 신탁금 + 세후 이자 (전년도 신탁금 × 예치 이자율 × (1 − 법인세율 ${taxPctLabel}%))`;
-            }
-
-            // 연차별 예치 이자율 추출 (1년차는 항상 공시 확정, 2~3년차 미공시 시 전년도 가정)
-            const disclosedRates = extractDisclosedYearlyRates(item, parPrice, liqPrice, corpTaxRate);
-            const rawYearlyTrusts = Array.isArray(item.yearly_trust_amounts) ? item.yearly_trust_amounts
-                : (Array.isArray(item.trust_by_year) ? item.trust_by_year : null);
-
-            const yearRows = [];
-            let runningTrust = ipoAmount;
-            let lastKnownRate = disclosedRates[0];
-            let hasUnannouncedYear = false;
-
-            for (let y = 1; y <= 3; y++) {
-                const explicitRate = disclosedRates[y - 1];
-                let isUnannounced = false;
-                let appliedRate = explicitRate;
-
-                if (appliedRate !== null && Number.isFinite(appliedRate)) {
-                    lastKnownRate = appliedRate;
-                } else {
-                    isUnannounced = true;
-                    hasUnannouncedYear = true;
-                    appliedRate = lastKnownRate;
-                }
-
-                const trustEntry = rawYearlyTrusts && rawYearlyTrusts[y - 1] !== undefined ? rawYearlyTrusts[y - 1] : null;
-                let yrTrust = trustEntry !== null
-                    ? toFiniteNumber(typeof trustEntry === 'object' ? (trustEntry.amount ?? trustEntry.trust_amount ?? trustEntry.balance) : trustEntry)
-                    : null;
-
-                if (yrTrust !== null && yrTrust > 0) {
-                    runningTrust = yrTrust;
-                } else if (appliedRate !== null) {
-                    const afterTaxInterest = runningTrust * (appliedRate / 100) * (1 - corpTaxRate);
-                    runningTrust = Math.round(runningTrust + afterTaxInterest);
-                    yrTrust = runningTrust;
-                }
-
-                yearRows.push({
-                    label: `${y}년차`,
-                    rate: appliedRate,
-                    isUnannounced,
-                    trust: yrTrust
-                });
-            }
-
-            // 매수적정가 = 공모가 + (청산가 - 공모가) * (오늘 - 상장일) / (상장폐지일 - 상장일)
-            const accruedFairPrice = computeAccruedFairPrice(parPrice, liqPrice, listingDate, delistingDate);
 
             // DOM 바인딩
             document.getElementById('detail-modal-name').innerText = item.name || '-';
@@ -1407,39 +1518,38 @@
             document.getElementById('detail-liquidation-price').innerText = liqPrice !== null ? `${liqPrice.toLocaleString()}원` : '미확인';
 
             const yearlyBody = document.getElementById('detail-yearly-trust-body');
-            yearlyBody.innerHTML = yearRows.map(r => {
-                const rateHtml = r.isUnannounced
-                    ? `<span class="inline-block bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded font-bold text-[11px]">미정${r.rate !== null ? ` (전년 ${r.rate.toFixed(2)}% 가정)` : ''}</span>`
-                    : `<span class="text-indigo-700 font-bold">${r.rate !== null ? `연 ${r.rate.toFixed(2)}%` : '-'}</span>`;
+            yearlyBody.innerHTML = trustRows.map(r => {
+                const isUnannounced = r.rate === null;
+                const rateHtml = isUnannounced
+                    ? `<span class="inline-block bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded font-bold text-[11px]">미정</span>`
+                    : `<span class="text-indigo-700 font-bold">연 ${r.rate.toFixed(2)}%</span>`;
                 return `
-                    <tr class="${r.isUnannounced ? 'bg-amber-50/40' : ''}">
+                    <tr class="${isUnannounced ? 'bg-amber-50/40' : ''}">
                         <td class="py-2 px-3 font-bold text-slate-800 text-center">${r.label}</td>
                         <td class="py-2 px-3 text-center">${rateHtml}</td>
-                        <td class="py-2 px-3 font-bold text-slate-900 text-center">${r.trust !== null ? `${r.trust.toLocaleString()}원` : '-'}</td>
+                        <td class="py-2 px-3 font-bold text-slate-900 text-center">${r.trust !== null ? `${r.trust.toLocaleString()}원` : '미정'}</td>
                     </tr>
                 `;
             }).join('');
 
-            const unannouncedNoteEl = document.getElementById('detail-unannounced-note');
-            if (unannouncedNoteEl) {
-                if (hasUnannouncedYear) unannouncedNoteEl.classList.remove('hidden');
-                else unannouncedNoteEl.classList.add('hidden');
-            }
-
             document.getElementById('detail-current-price').innerText = curPrice !== null ? `${curPrice.toLocaleString()}원` : '-';
 
-            // 예상 수익률: ISA / 일반 각각 괄호로 세후 예금 이자율 대비 +/-%p 표시
+            // 예상 수익률: 마이너스 수치는 빨간색 표기
             const isaPp = yIsa !== null ? formatSpreadPp(yIsa, baseAfterTaxRate) : null;
             const genPp = yGen !== null ? formatSpreadPp(yGen, baseAfterTaxRate) : null;
-            const isaColor = yIsa !== null && yIsa >= baseAfterTaxRate ? 'text-emerald-700' : (yIsa !== null && yIsa >= 0 ? 'text-slate-800' : 'text-rose-600');
-            const genColor = yGen !== null && yGen >= baseAfterTaxRate ? 'text-emerald-700' : (yGen !== null && yGen >= 0 ? 'text-slate-800' : 'text-rose-600');
+            const isaColor = yIsa === null
+                ? 'text-slate-400'
+                : (yIsa < 0 ? 'text-rose-600' : (yIsa >= baseAfterTaxRate ? 'text-emerald-700' : 'text-slate-800'));
+            const genColor = yGen === null
+                ? 'text-slate-400'
+                : (yGen < 0 ? 'text-rose-600' : (yGen >= baseAfterTaxRate ? 'text-emerald-700' : 'text-slate-800'));
 
             document.getElementById('detail-yields').innerHTML = `
                 <div class="${isaColor}">ISA ${yIsa !== null ? `${yIsa.toFixed(2)}% ${isaPp || ''}` : '-'}</div>
                 <div class="${genColor}">일반 ${yGen !== null ? `${yGen.toFixed(2)}% ${genPp || ''}` : '-'}</div>
             `;
 
-            // 매수적정 및 단일 매수적정가 ((O) 표기 제거)
+            // 매수적정 및 매수적정가 (데이터 미확정 시 임의 기재 금지)
             const fairStatusText = fairBuy === 'O'
                 ? `<span class="text-emerald-700 font-black">적정</span>`
                 : fairBuy === 'X'
@@ -1447,7 +1557,7 @@
                     : `<span class="text-amber-700 font-black">미확인</span>`;
             const fairPriceHtml = accruedFairPrice !== null
                 ? `<div class="text-xs font-bold text-slate-700 mt-0.5">매수적정가 ${accruedFairPrice.toLocaleString()}원</div>`
-                : `<div class="text-xs font-semibold text-slate-400 mt-0.5">매수적정가 -</div>`;
+                : `<div class="text-xs font-semibold text-slate-400 mt-0.5">매수적정가 미확인</div>`;
             document.getElementById('detail-fair-buy').innerHTML = `${fairStatusText}${fairPriceHtml}`;
 
             document.getElementById('spac-detail-modal').classList.remove('hidden');
@@ -2098,18 +2208,22 @@
 
                 allItems = activeItems.map((item, idx) => {
                     const resolvedDelistingDate = getDelistingDateValue(item);
-                    const normalizedItem = {
+                    const parsedDisclosure = parseSpacDisclosureData(item);
+                    const tempItem = {
                         ...item,
                         _idx: idx,
+                        _parsedDisclosure: parsedDisclosure,
                         current_price: toFiniteNumber(item.current_price ?? item.currentPrice),
-                        liquidation_price: toFiniteNumber(item.liquidation_price ?? item.liquidationPrice),
+                        liquidation_price: parsedDisclosure.liquidationPrice,
                         delisting_date: resolvedDelistingDate,
-                        is_fair_buy: normalizeFairBuy(item),
                         status: normalizeStatus(item.status)
                     };
+                    const fairEval = evaluateFairBuy(tempItem, parsedDisclosure);
                     return {
-                        ...normalizedItem,
-                        invest_type: normalizeInvestType(normalizedItem)
+                        ...tempItem,
+                        fair_price: fairEval.fairPrice,
+                        is_fair_buy: fairEval.isFairBuy,
+                        invest_type: normalizeInvestType(tempItem)
                     };
                 });
 
@@ -2397,7 +2511,6 @@
                 const yVal = hasYield ? Number(resolvedYield) : null;
                 const ppText = hasYield ? formatSpreadPp(yVal, baseAfterTaxRate) : null;
 
-                // 종목명 아래 헤더 배지 ((O) 표기 제거: 적정 / 부적정)
                 const fairSubBadge = item.is_fair_buy === 'O'
                     ? `<span class="bg-emerald-50 text-emerald-700 border border-emerald-200/80 font-bold px-1.5 py-0.5 rounded text-[10px]">적정</span>`
                     : item.is_fair_buy === 'X'
@@ -2422,9 +2535,9 @@
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80 transition-colors";
                 tr.innerHTML = `
-                    <td class="py-3.5 px-5 font-bold text-slate-900 whitespace-nowrap">
-                        <div class="flex items-center gap-2">
-                            <button type="button" onclick="openSpacDetailModal(${item._idx})" class="text-left font-bold text-slate-900 hover:text-indigo-600 underline decoration-slate-300 hover:decoration-indigo-500 underline-offset-4 transition-colors cursor-pointer">
+                    <td class="py-3.5 px-5 font-bold text-slate-900 whitespace-nowrap text-center">
+                        <div class="inline-flex items-center justify-center gap-2">
+                            <button type="button" onclick="openSpacDetailModal(${item._idx})" class="text-center font-bold text-slate-900 hover:text-indigo-600 underline decoration-slate-300 hover:decoration-indigo-500 underline-offset-4 transition-colors cursor-pointer">
                                 ${item.name || '-'}
                             </button>
                             <span class="inline-flex items-center gap-1 shrink-0">
