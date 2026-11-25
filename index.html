@@ -742,6 +742,22 @@
         const SEED_KEY = 'spac_seed_applied_v3';
         const EXCLUDED_SPAC_CODES = new Set(['206400']);
 
+        function escapeHtml(val) {
+            if (val === null || val === undefined) return '';
+            return String(val)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function syncBodyScrollLock() {
+            const detailOpen = !document.getElementById('spac-detail-modal').classList.contains('hidden');
+            const sellOpen = !document.getElementById('sell-modal').classList.contains('hidden');
+            document.body.classList.toggle('overflow-hidden', detailOpen || sellOpen);
+        }
+
         let bokDepositRates = {
             "2024-01": 3.67, "2024-02": 3.63, "2024-03": 3.58, "2024-04": 3.53,
             "2024-05": 3.55, "2024-06": 3.51, "2024-07": 3.41, "2024-08": 3.35,
@@ -1018,7 +1034,6 @@
             const direct = item.listing_date || item.listingDate || item.ipo_date || item.ipoDate || item.listed_date || item.krx_list_dd || '';
             if (direct) return normalizeDateStr(direct);
 
-            // 상장폐지일이 확인되는 경우 스팩 존속기한(3년) 기준으로 상장일 역산 보완
             const delist = getDelistingDateValue(item);
             const delistDt = parseDateOnly(delist);
             if (delistDt) {
@@ -1083,7 +1098,6 @@
             return '청산';
         }
 
-        // DART 투자설명서 + 예치신탁 계약 내용 변경 공시 + KRX API 데이터 교차 파싱
         function parseSpacDisclosureData(item) {
             const sources = [
                 item,
@@ -1098,7 +1112,6 @@
                 item.rates
             ].filter(o => o && typeof o === 'object');
 
-            // 1) 공모가 / 공모주수 / 공모금 / 예치비율 / 예치원금 파싱 (DART 투자설명서 + KRX 교차검증)
             let ipoPrice = null;
             let ipoShares = null;
             let ipoAmount = null;
@@ -1128,7 +1141,6 @@
             const recentDisclosures = Array.isArray(item.recent_disclosures) ? item.recent_disclosures : [];
             const allDisclosures = [...trustAmendments, ...recentDisclosures];
 
-            // 투자설명서 및 공시 요약 텍스트에서 공모가·공모주수·공모금·예치비율 보완 추출
             for (const d of allDisclosures) {
                 const txt = `${d?.report_nm || ''} ${d?.summary || ''} ${d?.content || ''} ${d?.note || ''}`;
                 if (ipoPrice === null) {
@@ -1152,7 +1164,6 @@
                 }
             }
 
-            // 국내 스팩 공모가 표준(2,000원) 및 산술 교차 검증
             if (ipoPrice === null || ipoPrice <= 0) {
                 if (ipoAmount !== null && ipoShares !== null && ipoShares > 0) {
                     ipoPrice = Math.round(ipoAmount / ipoShares);
@@ -1167,16 +1178,11 @@
                 ipoShares = Math.round(ipoAmount / ipoPrice);
             }
 
-            // 예치비율 적용 실제 신탁 예치원금 산출 (미명시 시 100% 기준)
             const effectiveRatio = depositRatio !== null ? depositRatio : 100;
             if (depositPrincipal === null && ipoAmount !== null && ipoAmount > 0) {
                 depositPrincipal = Math.round(ipoAmount * (effectiveRatio / 100));
             }
 
-            // 2) 연차별 / 반기별 예치이자율 파싱
-            // 규칙:
-            // - 1년차 예치이자율은 기본적으로 '투자설명서'에서 파싱
-            // - 단, '기업인수목적회사의 예치•신탁 계약 내용 변경' 공시에서 2년차 이자율 안내 시 전년도(1년차) 예치이자율이 확인되면 해당 값으로 덮어쓰기
             const scheduleEntries = [];
             const scheduleArrays = [
                 item.deposit_schedule,
@@ -1217,7 +1223,6 @@
 
             const yearlyRates = [null, null, null];
 
-            // A. 투자설명서 기반 1년차 이자율 우선 로드
             const prospectusRate = toFiniteNumber(
                 item.prospectus?.year1_rate ??
                 item.prospectus?.deposit_rate ??
@@ -1228,7 +1233,6 @@
                 yearlyRates[0] = prospectusRate;
             }
 
-            // B. 구조화된 연차별 배열/필드 반영
             const arrCandidates = [
                 item.yearly_deposit_rates,
                 item.deposit_rates_by_year,
@@ -1291,7 +1295,6 @@
                 }
             }
 
-            // C. '기업인수목적회사의 예치•신탁 계약 내용 변경' 공시 파싱 (오래된 순 -> 최신 순 적용하여 변경 공시 내 1년차 이자율로 덮어쓰기)
             const amendmentDisclosures = allDisclosures
                 .filter(d => {
                     const nm = String(d?.report_nm || '');
@@ -1303,7 +1306,6 @@
                 const txt = `${d?.report_nm || ''} ${d?.summary || ''} ${d?.content || ''} ${d?.note || ''}`;
                 if (!txt.trim()) continue;
 
-                // 변경 공시 내 구조화 필드가 있는 경우 우선 덮어쓰기
                 const amendY1 = toFiniteNumber(d?.year1_rate ?? d?.prev_rate ?? d?.before_rate);
                 const amendY2 = toFiniteNumber(d?.year2_rate ?? d?.new_rate ?? d?.after_rate);
                 const amendY3 = toFiniteNumber(d?.year3_rate);
@@ -1311,7 +1313,6 @@
                 if (amendY2 !== null && amendY2 > 0 && amendY2 < 15) yearlyRates[1] = amendY2;
                 if (amendY3 !== null && amendY3 > 0 && amendY3 < 15) yearlyRates[2] = amendY3;
 
-                // 본문 패턴: 변경 전(전년도/1년차) 이율 확인 시 투자설명서 값보다 우선 반영
                 const mBefore = txt.match(/(?:변경\s*전|기존|전년도|1년차|1차년도)[^%\d]{0,22}(?:연\s*)?(\d+(?:\.\d+)?)\s*%/);
                 if (mBefore) {
                     const v1 = toFiniteNumber(mBefore[1]);
@@ -1324,7 +1325,7 @@
                 }
 
                 for (let y = 1; y <= 3; y++) {
-                    const reYear = new RegExp(`(?:${y}년차|${y}차년도|제${y}차)[^%\\d]{0,18}(?:연\\s*)?(\\d+(?:\\.\\d+)?)\\s*%`);
+                    const reYear = new RegExp(`(?:${y}년차|${y}차년도|제${y}차)[^%\d]{0,18}(?:연\s*)?(\d+(?:\.\d+)?)\s*%`);
                     const mYr = txt.match(reYear);
                     if (mYr) {
                         const rVal = toFiniteNumber(mYr[1]);
@@ -1344,7 +1345,6 @@
                     rate: yearlyRates[y - 1]
                 }));
 
-            // 연차별 신탁금 계산 (신탁 수수료 0.1% 및 이자소득세 15.4% 차감 반영, 이자율 미정 구간은 신탁금 미확정)
             let runningTrust = depositPrincipal;
             let canComputeAllYears = depositPrincipal !== null && depositPrincipal > 0;
             const trustRows = finalSchedule.map(seg => {
@@ -1376,10 +1376,11 @@
                 };
             });
 
-            // 청산단가 확정: 3년치 이율이 모두 공시로 확정된 경우 계산값 사용, 미확정 연차가 있으면 기존 공시 청산가 사용
             let resolvedLiqPrice = toFiniteNumber(item.liquidation_price ?? item.liquidationPrice);
+            let recomputedFromSchedule = false;
             if (canComputeAllYears && runningTrust !== null && ipoShares !== null && ipoShares > 0) {
                 resolvedLiqPrice = Math.round(runningTrust / ipoShares);
+                recomputedFromSchedule = true;
             }
 
             return {
@@ -1389,11 +1390,11 @@
                 depositRatio: effectiveRatio,
                 depositPrincipal,
                 trustRows,
-                liquidationPrice: resolvedLiqPrice
+                liquidationPrice: resolvedLiqPrice,
+                recomputedFromSchedule
             };
         }
 
-        // 매수적정가 = 공모가 + (청산가 - 공모가) * (오늘 - 상장일) / (상장폐지일 - 상장일)
         function computeAccruedFairPrice(parPrice, liqPrice, listingDateStr, delistingDateStr) {
             const P = toFiniteNumber(parPrice);
             const L = toFiniteNumber(liqPrice);
@@ -1410,7 +1411,6 @@
             return Math.round(P + (L - P) * (elapsedDays / totalDays));
         }
 
-        // 테이블·상단 카드·상세 모달이 100% 동일한 산식으로 매수적정 여부를 판정
         function evaluateFairBuy(item, parsedDisclosure) {
             const curPrice = toFiniteNumber(item?.current_price ?? item?.currentPrice);
             const listingDate = getListingDateValue(item);
@@ -1481,6 +1481,12 @@
         function resolveAccountYield(item, accountType) {
             if (!item) return null;
             const isIsa = accountType === 'isa';
+
+            // 연차별 공시 이율로 청산가를 재계산한 경우 기존 JSON의 구(舊) 수익률과 불일치하지 않도록 재계산된 청산가 기준으로 산출
+            if (item._parsedDisclosure && item._parsedDisclosure.recomputedFromSchedule) {
+                return computeFallbackYieldFromSpac(item, accountType);
+            }
+
             const directCandidates = isIsa
                 ? [item.yield_isa, item.isa_yield, item.expected_yield_isa, item.rates?.isaAnnualized]
                 : [item.yield_general, item.general_yield, item.expected_yield_general, item.rates?.generalAnnualized];
@@ -1538,7 +1544,6 @@
             const yIsa = resolveAccountYield(item, 'isa');
             const yGen = resolveAccountYield(item, 'general');
 
-            // DOM 바인딩
             document.getElementById('detail-modal-name').innerText = item.name || '-';
             document.getElementById('detail-modal-code').innerText = item.code ? `(${String(item.code).padStart(6, '0')})` : '';
 
@@ -1558,12 +1563,13 @@
             const yearlyBody = document.getElementById('detail-yearly-trust-body');
             yearlyBody.innerHTML = trustRows.map(r => {
                 const isUnannounced = r.rate === null;
+                const safeLabel = escapeHtml(r.label);
                 const rateHtml = isUnannounced
                     ? `<span class="inline-block bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded font-bold text-[11px]">미정</span>`
-                    : `<span class="text-indigo-700 font-bold">연 ${r.rate.toFixed(2)}%</span>`;
+                    : `<span class="text-indigo-700 font-bold">연 ${Number(r.rate).toFixed(2)}%</span>`;
                 return `
                     <tr class="${isUnannounced ? 'bg-amber-50/40' : ''}">
-                        <td class="py-2 px-3 font-bold text-slate-800 text-center">${r.label}</td>
+                        <td class="py-2 px-3 font-bold text-slate-800 text-center">${safeLabel}</td>
                         <td class="py-2 px-3 text-center">${rateHtml}</td>
                         <td class="py-2 px-3 font-bold text-slate-900 text-center">${r.trust !== null ? `${r.trust.toLocaleString()}원` : '미정'}</td>
                     </tr>
@@ -1572,7 +1578,6 @@
 
             document.getElementById('detail-current-price').innerText = curPrice !== null ? `${curPrice.toLocaleString()}원` : '-';
 
-            // 예상 수익률: 마이너스 수치는 빨간색 표기
             const isaPp = yIsa !== null ? formatSpreadPp(yIsa, baseAfterTaxRate) : null;
             const genPp = yGen !== null ? formatSpreadPp(yGen, baseAfterTaxRate) : null;
             const isaColor = yIsa === null
@@ -1583,8 +1588,8 @@
                 : (yGen < 0 ? 'text-rose-600' : (yGen >= baseAfterTaxRate ? 'text-emerald-700' : 'text-slate-800'));
 
             document.getElementById('detail-yields').innerHTML = `
-                <div class="${isaColor}">ISA ${yIsa !== null ? `${yIsa.toFixed(2)}% ${isaPp || ''}` : '-'}</div>
-                <div class="${genColor}">일반 ${yGen !== null ? `${yGen.toFixed(2)}% ${genPp || ''}` : '-'}</div>
+                <div class="${isaColor}">ISA ${yIsa !== null ? `${yIsa.toFixed(2)}% ${escapeHtml(isaPp || '')}` : '-'}</div>
+                <div class="${genColor}">일반 ${yGen !== null ? `${yGen.toFixed(2)}% ${escapeHtml(genPp || '')}` : '-'}</div>
             `;
 
             const fairStatusText = fairBuy === 'O'
@@ -1598,10 +1603,12 @@
             document.getElementById('detail-fair-buy').innerHTML = `${fairStatusText}${fairPriceHtml}`;
 
             document.getElementById('spac-detail-modal').classList.remove('hidden');
+            syncBodyScrollLock();
         }
 
         function closeSpacDetailModal() {
             document.getElementById('spac-detail-modal').classList.add('hidden');
+            syncBodyScrollLock();
         }
 
         async function processLiquidations() {
@@ -1840,10 +1847,12 @@
             document.getElementById('sell-modal-amount').value = estimatedEval > 0 ? Math.round(estimatedEval) : item.buy_amount;
             document.getElementById('sell-modal-date').value = getTodayStr();
             document.getElementById('sell-modal').classList.remove('hidden');
+            syncBodyScrollLock();
         }
 
         function closeSellModal() {
             document.getElementById('sell-modal').classList.add('hidden');
+            syncBodyScrollLock();
         }
 
         function confirmSellHolding(event) {
@@ -2007,7 +2016,7 @@
 
                 const statusBadge = item.spacStatus === '일반'
                     ? `<span class="text-slate-700 font-normal">일반</span>`
-                    : `<span class="bg-rose-50 text-rose-600 text-xs px-2 py-0.5 rounded font-bold">${item.spacStatus}</span>`;
+                    : `<span class="bg-rose-50 text-rose-600 text-xs px-2 py-0.5 rounded font-bold">${escapeHtml(item.spacStatus)}</span>`;
 
                 const holderBadge = item.holder === '아내'
                     ? `<span class="bg-amber-50 text-amber-700 text-xs px-2 py-0.5 rounded font-semibold">아내</span>`
@@ -2022,7 +2031,7 @@
                 tr.innerHTML = `
                     <td class="py-4 px-4 text-center">${holderBadge}</td>
                     <td class="py-4 px-4 text-center">${accountBadge}</td>
-                    <td class="py-4 px-5 font-bold text-slate-900">${item.name}</td>
+                    <td class="py-4 px-5 font-bold text-slate-900">${escapeHtml(item.name)}</td>
                     <td class="py-4 px-4 text-slate-700 font-semibold">${item.buy_amount.toLocaleString()}원</td>
                     <td class="py-4 px-4 ${evalColor}">${item.estimatedEval.toLocaleString()}원<br><span class="text-xs font-normal">(${item.evalDiff >= 0 ? '+' : ''}${item.evalDiff.toLocaleString()}원)</span></td>
                     <td class="py-4 px-4"><div class="${annualColor}">${item.currentAnnual.toFixed(2)}% ${diffBadge}</div><div class="${simpleColor} text-xs mt-0.5">${item.simpleYield.toFixed(2)}%</div></td>
@@ -2191,12 +2200,12 @@
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80 transition-colors";
                 tr.innerHTML = `
-                    <td class="py-4 px-5 font-bold text-slate-900">${item.name}${item.account ? ` <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded ${item.account === '아내' ? 'bg-amber-50 text-amber-700' : 'bg-sky-50 text-sky-700'}">${item.account}</span>` : ''}${item.acct ? ` <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded ${item.acct === 'ISA' ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-100 text-slate-600'}">${item.acct}</span>` : ''}${item.tax ? `<div class="text-[10px] font-normal text-slate-400">세금 ${item.tax.toLocaleString()}원 차감</div>` : ''}</td>
+                    <td class="py-4 px-5 font-bold text-slate-900">${escapeHtml(item.name)}${item.account ? ` <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded ${item.account === '아내' ? 'bg-amber-50 text-amber-700' : 'bg-sky-50 text-sky-700'}">${escapeHtml(item.account)}</span>` : ''}${item.acct ? ` <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded ${item.acct === 'ISA' ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-100 text-slate-600'}">${escapeHtml(item.acct)}</span>` : ''}${item.tax ? `<div class="text-[10px] font-normal text-slate-400">세금 ${item.tax.toLocaleString()}원 차감</div>` : ''}</td>
                     <td class="py-4 px-4">${typeBadge}</td>
                     <td class="py-4 px-5 text-slate-700 font-semibold">${item.buy_amount.toLocaleString()}원</td>
-                    <td class="py-4 px-4 text-slate-600">${item.buy_date}</td>
+                    <td class="py-4 px-4 text-slate-600">${escapeHtml(item.buy_date)}</td>
                     <td class="py-4 px-5 ${pnlColor}">${item.sell_amount.toLocaleString()}원<br><span class="text-xs font-normal">(${item.pnl >= 0 ? '+' : ''}${item.pnl.toLocaleString()}원)</span></td>
-                    <td class="py-4 px-4 text-slate-600">${item.sell_date}</td>
+                    <td class="py-4 px-4 text-slate-600">${escapeHtml(item.sell_date)}</td>
                     <td class="py-4 px-4"><div class="${annualColor}">${item.annualYield.toFixed(2)}% ${diffBadge}</div><div class="${simpleColor} text-xs mt-0.5">${item.simpleYield.toFixed(2)}%</div></td>
                     <td class="py-4 px-4 text-center">
                         <button onclick="deletePerformanceItem(${item.origIndex})" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-2.5 py-1.5 rounded-lg transition-colors">삭제</button>
@@ -2266,7 +2275,7 @@
 
                 const datalist = document.getElementById('spac-name-list');
                 if (datalist) {
-                    datalist.innerHTML = allItems.map(i => `<option value="${i.name}">`).join('');
+                    datalist.innerHTML = allItems.map(i => `<option value="${escapeHtml(i.name)}">`).join('');
                 }
 
                 const baseAfterTaxRate = getCurrentBaseDepositRate();
@@ -2360,7 +2369,6 @@
             const baseAfterTaxRate = getCurrentBaseDepositRate() ?? 0;
             document.getElementById('stat-total-count').innerText = items.length + ' 개';
 
-            // 합병형 (매수적정, 수익률 0% 이상)
             const mergerFairCount = items.filter(i => {
                 if (i.invest_type !== '합병' || i.is_fair_buy !== 'O') return false;
                 const yIsa = resolveAccountYield(i, 'isa');
@@ -2368,7 +2376,6 @@
                 return (yIsa !== null && yIsa >= 0) || (yGen !== null && yGen >= 0);
             }).length;
 
-            // 청산형 (매수적정, 수익률 예금 이상)
             const liqFairCount = items.filter(i => {
                 if (i.invest_type !== '청산' || i.is_fair_buy !== 'O') return false;
                 const yIsa = resolveAccountYield(i, 'isa');
@@ -2449,7 +2456,7 @@
                 if (yVal !== null) {
                     const yColor = yVal >= baseAfterTaxRate ? 'text-emerald-400' : (yVal >= 0 ? 'text-amber-300' : 'text-rose-400');
                     const ppColor = ppText && ppText.startsWith('(+') ? 'text-emerald-300' : 'text-rose-300';
-                    yieldEl.innerHTML = `<div class="${yColor}">${yVal.toFixed(2)}%</div>${ppText ? `<div class="text-[10px] font-semibold ${ppColor}">${ppText}</div>` : ''}`;
+                    yieldEl.innerHTML = `<div class="${yColor}">${yVal.toFixed(2)}%</div>${ppText ? `<div class="text-[10px] font-semibold ${ppColor}">${escapeHtml(ppText)}</div>` : ''}`;
                 } else {
                     yieldEl.innerHTML = '-';
                 }
@@ -2529,6 +2536,11 @@
                 } else if (currentSortColumn === 'current_price' || currentSortColumn === 'liquidation_price') {
                     valA = toFiniteNumber(a[currentSortColumn]) ?? -Infinity;
                     valB = toFiniteNumber(b[currentSortColumn]) ?? -Infinity;
+                } else if (currentSortColumn === 'delisting_date') {
+                    const dA = String(a.delisting_date || '').trim();
+                    const dB = String(b.delisting_date || '').trim();
+                    valA = dA || '9999-12-31';
+                    valB = dB || '9999-12-31';
                 } else {
                     valA = a[currentSortColumn] ?? (typeof b[currentSortColumn] === 'string' ? '' : -Infinity);
                     valB = b[currentSortColumn] ?? (typeof a[currentSortColumn] === 'string' ? '' : -Infinity);
@@ -2571,7 +2583,7 @@
 
                 const statusBadge = item.status === '일반'
                     ? `<span class="text-slate-700 font-normal">일반</span>`
-                    : `<span class="bg-rose-50 text-rose-600 text-xs px-2 py-0.5 rounded font-bold">${item.status}</span>`;
+                    : `<span class="bg-rose-50 text-rose-600 text-xs px-2 py-0.5 rounded font-bold">${escapeHtml(item.status)}</span>`;
 
                 const yieldColor = !hasYield ? 'text-slate-400' : (yVal >= 0 ? 'text-emerald-600 font-bold' : 'text-rose-500 font-bold');
                 const ppColor = !ppText ? 'text-slate-400' : (ppText.startsWith('(+') ? 'text-emerald-700 font-semibold' : 'text-rose-600 font-semibold');
@@ -2586,7 +2598,7 @@
                     <td class="py-3.5 px-5 font-bold text-slate-900 whitespace-nowrap text-center">
                         <div class="inline-flex items-center justify-center gap-2">
                             <button type="button" onclick="openSpacDetailModal(${item._idx})" class="text-center font-bold text-slate-900 hover:text-indigo-600 underline decoration-slate-300 hover:decoration-indigo-500 underline-offset-4 transition-colors cursor-pointer">
-                                ${item.name || '-'}
+                                ${escapeHtml(item.name || '-')}
                             </button>
                             <span class="inline-flex items-center gap-1 shrink-0">
                                 ${fairSubBadge}
@@ -2598,9 +2610,9 @@
                     <td class="py-3.5 px-4 text-slate-600 text-right whitespace-nowrap">${liqText}</td>
                     <td class="py-3.5 px-4 text-right whitespace-nowrap">
                         <span class="${yieldColor}">${hasYield ? yVal.toFixed(2) + '%' : '-'}</span>
-                        ${ppText ? `<span class="text-[11px] ml-1 ${ppColor}">${ppText}</span>` : ''}
+                        ${ppText ? `<span class="text-[11px] ml-1 ${ppColor}">${escapeHtml(ppText)}</span>` : ''}
                     </td>
-                    <td class="py-3.5 px-4 text-slate-500 text-xs text-center whitespace-nowrap">${item.delisting_date || '-'}</td>
+                    <td class="py-3.5 px-4 text-slate-500 text-xs text-center whitespace-nowrap">${escapeHtml(item.delisting_date || '-')}</td>
                     <td class="py-3.5 px-4 text-center whitespace-nowrap">${statusBadge}</td>
                 `;
                 tbody.appendChild(tr);
@@ -2618,3 +2630,4 @@
     </script>
 </body>
 </html>
+```[cite: 4]
