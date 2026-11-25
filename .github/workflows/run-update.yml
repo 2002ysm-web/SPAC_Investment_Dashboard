@@ -28,7 +28,7 @@ jobs:
         env:
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
           KRX_OPENAPI_KEY: ${{ secrets.KRX_OPENAPI_KEY }}
-          ECOS_API_KEY: ${{ secrets.ECOS_API_KEY }}
+          BOK_API_KEY: ${{ secrets.BOK_API_KEY }}
           EXCLUDE_DELISTING_NOTICE: "true"
         run: python -u main_run.py
 
