@@ -1,17 +1,199 @@
 {
-  "updated_at": "2026-11-25 12:34:08 KST",
+  "updated_at": "2026-11-25 13:23:22 KST",
   "trade_date": "20261124",
   "deposit_rate_gross": 2.35,
   "deposit_rate_after_tax": 1.9881,
+  "excluded_phantom_spacs": [
+    {
+      "code": "0088D0",
+      "name": "메리츠제1호스팩",
+      "reason": "phantom_name:(우$|1우|2우|3우|ETN|ETF|리츠|선물|옵션)"
+    },
+    {
+      "code": "0165X0",
+      "name": "메리츠제2호스팩",
+      "reason": "phantom_name:(우$|1우|2우|3우|ETN|ETF|리츠|선물|옵션)"
+    },
+    {
+      "code": "206400",
+      "name": "아인스팩씨엔에스",
+      "reason": "excluded_or_invalid_code"
+    },
+    {
+      "code": "468760",
+      "name": "유진스팩10호",
+      "reason": "exceeds_target_65"
+    },
+    {
+      "code": "469480",
+      "name": "IBKS제24호스팩",
+      "reason": "exceeds_target_65"
+    }
+  ],
   "summary": {
-    "total_candidates": 69,
-    "eligible_count": 55,
-    "valid_prices": 55,
-    "resolved_liquidation_count": 55,
-    "fair_buy_o_count": 54
+    "target_spac_count": 65,
+    "excluded_phantom_count": 5,
+    "total_candidates": 65,
+    "eligible_count": 53,
+    "valid_prices": 65,
+    "resolved_liquidation_count": 65,
+    "fair_buy_o_count": 62
   },
-  "count": 55,
+  "count": 65,
   "items": [
+    {
+      "code": "477760",
+      "name": "DB금융스팩12호",
+      "market": "KOSDAQ",
+      "krx_dept": "SPAC(소속부없음)",
+      "listing_date": "2024-06-18",
+      "delisting_date": "2027-06-18",
+      "maturity_date": "2027-06-18",
+      "remaining_days": 205,
+      "corp_code": "01814589",
+      "base_price": 2000,
+      "ipo_price": 2000,
+      "ipo_shares": 5000000,
+      "ipo_amount": 10000000000,
+      "deposit_ratio": null,
+      "deposit_principal": null,
+      "krx_listed_shares": 5840000,
+      "krx_cross_check_match": true,
+      "year1_deposit_rate": 3.45,
+      "year2_deposit_rate": 2.49,
+      "year3_deposit_rate": 2.47,
+      "yearly_deposit_rates": [
+        3.45,
+        2.49,
+        2.47
+      ],
+      "deposit_interest_rate": 3.45,
+      "dart_deposit_rate": 3.45,
+      "dart_summary": "[20261113] 분기보고서 (2026.09) / [20261022] 주식등의대량보유상황보고서(약식) / [20260811] 반기보고서 (2026.06) / [20260708] 주식등의대량보유상황보고서(약식) / [20260615] 기업인수목적회사의예치ㆍ신탁계약내용변경 / [20260526] 주권매매거래정지해제              (합병결정 철회) / [20260526] 기업인수목적회사관련합병취소ㆍ부인사실발생 / [20260526] [기재정정]주요사항보고서(회사합병결정)",
+      "prospectus_report": "[기재정정]투자설명서",
+      "trust_amendment_reports": [
+        "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+        "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+        "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+        "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+        "기업인수목적회사의예치ㆍ신탁계약내용변경              "
+      ],
+      "current_price": 2075,
+      "open_price": 2085,
+      "high_price": 2085,
+      "low_price": 2075,
+      "prev_diff": -5,
+      "chg_rate": -0.24,
+      "change_rate": -0.24,
+      "volume": 657,
+      "trading_value": 1365685,
+      "market_cap": 12118000000,
+      "trade_date": "20261124",
+      "liquidation_price": 2120.29,
+      "liquidation_price_source": "공시공모가(2,000원)+공시예치이율산식",
+      "liquidation_source": "공시공모가(2,000원)+공시예치이율산식",
+      "liquidation_note": null,
+      "fair_buy_price": 2097.77,
+      "is_fair_buy": "O",
+      "invest_type": "청산",
+      "yield_isa": 3.39,
+      "yield_general": 2.87,
+      "simple_yield": 2.18,
+      "deposit_rate": 1.9881,
+      "deposit_rate_after_tax": 1.9881,
+      "deposit_rate_gross": 2.35,
+      "is_suspended": false,
+      "trading_on_krx": true,
+      "has_liquidation_notice": true,
+      "merger_status": "합병추진",
+      "merger_target": null,
+      "merger_approved_at": "2026-05-26",
+      "latest_report": "분기보고서 (2026.09)",
+      "latest_report_date": "2026-11-13",
+      "status": "합병",
+      "recent_disclosures": [
+        {
+          "report_nm": "분기보고서 (2026.09)",
+          "rcept_dt": "20261113",
+          "rcept_no": "20261113000032"
+        },
+        {
+          "report_nm": "주식등의대량보유상황보고서(약식)",
+          "rcept_dt": "20261022",
+          "rcept_no": "20261022000378"
+        },
+        {
+          "report_nm": "반기보고서 (2026.06)",
+          "rcept_dt": "20260811",
+          "rcept_no": "20260811000570"
+        },
+        {
+          "report_nm": "주식등의대량보유상황보고서(약식)",
+          "rcept_dt": "20260708",
+          "rcept_no": "20260708000110"
+        },
+        {
+          "report_nm": "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+          "rcept_dt": "20260615",
+          "rcept_no": "20260615900762"
+        },
+        {
+          "report_nm": "주권매매거래정지해제              (합병결정 철회)",
+          "rcept_dt": "20260526",
+          "rcept_no": "20260526900733"
+        },
+        {
+          "report_nm": "기업인수목적회사관련합병취소ㆍ부인사실발생              ",
+          "rcept_dt": "20260526",
+          "rcept_no": "20260526900703"
+        },
+        {
+          "report_nm": "[기재정정]주요사항보고서(회사합병결정)",
+          "rcept_dt": "20260526",
+          "rcept_no": "20260526000375"
+        },
+        {
+          "report_nm": "분기보고서 (2026.03)",
+          "rcept_dt": "20260515",
+          "rcept_no": "20260515000187"
+        },
+        {
+          "report_nm": "정기주주총회결과              ",
+          "rcept_dt": "20260326",
+          "rcept_no": "20260326901320"
+        },
+        {
+          "report_nm": "사업보고서 (2025.12)",
+          "rcept_dt": "20260318",
+          "rcept_no": "20260318000567"
+        },
+        {
+          "report_nm": "감사보고서제출              ",
+          "rcept_dt": "20260318",
+          "rcept_no": "20260318900543"
+        },
+        {
+          "report_nm": "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+          "rcept_dt": "20260313",
+          "rcept_no": "20260313901011"
+        },
+        {
+          "report_nm": "의결권대리행사권유참고서류",
+          "rcept_dt": "20260311",
+          "rcept_no": "20260311003503"
+        },
+        {
+          "report_nm": "주주총회소집공고",
+          "rcept_dt": "20260311",
+          "rcept_no": "20260311003496"
+        }
+      ],
+      "is_eligible": false,
+      "ineligible_reasons": [
+        "liquidation_notice_flag",
+        "risk_disclosure:주권매매거래정지해제              (합병결정 철회)"
+      ]
+    },
     {
       "code": "0099X0",
       "name": "IBKS제25호스팩",
@@ -152,7 +334,9 @@
           "rcept_dt": "20260929",
           "rcept_no": "20260929000639"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "478390",
@@ -168,8 +352,8 @@
       "ipo_price": 2000,
       "ipo_shares": 6000000,
       "ipo_amount": 12000000000,
-      "deposit_ratio": 0.0,
-      "deposit_principal": 7,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 6220000,
       "krx_cross_check_match": true,
       "year1_deposit_rate": 3.32,
@@ -297,7 +481,9 @@
           "rcept_dt": "20260213",
           "rcept_no": "20260213900493"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "486630",
@@ -313,8 +499,8 @@
       "ipo_price": 2000,
       "ipo_shares": 5000000,
       "ipo_amount": 10000000000,
-      "deposit_ratio": 0.0,
-      "deposit_principal": 10,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 5310000,
       "krx_cross_check_match": true,
       "year1_deposit_rate": 3.2,
@@ -442,6 +628,157 @@
           "rcept_dt": "20250812",
           "rcept_no": "20250812000467"
         }
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
+    },
+    {
+      "code": "492220",
+      "name": "KB제31호스팩",
+      "market": "KOSDAQ",
+      "krx_dept": "SPAC(소속부없음)",
+      "listing_date": "2024-12-12",
+      "delisting_date": "2027-12-12",
+      "maturity_date": "2027-12-12",
+      "remaining_days": 382,
+      "corp_code": "01866926",
+      "base_price": 2000,
+      "ipo_price": 2000,
+      "ipo_shares": 6000000,
+      "ipo_amount": 12000000000,
+      "deposit_ratio": null,
+      "deposit_principal": null,
+      "krx_listed_shares": 6210000,
+      "krx_cross_check_match": true,
+      "year1_deposit_rate": 3.1,
+      "year2_deposit_rate": 2.55,
+      "year3_deposit_rate": null,
+      "yearly_deposit_rates": [
+        3.1,
+        2.55,
+        null
+      ],
+      "deposit_interest_rate": 3.1,
+      "dart_deposit_rate": 3.1,
+      "dart_summary": "[20261110] 분기보고서 (2026.09) / [20260814] 반기보고서 (2026.06) / [20260514] 분기보고서 (2026.03) / [20260319] 정기주주총회결과 / [20260311] 사업보고서 (2025.12) / [20260311] 감사보고서제출 / [20260304] 의결권대리행사권유참고서류 / [20260304] 주주총회소집공고",
+      "prospectus_report": "[기재정정]투자설명서",
+      "trust_amendment_reports": [
+        "기업인수목적회사의예치ㆍ신탁계약내용변경              "
+      ],
+      "current_price": 2030,
+      "open_price": 2030,
+      "high_price": 2035,
+      "low_price": 2025,
+      "prev_diff": -5,
+      "chg_rate": -0.25,
+      "change_rate": -0.25,
+      "volume": 9699,
+      "trading_value": 19710905,
+      "market_cap": 12606300000,
+      "trade_date": "20261124",
+      "liquidation_price": 2115.84,
+      "liquidation_price_source": "공시공모가(2,000원)+공시예치이율산식(미정연차전년도가정)",
+      "liquidation_source": "공시공모가(2,000원)+공시예치이율산식(미정연차전년도가정)",
+      "liquidation_note": "※ 미정인 3년차 예치이자율은 직전 연도 수치로 가정하여 계산한 잠정 청산가입니다.",
+      "fair_buy_price": 2075.43,
+      "is_fair_buy": "O",
+      "invest_type": "합병",
+      "yield_isa": 3.75,
+      "yield_general": 3.17,
+      "simple_yield": 4.23,
+      "deposit_rate": 1.9881,
+      "deposit_rate_after_tax": 1.9881,
+      "deposit_rate_gross": 2.35,
+      "is_suspended": false,
+      "trading_on_krx": true,
+      "has_liquidation_notice": true,
+      "merger_status": "합병추진",
+      "merger_target": null,
+      "merger_approved_at": "2025-07-17",
+      "latest_report": "분기보고서 (2026.09)",
+      "latest_report_date": "2026-11-10",
+      "status": "합병",
+      "recent_disclosures": [
+        {
+          "report_nm": "분기보고서 (2026.09)",
+          "rcept_dt": "20261110",
+          "rcept_no": "20261110000049"
+        },
+        {
+          "report_nm": "반기보고서 (2026.06)",
+          "rcept_dt": "20260814",
+          "rcept_no": "20260814000784"
+        },
+        {
+          "report_nm": "분기보고서 (2026.03)",
+          "rcept_dt": "20260514",
+          "rcept_no": "20260514000357"
+        },
+        {
+          "report_nm": "정기주주총회결과              ",
+          "rcept_dt": "20260319",
+          "rcept_no": "20260319901295"
+        },
+        {
+          "report_nm": "사업보고서 (2025.12)",
+          "rcept_dt": "20260311",
+          "rcept_no": "20260311003839"
+        },
+        {
+          "report_nm": "감사보고서제출              ",
+          "rcept_dt": "20260311",
+          "rcept_no": "20260311900709"
+        },
+        {
+          "report_nm": "의결권대리행사권유참고서류",
+          "rcept_dt": "20260304",
+          "rcept_no": "20260304001153"
+        },
+        {
+          "report_nm": "주주총회소집공고",
+          "rcept_dt": "20260304",
+          "rcept_no": "20260304000255"
+        },
+        {
+          "report_nm": "매출액또는손익구조30%(대규모법인은15%)이상변동              ",
+          "rcept_dt": "20260220",
+          "rcept_no": "20260220900386"
+        },
+        {
+          "report_nm": "주주총회소집결의              ",
+          "rcept_dt": "20260213",
+          "rcept_no": "20260213900388"
+        },
+        {
+          "report_nm": "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+          "rcept_dt": "20251208",
+          "rcept_no": "20251208900186"
+        },
+        {
+          "report_nm": "분기보고서 (2025.09)",
+          "rcept_dt": "20251113",
+          "rcept_no": "20251113000094"
+        },
+        {
+          "report_nm": "반기보고서 (2025.06)",
+          "rcept_dt": "20250812",
+          "rcept_no": "20250812000149"
+        },
+        {
+          "report_nm": "기업인수목적회사관련합병취소ㆍ부인사실발생              ",
+          "rcept_dt": "20250717",
+          "rcept_no": "20250717900481"
+        },
+        {
+          "report_nm": "주권매매거래정지해제              (합병결정 철회)",
+          "rcept_dt": "20250717",
+          "rcept_no": "20250717900478"
+        }
+      ],
+      "is_eligible": false,
+      "ineligible_reasons": [
+        "liquidation_notice_flag",
+        "risk_disclosure:주권매매거래정지해제              (합병결정 철회)"
       ]
     },
     {
@@ -458,8 +795,8 @@
       "ipo_price": 2000,
       "ipo_shares": 6000000,
       "ipo_amount": 12000000000,
-      "deposit_ratio": 0.0,
-      "deposit_principal": 10,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 6330000,
       "krx_cross_check_match": true,
       "year1_deposit_rate": 2.4,
@@ -586,7 +923,9 @@
           "rcept_dt": "20250805",
           "rcept_no": "20250805000084"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0072Z0",
@@ -602,8 +941,8 @@
       "ipo_price": 2000,
       "ipo_shares": 7500000,
       "ipo_amount": 15000000000,
-      "deposit_ratio": 0.0,
-      "deposit_principal": 13,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 7885000,
       "krx_cross_check_match": true,
       "year1_deposit_rate": 2.25,
@@ -730,7 +1069,9 @@
           "rcept_dt": "20260304",
           "rcept_no": "20260304001563"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0209J0",
@@ -847,6 +1188,158 @@
           "rcept_dt": "20260813",
           "rcept_no": "20260813001038"
         }
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
+    },
+    {
+      "code": "482520",
+      "name": "교보16호스팩",
+      "market": "KOSDAQ",
+      "krx_dept": "SPAC(소속부없음)",
+      "listing_date": "2024-08-13",
+      "delisting_date": "2027-08-13",
+      "maturity_date": "2027-08-13",
+      "remaining_days": 261,
+      "corp_code": "01845701",
+      "base_price": 2000,
+      "ipo_price": 2000,
+      "ipo_shares": 5800000,
+      "ipo_amount": 11600000000,
+      "deposit_ratio": null,
+      "deposit_principal": null,
+      "krx_listed_shares": 6100000,
+      "krx_cross_check_match": true,
+      "year1_deposit_rate": 3.3,
+      "year2_deposit_rate": 2.43,
+      "year3_deposit_rate": 3.22,
+      "yearly_deposit_rates": [
+        3.3,
+        2.43,
+        3.22
+      ],
+      "deposit_interest_rate": 3.3,
+      "dart_deposit_rate": 3.3,
+      "dart_summary": "[20261113] 분기보고서 (2026.09) / [20260918] 주요사항보고서(회사합병결정) / [20260918] 주권매매거래정지              (SPAC 합병(예비심사청구대상)) / [20260901] 대표이사변경 / [20260901] 기업인수목적회사의임원사임 / [20260901] 임시주주총회결과 / [20260813] 의결권대리행사권유참고서류 / [20260813] 주주총회소집공고",
+      "prospectus_report": "[기재정정]투자설명서",
+      "trust_amendment_reports": [
+        "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+        "기업인수목적회사의예치ㆍ신탁계약내용변경              "
+      ],
+      "current_price": 2065,
+      "open_price": 0,
+      "high_price": 0,
+      "low_price": 0,
+      "prev_diff": 0,
+      "chg_rate": 0.0,
+      "change_rate": 0.0,
+      "volume": 0,
+      "trading_value": 0,
+      "market_cap": 12596500000,
+      "trade_date": "20261124",
+      "liquidation_price": 2122.25,
+      "liquidation_price_source": "공시공모가(2,000원)+공시예치이율산식",
+      "liquidation_source": "공시공모가(2,000원)+공시예치이율산식",
+      "liquidation_note": null,
+      "fair_buy_price": 2093.11,
+      "is_fair_buy": "O",
+      "invest_type": "청산",
+      "yield_isa": 3.48,
+      "yield_general": 2.94,
+      "simple_yield": 2.77,
+      "deposit_rate": 1.9881,
+      "deposit_rate_after_tax": 1.9881,
+      "deposit_rate_gross": 2.35,
+      "is_suspended": false,
+      "trading_on_krx": true,
+      "has_liquidation_notice": true,
+      "merger_status": "합병추진",
+      "merger_target": null,
+      "merger_approved_at": "2026-09-18",
+      "latest_report": "분기보고서 (2026.09)",
+      "latest_report_date": "2026-11-13",
+      "status": "합병",
+      "recent_disclosures": [
+        {
+          "report_nm": "분기보고서 (2026.09)",
+          "rcept_dt": "20261113",
+          "rcept_no": "20261113000280"
+        },
+        {
+          "report_nm": "주요사항보고서(회사합병결정)",
+          "rcept_dt": "20260918",
+          "rcept_no": "20260918000373"
+        },
+        {
+          "report_nm": "주권매매거래정지              (SPAC 합병(예비심사청구대상))",
+          "rcept_dt": "20260918",
+          "rcept_no": "20260918900581"
+        },
+        {
+          "report_nm": "대표이사변경              ",
+          "rcept_dt": "20260901",
+          "rcept_no": "20260901900493"
+        },
+        {
+          "report_nm": "기업인수목적회사의임원사임              ",
+          "rcept_dt": "20260901",
+          "rcept_no": "20260901900457"
+        },
+        {
+          "report_nm": "임시주주총회결과              ",
+          "rcept_dt": "20260901",
+          "rcept_no": "20260901900242"
+        },
+        {
+          "report_nm": "의결권대리행사권유참고서류",
+          "rcept_dt": "20260813",
+          "rcept_no": "20260813001134"
+        },
+        {
+          "report_nm": "주주총회소집공고",
+          "rcept_dt": "20260813",
+          "rcept_no": "20260813001117"
+        },
+        {
+          "report_nm": "반기보고서 (2026.06)",
+          "rcept_dt": "20260813",
+          "rcept_no": "20260813001109"
+        },
+        {
+          "report_nm": "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+          "rcept_dt": "20260810",
+          "rcept_no": "20260810900258"
+        },
+        {
+          "report_nm": "기업인수목적회사의임원선임결정              ",
+          "rcept_dt": "20260715",
+          "rcept_no": "20260715900661"
+        },
+        {
+          "report_nm": "주주명부폐쇄기간또는기준일설정              ",
+          "rcept_dt": "20260715",
+          "rcept_no": "20260715900648"
+        },
+        {
+          "report_nm": "주주총회소집결의              (임시주주총회)",
+          "rcept_dt": "20260715",
+          "rcept_no": "20260715900622"
+        },
+        {
+          "report_nm": "분기보고서 (2026.03)",
+          "rcept_dt": "20260515",
+          "rcept_no": "20260515000251"
+        },
+        {
+          "report_nm": "[기재정정]주요사항보고서(회사합병결정)",
+          "rcept_dt": "20260511",
+          "rcept_no": "20260511000351"
+        }
+      ],
+      "is_eligible": false,
+      "ineligible_reasons": [
+        "liquidation_notice_flag",
+        "risk_disclosure:주권매매거래정지              (SPAC 합병(예비심사청구대상))"
       ]
     },
     {
@@ -862,11 +1355,11 @@
       "base_price": 2000,
       "ipo_price": 2000,
       "ipo_shares": 5000000,
-      "ipo_amount": 1250000,
-      "deposit_ratio": 0.0,
-      "deposit_principal": 14,
+      "ipo_amount": 10000000000,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 5180000,
-      "krx_cross_check_match": false,
+      "krx_cross_check_match": true,
       "year1_deposit_rate": 3.3,
       "year2_deposit_rate": 2.82,
       "year3_deposit_rate": 3.49,
@@ -992,7 +1485,9 @@
           "rcept_dt": "20251114",
           "rcept_no": "20251114001018"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0041B0",
@@ -1007,11 +1502,11 @@
       "base_price": 2000,
       "ipo_price": 2000,
       "ipo_shares": 4500000,
-      "ipo_amount": 1125000,
-      "deposit_ratio": 0.0,
-      "deposit_principal": 14,
+      "ipo_amount": 9000000000,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 5040000,
-      "krx_cross_check_match": false,
+      "krx_cross_check_match": true,
       "year1_deposit_rate": 2.42,
       "year2_deposit_rate": 3.22,
       "year3_deposit_rate": null,
@@ -1136,7 +1631,9 @@
           "rcept_dt": "20251205",
           "rcept_no": "20251205000406"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0098T0",
@@ -1278,7 +1775,9 @@
           "rcept_dt": "20260211",
           "rcept_no": "20260211000880"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0132G0",
@@ -1293,11 +1792,11 @@
       "base_price": 2000,
       "ipo_price": 2000,
       "ipo_shares": 5400000,
-      "ipo_amount": 1350000,
-      "deposit_ratio": 0.0,
-      "deposit_principal": 14,
+      "ipo_amount": 10800000000,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 5970000,
-      "krx_cross_check_match": false,
+      "krx_cross_check_match": true,
       "year1_deposit_rate": 2.91,
       "year2_deposit_rate": null,
       "year3_deposit_rate": null,
@@ -1410,7 +1909,9 @@
           "rcept_dt": "20260212",
           "rcept_no": "20260212001464"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "482690",
@@ -1425,11 +1926,11 @@
       "base_price": 2000,
       "ipo_price": 2000,
       "ipo_shares": 5500000,
-      "ipo_amount": 3,
+      "ipo_amount": 11000000000,
       "deposit_ratio": 100.0,
-      "deposit_principal": 100,
+      "deposit_principal": 11000000000,
       "krx_listed_shares": 5615000,
-      "krx_cross_check_match": false,
+      "krx_cross_check_match": true,
       "year1_deposit_rate": 3.3,
       "year2_deposit_rate": 2.82,
       "year3_deposit_rate": null,
@@ -1554,7 +2055,9 @@
           "rcept_dt": "20250515",
           "rcept_no": "20250515001920"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0134X0",
@@ -1691,7 +2194,9 @@
           "rcept_dt": "20260331",
           "rcept_no": "20260331000079"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "489730",
@@ -1706,11 +2211,11 @@
       "base_price": 2000,
       "ipo_price": 2000,
       "ipo_shares": 8400000,
-      "ipo_amount": 4,
-      "deposit_ratio": 300000000000.0,
+      "ipo_amount": 16800000000,
+      "deposit_ratio": 71.43,
       "deposit_principal": 12000000000,
       "krx_listed_shares": 6332000,
-      "krx_cross_check_match": false,
+      "krx_cross_check_match": true,
       "year1_deposit_rate": 3.3,
       "year2_deposit_rate": 2.82,
       "year3_deposit_rate": 3.42,
@@ -1836,7 +2341,9 @@
           "rcept_dt": "20260205",
           "rcept_no": "20260205900934"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0004Y0",
@@ -1851,11 +2358,11 @@
       "base_price": 2000,
       "ipo_price": 2000,
       "ipo_shares": 7100000,
-      "ipo_amount": 4,
-      "deposit_ratio": 250000000000.0,
+      "ipo_amount": 14200000000,
+      "deposit_ratio": 70.42,
       "deposit_principal": 10000000000,
       "krx_listed_shares": 5315000,
-      "krx_cross_check_match": false,
+      "krx_cross_check_match": true,
       "year1_deposit_rate": 2.42,
       "year2_deposit_rate": 3.22,
       "year3_deposit_rate": null,
@@ -1980,291 +2487,9 @@
           "rcept_dt": "20250813",
           "rcept_no": "20250813000988"
         }
-      ]
-    },
-    {
-      "code": "0088D0",
-      "name": "메리츠제1호스팩",
-      "market": "KOSDAQ",
-      "krx_dept": "SPAC(소속부없음)",
-      "listing_date": "2025-12-15",
-      "delisting_date": "2028-12-15",
-      "maturity_date": "2028-12-15",
-      "remaining_days": 751,
-      "corp_code": "01958111",
-      "base_price": 2000,
-      "ipo_price": 2000,
-      "ipo_shares": 5500000,
-      "ipo_amount": 11000000000,
-      "deposit_ratio": 0.0,
-      "deposit_principal": 14,
-      "krx_listed_shares": 5795000,
-      "krx_cross_check_match": true,
-      "year1_deposit_rate": 2.57,
-      "year2_deposit_rate": null,
-      "year3_deposit_rate": null,
-      "yearly_deposit_rates": [
-        2.57,
-        null,
-        null
       ],
-      "deposit_interest_rate": 2.57,
-      "dart_deposit_rate": 2.57,
-      "dart_summary": "[20261113] 분기보고서 (2026.09) / [20260814] [기재정정]반기보고서 (2026.06) / [20260814] [기재정정]반기보고서 (2026.06) / [20260814] 반기보고서 (2026.06) / [20260723] 임원ㆍ주요주주특정증권등소유상황보고서 / [20260714] 임원ㆍ주요주주특정증권등소유상황보고서 / [20260706] 임원ㆍ주요주주특정증권등소유상황보고서 / [20260625] 임원ㆍ주요주주특정증권등소유상황보고서",
-      "prospectus_report": "[기재정정]투자설명서",
-      "trust_amendment_reports": [],
-      "current_price": 2030,
-      "open_price": 2025,
-      "high_price": 2035,
-      "low_price": 2025,
-      "prev_diff": -10,
-      "chg_rate": -0.49,
-      "change_rate": -0.49,
-      "volume": 313,
-      "trading_value": 634535,
-      "market_cap": 11763850000,
-      "trade_date": "20261124",
-      "liquidation_price": 2107.09,
-      "liquidation_price_source": "공시공모가(2,000원)+공시예치이율산식(미정연차전년도가정)",
-      "liquidation_source": "공시공모가(2,000원)+공시예치이율산식(미정연차전년도가정)",
-      "liquidation_note": "※ 미정인 2년차·3년차 예치이자율은 직전 연도 수치로 가정하여 계산한 잠정 청산가입니다.",
-      "fair_buy_price": 2033.74,
-      "is_fair_buy": "O",
-      "invest_type": "합병",
-      "yield_isa": 1.77,
-      "yield_general": 1.5,
-      "simple_yield": 3.8,
-      "deposit_rate": 1.9881,
-      "deposit_rate_after_tax": 1.9881,
-      "deposit_rate_gross": 2.35,
-      "is_suspended": false,
-      "trading_on_krx": true,
-      "has_liquidation_notice": false,
-      "merger_status": null,
-      "merger_target": null,
-      "merger_approved_at": null,
-      "latest_report": "분기보고서 (2026.09)",
-      "latest_report_date": "2026-11-13",
-      "status": "일반",
-      "recent_disclosures": [
-        {
-          "report_nm": "분기보고서 (2026.09)",
-          "rcept_dt": "20261113",
-          "rcept_no": "20261113001471"
-        },
-        {
-          "report_nm": "[기재정정]반기보고서 (2026.06)",
-          "rcept_dt": "20260814",
-          "rcept_no": "20260814003820"
-        },
-        {
-          "report_nm": "[기재정정]반기보고서 (2026.06)",
-          "rcept_dt": "20260814",
-          "rcept_no": "20260814002729"
-        },
-        {
-          "report_nm": "반기보고서 (2026.06)",
-          "rcept_dt": "20260814",
-          "rcept_no": "20260814002298"
-        },
-        {
-          "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
-          "rcept_dt": "20260723",
-          "rcept_no": "20260723000377"
-        },
-        {
-          "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
-          "rcept_dt": "20260714",
-          "rcept_no": "20260714000412"
-        },
-        {
-          "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
-          "rcept_dt": "20260706",
-          "rcept_no": "20260706000416"
-        },
-        {
-          "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
-          "rcept_dt": "20260625",
-          "rcept_no": "20260625000568"
-        },
-        {
-          "report_nm": "분기보고서 (2026.03)",
-          "rcept_dt": "20260507",
-          "rcept_no": "20260507000155"
-        },
-        {
-          "report_nm": "정기주주총회결과              ",
-          "rcept_dt": "20260327",
-          "rcept_no": "20260327902859"
-        },
-        {
-          "report_nm": "사업보고서 (2025.12)",
-          "rcept_dt": "20260317",
-          "rcept_no": "20260317000757"
-        },
-        {
-          "report_nm": "감사보고서제출              ",
-          "rcept_dt": "20260317",
-          "rcept_no": "20260317900552"
-        },
-        {
-          "report_nm": "주주총회소집공고",
-          "rcept_dt": "20260310",
-          "rcept_no": "20260310002813"
-        },
-        {
-          "report_nm": "주주총회집중일개최사유신고              ",
-          "rcept_dt": "20260303",
-          "rcept_no": "20260303900418"
-        },
-        {
-          "report_nm": "주주총회소집결의              ",
-          "rcept_dt": "20260227",
-          "rcept_no": "20260227902008"
-        }
-      ]
-    },
-    {
-      "code": "0165X0",
-      "name": "메리츠제2호스팩",
-      "market": "KOSDAQ",
-      "krx_dept": "SPAC(소속부없음)",
-      "listing_date": "2026-06-19",
-      "delisting_date": "2029-06-19",
-      "maturity_date": "2029-06-19",
-      "remaining_days": 937,
-      "corp_code": "01989041",
-      "base_price": 2000,
-      "ipo_price": 2000,
-      "ipo_shares": 7000000,
-      "ipo_amount": 7000000,
-      "deposit_ratio": null,
-      "deposit_principal": null,
-      "krx_listed_shares": 7240000,
-      "krx_cross_check_match": false,
-      "year1_deposit_rate": 2.99,
-      "year2_deposit_rate": null,
-      "year3_deposit_rate": null,
-      "yearly_deposit_rates": [
-        2.99,
-        null,
-        null
-      ],
-      "deposit_interest_rate": 2.99,
-      "dart_deposit_rate": 2.99,
-      "dart_summary": "[20261113] 분기보고서 (2026.09) / [20260814] 반기보고서 (2026.06) / [20260709] 주식등의대량보유상황보고서(약식) / [20260625] 주식등의대량보유상황보고서(약식) / [20260625] 임원ㆍ주요주주특정증권등소유상황보고서 / [20260625] 주식등의대량보유상황보고서(일반) / [20260612] 증권발행실적보고서 / [20260608] [기재정정]투자설명서",
-      "prospectus_report": "[기재정정]투자설명서",
-      "trust_amendment_reports": [],
-      "current_price": 1920,
-      "open_price": 1925,
-      "high_price": 1925,
-      "low_price": 1910,
-      "prev_diff": -5,
-      "chg_rate": -0.26,
-      "change_rate": -0.26,
-      "volume": 39472,
-      "trading_value": 75578711,
-      "market_cap": 13900800000,
-      "trade_date": "20261124",
-      "liquidation_price": 2124.93,
-      "liquidation_price_source": "공시공모가(2,000원)+공시예치이율산식(미정연차전년도가정)",
-      "liquidation_source": "공시공모가(2,000원)+공시예치이율산식(미정연차전년도가정)",
-      "liquidation_note": "※ 미정인 2년차·3년차 예치이자율은 직전 연도 수치로 가정하여 계산한 잠정 청산가입니다.",
-      "fair_buy_price": 2018.14,
-      "is_fair_buy": "O",
-      "invest_type": "합병",
-      "yield_isa": 4.03,
-      "yield_general": 3.41,
-      "simple_yield": 10.67,
-      "deposit_rate": 1.9881,
-      "deposit_rate_after_tax": 1.9881,
-      "deposit_rate_gross": 2.35,
-      "is_suspended": false,
-      "trading_on_krx": true,
-      "has_liquidation_notice": false,
-      "merger_status": null,
-      "merger_target": null,
-      "merger_approved_at": null,
-      "latest_report": "분기보고서 (2026.09)",
-      "latest_report_date": "2026-11-13",
-      "status": "일반",
-      "recent_disclosures": [
-        {
-          "report_nm": "분기보고서 (2026.09)",
-          "rcept_dt": "20261113",
-          "rcept_no": "20261113000915"
-        },
-        {
-          "report_nm": "반기보고서 (2026.06)",
-          "rcept_dt": "20260814",
-          "rcept_no": "20260814003985"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(약식)",
-          "rcept_dt": "20260709",
-          "rcept_no": "20260709000028"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(약식)",
-          "rcept_dt": "20260625",
-          "rcept_no": "20260625000633"
-        },
-        {
-          "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
-          "rcept_dt": "20260625",
-          "rcept_no": "20260625000577"
-        },
-        {
-          "report_nm": "주식등의대량보유상황보고서(일반)",
-          "rcept_dt": "20260625",
-          "rcept_no": "20260625000576"
-        },
-        {
-          "report_nm": "증권발행실적보고서",
-          "rcept_dt": "20260612",
-          "rcept_no": "20260612000207"
-        },
-        {
-          "report_nm": "[기재정정]투자설명서",
-          "rcept_dt": "20260608",
-          "rcept_no": "20260608000232"
-        },
-        {
-          "report_nm": "[발행조건확정]증권신고서(지분증권)",
-          "rcept_dt": "20260608",
-          "rcept_no": "20260608000229"
-        },
-        {
-          "report_nm": "[기재정정]투자설명서",
-          "rcept_dt": "20260608",
-          "rcept_no": "20260608000164"
-        },
-        {
-          "report_nm": "[발행조건확정]증권신고서(지분증권)",
-          "rcept_dt": "20260608",
-          "rcept_no": "20260608000163"
-        },
-        {
-          "report_nm": "투자설명서",
-          "rcept_dt": "20260601",
-          "rcept_no": "20260601000088"
-        },
-        {
-          "report_nm": "[첨부정정]증권신고서(지분증권)",
-          "rcept_dt": "20260520",
-          "rcept_no": "20260520000204"
-        },
-        {
-          "report_nm": "[첨부정정]증권신고서(지분증권)",
-          "rcept_dt": "20260520",
-          "rcept_no": "20260520000203"
-        },
-        {
-          "report_nm": "[기재정정]증권신고서(지분증권)",
-          "rcept_dt": "20260518",
-          "rcept_no": "20260518000391"
-        }
-      ]
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0097F0",
@@ -2406,7 +2631,9 @@
           "rcept_dt": "20260109",
           "rcept_no": "20260109000684"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0099W0",
@@ -2548,6 +2775,157 @@
           "rcept_dt": "20251224",
           "rcept_no": "20251224000564"
         }
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
+    },
+    {
+      "code": "477380",
+      "name": "미래에셋비전스팩4호",
+      "market": "KOSDAQ",
+      "krx_dept": "관리종목(소속부없음)",
+      "listing_date": "2024-05-29",
+      "delisting_date": "2027-05-29",
+      "maturity_date": "2027-05-29",
+      "remaining_days": 185,
+      "corp_code": "01814233",
+      "base_price": 2000,
+      "ipo_price": 2000,
+      "ipo_shares": 6650000,
+      "ipo_amount": 13300000000,
+      "deposit_ratio": 100.0,
+      "deposit_principal": 13300000000,
+      "krx_listed_shares": 8100000,
+      "krx_cross_check_match": true,
+      "year1_deposit_rate": 3.32,
+      "year2_deposit_rate": 2.4,
+      "year3_deposit_rate": 2.55,
+      "yearly_deposit_rates": [
+        3.32,
+        2.4,
+        2.55
+      ],
+      "deposit_interest_rate": 3.32,
+      "dart_deposit_rate": 3.32,
+      "dart_summary": "[20261116] 분기보고서 (2026.09) / [20261113] 기타시장안내(관리종목지정우려종목) / [20260814] 반기보고서 (2026.06) / [20260709] 주식등의대량보유상황보고서(약식) / [20260619] 주식등의대량보유상황보고서(약식) / [20260526] 기업인수목적회사의예치ㆍ신탁계약내용변경 / [20260513] 분기보고서 (2026.03) / [20260317] 정기주주총회결과",
+      "prospectus_report": "[기재정정]투자설명서",
+      "trust_amendment_reports": [
+        "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+        "기업인수목적회사의예치ㆍ신탁계약내용변경              "
+      ],
+      "current_price": 2075,
+      "open_price": 2075,
+      "high_price": 2080,
+      "low_price": 2075,
+      "prev_diff": 0,
+      "chg_rate": 0.0,
+      "change_rate": 0.0,
+      "volume": 23712,
+      "trading_value": 49276215,
+      "market_cap": 16807500000,
+      "trade_date": "20261124",
+      "liquidation_price": 2117.04,
+      "liquidation_price_source": "공시공모가(2,000원)+공시예치이율산식",
+      "liquidation_source": "공시공모가(2,000원)+공시예치이율산식",
+      "liquidation_note": null,
+      "fair_buy_price": 2097.27,
+      "is_fair_buy": "O",
+      "invest_type": "청산",
+      "yield_isa": 3.44,
+      "yield_general": 2.91,
+      "simple_yield": 2.03,
+      "deposit_rate": 1.9881,
+      "deposit_rate_after_tax": 1.9881,
+      "deposit_rate_gross": 2.35,
+      "is_suspended": false,
+      "trading_on_krx": true,
+      "has_liquidation_notice": false,
+      "merger_status": null,
+      "merger_target": null,
+      "merger_approved_at": null,
+      "latest_report": "분기보고서 (2026.09)",
+      "latest_report_date": "2026-11-16",
+      "status": "일반",
+      "recent_disclosures": [
+        {
+          "report_nm": "분기보고서 (2026.09)",
+          "rcept_dt": "20261116",
+          "rcept_no": "20261116001083"
+        },
+        {
+          "report_nm": "기타시장안내(관리종목지정우려종목)              ",
+          "rcept_dt": "20261113",
+          "rcept_no": "20261113901916"
+        },
+        {
+          "report_nm": "반기보고서 (2026.06)",
+          "rcept_dt": "20260814",
+          "rcept_no": "20260814001787"
+        },
+        {
+          "report_nm": "주식등의대량보유상황보고서(약식)",
+          "rcept_dt": "20260709",
+          "rcept_no": "20260709000537"
+        },
+        {
+          "report_nm": "주식등의대량보유상황보고서(약식)",
+          "rcept_dt": "20260619",
+          "rcept_no": "20260619000481"
+        },
+        {
+          "report_nm": "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+          "rcept_dt": "20260526",
+          "rcept_no": "20260526900406"
+        },
+        {
+          "report_nm": "분기보고서 (2026.03)",
+          "rcept_dt": "20260513",
+          "rcept_no": "20260513000224"
+        },
+        {
+          "report_nm": "정기주주총회결과              ",
+          "rcept_dt": "20260317",
+          "rcept_no": "20260317900569"
+        },
+        {
+          "report_nm": "사업보고서 (2025.12)",
+          "rcept_dt": "20260306",
+          "rcept_no": "20260306000789"
+        },
+        {
+          "report_nm": "감사보고서제출              ",
+          "rcept_dt": "20260306",
+          "rcept_no": "20260306900937"
+        },
+        {
+          "report_nm": "의결권대리행사권유참고서류",
+          "rcept_dt": "20260220",
+          "rcept_no": "20260220000598"
+        },
+        {
+          "report_nm": "주주총회소집공고",
+          "rcept_dt": "20260220",
+          "rcept_no": "20260220000593"
+        },
+        {
+          "report_nm": "주주총회소집결의              ",
+          "rcept_dt": "20260206",
+          "rcept_no": "20260206901563"
+        },
+        {
+          "report_nm": "매출액또는손익구조30%(대규모법인은15%)이상변동              ",
+          "rcept_dt": "20260130",
+          "rcept_no": "20260130900805"
+        },
+        {
+          "report_nm": "분기보고서 (2025.09)",
+          "rcept_dt": "20251114",
+          "rcept_no": "20251114000056"
+        }
+      ],
+      "is_eligible": false,
+      "ineligible_reasons": [
+        "administrative_issue"
       ]
     },
     {
@@ -2563,11 +2941,11 @@
       "base_price": 2000,
       "ipo_price": 2000,
       "ipo_shares": 4750000,
-      "ipo_amount": 2000,
-      "deposit_ratio": 475000000.0,
+      "ipo_amount": 9500000000,
+      "deposit_ratio": 100.0,
       "deposit_principal": 9500000000,
       "krx_listed_shares": 5480000,
-      "krx_cross_check_match": false,
+      "krx_cross_check_match": true,
       "year1_deposit_rate": 3.32,
       "year2_deposit_rate": 2.4,
       "year3_deposit_rate": 2.55,
@@ -2693,7 +3071,9 @@
           "rcept_dt": "20250812",
           "rcept_no": "20250812000645"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "478440",
@@ -2708,11 +3088,11 @@
       "base_price": 2000,
       "ipo_price": 2000,
       "ipo_shares": 6450000,
-      "ipo_amount": 2000,
-      "deposit_ratio": 645000000.0,
+      "ipo_amount": 12900000000,
+      "deposit_ratio": 100.0,
       "deposit_principal": 12900000000,
       "krx_listed_shares": 6930000,
-      "krx_cross_check_match": false,
+      "krx_cross_check_match": true,
       "year1_deposit_rate": 3.32,
       "year2_deposit_rate": 2.4,
       "year3_deposit_rate": 2.55,
@@ -2838,6 +3218,158 @@
           "rcept_dt": "20251114",
           "rcept_no": "20251114000565"
         }
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
+    },
+    {
+      "code": "482680",
+      "name": "미래에셋비전스팩7호",
+      "market": "KOSDAQ",
+      "krx_dept": "SPAC(소속부없음)",
+      "listing_date": "2024-09-11",
+      "delisting_date": "2027-09-11",
+      "maturity_date": "2027-09-11",
+      "remaining_days": 290,
+      "corp_code": "01841635",
+      "base_price": 2000,
+      "ipo_price": 2000,
+      "ipo_shares": 7950000,
+      "ipo_amount": 15900000000,
+      "deposit_ratio": 100.0,
+      "deposit_principal": 15900000000,
+      "krx_listed_shares": 8215000,
+      "krx_cross_check_match": true,
+      "year1_deposit_rate": 3.2,
+      "year2_deposit_rate": 2.25,
+      "year3_deposit_rate": 3.35,
+      "yearly_deposit_rates": [
+        3.2,
+        2.25,
+        3.35
+      ],
+      "deposit_interest_rate": 3.2,
+      "dart_deposit_rate": 3.2,
+      "dart_summary": "[20261124] [기재정정]주요사항보고서(회사합병결정) / [20261104] 분기보고서 (2026.09) / [20260930] [기재정정]주요사항보고서(회사합병결정) / [20260908] 기업인수목적회사의예치ㆍ신탁계약내용변경 / [20260814] 반기보고서 (2026.06) / [20260514] 분기보고서 (2026.03) / [20260513] [첨부정정]주요사항보고서(회사합병결정) / [20260512] 주권매매거래정지              (SPAC 합병(예비심사청구대상))",
+      "prospectus_report": "[기재정정]투자설명서",
+      "trust_amendment_reports": [
+        "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+        "기업인수목적회사의예치ㆍ신탁계약내용변경              "
+      ],
+      "current_price": 2055,
+      "open_price": 0,
+      "high_price": 0,
+      "low_price": 0,
+      "prev_diff": 0,
+      "chg_rate": 0.0,
+      "change_rate": 0.0,
+      "volume": 0,
+      "trading_value": 0,
+      "market_cap": 16881825000,
+      "trade_date": "20261124",
+      "liquidation_price": 2118.31,
+      "liquidation_price_source": "공시공모가(2,000원)+공시예치이율산식",
+      "liquidation_source": "공시공모가(2,000원)+공시예치이율산식",
+      "liquidation_note": null,
+      "fair_buy_price": 2086.98,
+      "is_fair_buy": "O",
+      "invest_type": "청산",
+      "yield_isa": 3.51,
+      "yield_general": 2.97,
+      "simple_yield": 3.08,
+      "deposit_rate": 1.9881,
+      "deposit_rate_after_tax": 1.9881,
+      "deposit_rate_gross": 2.35,
+      "is_suspended": false,
+      "trading_on_krx": true,
+      "has_liquidation_notice": true,
+      "merger_status": "합병추진",
+      "merger_target": null,
+      "merger_approved_at": "2026-11-24",
+      "latest_report": "[기재정정]주요사항보고서(회사합병결정)",
+      "latest_report_date": "2026-11-24",
+      "status": "합병",
+      "recent_disclosures": [
+        {
+          "report_nm": "[기재정정]주요사항보고서(회사합병결정)",
+          "rcept_dt": "20261124",
+          "rcept_no": "20261124000455"
+        },
+        {
+          "report_nm": "분기보고서 (2026.09)",
+          "rcept_dt": "20261104",
+          "rcept_no": "20261104000007"
+        },
+        {
+          "report_nm": "[기재정정]주요사항보고서(회사합병결정)",
+          "rcept_dt": "20260930",
+          "rcept_no": "20260930000489"
+        },
+        {
+          "report_nm": "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+          "rcept_dt": "20260908",
+          "rcept_no": "20260908900528"
+        },
+        {
+          "report_nm": "반기보고서 (2026.06)",
+          "rcept_dt": "20260814",
+          "rcept_no": "20260814002349"
+        },
+        {
+          "report_nm": "분기보고서 (2026.03)",
+          "rcept_dt": "20260514",
+          "rcept_no": "20260514001282"
+        },
+        {
+          "report_nm": "[첨부정정]주요사항보고서(회사합병결정)",
+          "rcept_dt": "20260513",
+          "rcept_no": "20260513000590"
+        },
+        {
+          "report_nm": "주권매매거래정지              (SPAC 합병(예비심사청구대상))",
+          "rcept_dt": "20260512",
+          "rcept_no": "20260512900907"
+        },
+        {
+          "report_nm": "주요사항보고서(회사합병결정)",
+          "rcept_dt": "20260512",
+          "rcept_no": "20260512000669"
+        },
+        {
+          "report_nm": "정기주주총회결과              ",
+          "rcept_dt": "20260320",
+          "rcept_no": "20260320900860"
+        },
+        {
+          "report_nm": "사업보고서 (2025.12)",
+          "rcept_dt": "20260312",
+          "rcept_no": "20260312000963"
+        },
+        {
+          "report_nm": "감사보고서제출              ",
+          "rcept_dt": "20260312",
+          "rcept_no": "20260312900512"
+        },
+        {
+          "report_nm": "의결권대리행사권유참고서류",
+          "rcept_dt": "20260304",
+          "rcept_no": "20260304001204"
+        },
+        {
+          "report_nm": "주주총회소집공고",
+          "rcept_dt": "20260304",
+          "rcept_no": "20260304001188"
+        },
+        {
+          "report_nm": "주주총회소집결의              ",
+          "rcept_dt": "20260209",
+          "rcept_no": "20260209901511"
+        }
+      ],
+      "is_eligible": false,
+      "ineligible_reasons": [
+        "liquidation_notice_flag",
+        "risk_disclosure:주권매매거래정지              (SPAC 합병(예비심사청구대상))"
       ]
     },
     {
@@ -2982,7 +3514,9 @@
           "rcept_dt": "20251127",
           "rcept_no": "20251127000788"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0096D0",
@@ -3124,7 +3658,9 @@
           "rcept_dt": "20251201",
           "rcept_no": "20251201000324"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0068Y0",
@@ -3140,8 +3676,8 @@
       "ipo_price": 2000,
       "ipo_shares": 4000000,
       "ipo_amount": 8000000000,
-      "deposit_ratio": 0.0,
-      "deposit_principal": 12,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 4310000,
       "krx_cross_check_match": true,
       "year1_deposit_rate": 2.82,
@@ -3268,7 +3804,9 @@
           "rcept_dt": "20251114",
           "rcept_no": "20251114003106"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0044K0",
@@ -3284,8 +3822,8 @@
       "ipo_price": 2000,
       "ipo_shares": 7000000,
       "ipo_amount": 14000000000,
-      "deposit_ratio": 0.0,
-      "deposit_principal": 13,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 7520000,
       "krx_cross_check_match": true,
       "year1_deposit_rate": 2.42,
@@ -3412,7 +3950,9 @@
           "rcept_dt": "20250827",
           "rcept_no": "20250827000492"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0071M0",
@@ -3428,8 +3968,8 @@
       "ipo_price": 2000,
       "ipo_shares": 5000000,
       "ipo_amount": 10000000000,
-      "deposit_ratio": 0.0,
-      "deposit_principal": 15,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 5760000,
       "krx_cross_check_match": true,
       "year1_deposit_rate": 2.47,
@@ -3556,7 +4096,9 @@
           "rcept_dt": "20251014",
           "rcept_no": "20251014000336"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0096B0",
@@ -3572,8 +4114,8 @@
       "ipo_price": 2000,
       "ipo_shares": 6000000,
       "ipo_amount": 12000000000,
-      "deposit_ratio": 0.0,
-      "deposit_principal": 13,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 6580000,
       "krx_cross_check_match": true,
       "year1_deposit_rate": 2.05,
@@ -3698,7 +4240,9 @@
           "rcept_dt": "20251203",
           "rcept_no": "20251203000262"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0115H0",
@@ -3714,8 +4258,8 @@
       "ipo_price": 2000,
       "ipo_shares": 6000000,
       "ipo_amount": 12000000000,
-      "deposit_ratio": 0.0,
-      "deposit_principal": 14,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 7350000,
       "krx_cross_check_match": true,
       "year1_deposit_rate": 2.05,
@@ -3840,7 +4384,9 @@
           "rcept_dt": "20260126",
           "rcept_no": "20260126000525"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0091W0",
@@ -3984,6 +4530,159 @@
           "rcept_dt": "20251110",
           "rcept_no": "20251110000009"
         }
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
+    },
+    {
+      "code": "474930",
+      "name": "신한제13호스팩",
+      "market": "KOSDAQ",
+      "krx_dept": "관리종목(소속부없음)",
+      "listing_date": "2024-04-22",
+      "delisting_date": "2027-04-22",
+      "maturity_date": "2027-04-22",
+      "remaining_days": 148,
+      "corp_code": "01807747",
+      "base_price": 2000,
+      "ipo_price": 2000,
+      "ipo_shares": 3000000,
+      "ipo_amount": 6000000000,
+      "deposit_ratio": null,
+      "deposit_principal": null,
+      "krx_listed_shares": 3620000,
+      "krx_cross_check_match": true,
+      "year1_deposit_rate": 3.45,
+      "year2_deposit_rate": 2.65,
+      "year3_deposit_rate": 3.01,
+      "yearly_deposit_rates": [
+        3.45,
+        2.65,
+        3.01
+      ],
+      "deposit_interest_rate": 3.45,
+      "dart_deposit_rate": 3.45,
+      "dart_summary": "[20261117] 기타경영사항(자율공시)              (청산 관련 주요사항 안내) / [20261116] 주권매매거래정지              (상장폐지 사유발생) / [20261116] [기재정정]분기보고서 (2026.09) / [20261112] 분기보고서 (2026.09) / [20261109] 기타시장안내              (주권 상장폐지 우려 예고) / [20261007] 기타시장안내(관리종목지정우려종목) / [20261006] 주식등의대량보유상황보고서(약식) / [20260813] 반기보고서 (2026.06)",
+      "prospectus_report": "[기재정정]투자설명서",
+      "trust_amendment_reports": [
+        "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+        "기업인수목적회사의예치ㆍ신탁계약내용변경              "
+      ],
+      "current_price": 2095,
+      "open_price": 2095,
+      "high_price": 2095,
+      "low_price": 2090,
+      "prev_diff": 0,
+      "chg_rate": 0.0,
+      "change_rate": 0.0,
+      "volume": 43728,
+      "trading_value": 91410160,
+      "market_cap": 7583900000,
+      "trade_date": "20261124",
+      "liquidation_price": 2127.16,
+      "liquidation_price_source": "공시공모가(2,000원)+공시예치이율산식",
+      "liquidation_source": "공시공모가(2,000원)+공시예치이율산식",
+      "liquidation_note": null,
+      "fair_buy_price": 2109.97,
+      "is_fair_buy": "O",
+      "invest_type": "청산",
+      "yield_isa": 3.15,
+      "yield_general": 2.66,
+      "simple_yield": 1.54,
+      "deposit_rate": 1.9881,
+      "deposit_rate_after_tax": 1.9881,
+      "deposit_rate_gross": 2.35,
+      "is_suspended": false,
+      "trading_on_krx": true,
+      "has_liquidation_notice": true,
+      "merger_status": null,
+      "merger_target": null,
+      "merger_approved_at": null,
+      "latest_report": "기타경영사항(자율공시)              (청산 관련 주요사항 안내)",
+      "latest_report_date": "2026-11-17",
+      "status": "일반",
+      "recent_disclosures": [
+        {
+          "report_nm": "기타경영사항(자율공시)              (청산 관련 주요사항 안내)",
+          "rcept_dt": "20261117",
+          "rcept_no": "20261117900324"
+        },
+        {
+          "report_nm": "주권매매거래정지              (상장폐지 사유발생)",
+          "rcept_dt": "20261116",
+          "rcept_no": "20261116902611"
+        },
+        {
+          "report_nm": "[기재정정]분기보고서 (2026.09)",
+          "rcept_dt": "20261116",
+          "rcept_no": "20261116001677"
+        },
+        {
+          "report_nm": "분기보고서 (2026.09)",
+          "rcept_dt": "20261112",
+          "rcept_no": "20261112000307"
+        },
+        {
+          "report_nm": "기타시장안내              (주권 상장폐지 우려 예고)",
+          "rcept_dt": "20261109",
+          "rcept_no": "20261109900800"
+        },
+        {
+          "report_nm": "기타시장안내(관리종목지정우려종목)              ",
+          "rcept_dt": "20261007",
+          "rcept_no": "20261007900685"
+        },
+        {
+          "report_nm": "주식등의대량보유상황보고서(약식)",
+          "rcept_dt": "20261006",
+          "rcept_no": "20261006000395"
+        },
+        {
+          "report_nm": "반기보고서 (2026.06)",
+          "rcept_dt": "20260813",
+          "rcept_no": "20260813001192"
+        },
+        {
+          "report_nm": "주식등의대량보유상황보고서(약식)",
+          "rcept_dt": "20260708",
+          "rcept_no": "20260708000292"
+        },
+        {
+          "report_nm": "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+          "rcept_dt": "20260616",
+          "rcept_no": "20260616900447"
+        },
+        {
+          "report_nm": "주식등의대량보유상황보고서(약식)",
+          "rcept_dt": "20260520",
+          "rcept_no": "20260520000049"
+        },
+        {
+          "report_nm": "분기보고서 (2026.03)",
+          "rcept_dt": "20260513",
+          "rcept_no": "20260513000591"
+        },
+        {
+          "report_nm": "정기주주총회결과              ",
+          "rcept_dt": "20260319",
+          "rcept_no": "20260319902046"
+        },
+        {
+          "report_nm": "사업보고서 (2025.12)",
+          "rcept_dt": "20260311",
+          "rcept_no": "20260311004530"
+        },
+        {
+          "report_nm": "감사보고서제출              ",
+          "rcept_dt": "20260311",
+          "rcept_no": "20260311901185"
+        }
+      ],
+      "is_eligible": false,
+      "ineligible_reasons": [
+        "administrative_issue",
+        "liquidation_notice_flag",
+        "risk_disclosure:주권매매거래정지              (상장폐지 사유발생)"
       ]
     },
     {
@@ -3999,11 +4698,11 @@
       "base_price": 2000,
       "ipo_price": 2000,
       "ipo_shares": 5000000,
-      "ipo_amount": 4,
-      "deposit_ratio": 2500.0,
-      "deposit_principal": 100,
+      "ipo_amount": 10000000000,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 5640000,
-      "krx_cross_check_match": false,
+      "krx_cross_check_match": true,
       "year1_deposit_rate": 3.2,
       "year2_deposit_rate": 2.92,
       "year3_deposit_rate": null,
@@ -4128,7 +4827,9 @@
           "rcept_dt": "20260102",
           "rcept_no": "20260102000096"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "487830",
@@ -4143,11 +4844,11 @@
       "base_price": 2000,
       "ipo_price": 2000,
       "ipo_shares": 3900000,
-      "ipo_amount": 4,
-      "deposit_ratio": 2500.0,
-      "deposit_principal": 100,
+      "ipo_amount": 7800000000,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 4350000,
-      "krx_cross_check_match": false,
+      "krx_cross_check_match": true,
       "year1_deposit_rate": 3.3,
       "year2_deposit_rate": 2.72,
       "year3_deposit_rate": 3.59,
@@ -4273,7 +4974,9 @@
           "rcept_dt": "20260311",
           "rcept_no": "20260311901084"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "496070",
@@ -4288,11 +4991,11 @@
       "base_price": 2000,
       "ipo_price": 2000,
       "ipo_shares": 5000000,
-      "ipo_amount": 4,
-      "deposit_ratio": 2500.0,
-      "deposit_principal": 100,
+      "ipo_amount": 10000000000,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 5620000,
-      "krx_cross_check_match": false,
+      "krx_cross_check_match": true,
       "year1_deposit_rate": 2.56,
       "year2_deposit_rate": 3.07,
       "year3_deposit_rate": null,
@@ -4417,7 +5120,9 @@
           "rcept_dt": "20260311",
           "rcept_no": "20260311901910"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0130D0",
@@ -4433,8 +5138,8 @@
       "ipo_price": 2000,
       "ipo_shares": 5000000,
       "ipo_amount": 10000000000,
-      "deposit_ratio": 0.0,
-      "deposit_principal": 100,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 5340000,
       "krx_cross_check_match": true,
       "year1_deposit_rate": 2.5,
@@ -4559,7 +5264,9 @@
           "rcept_dt": "20260318",
           "rcept_no": "20260318000201"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0129K0",
@@ -4701,7 +5408,9 @@
           "rcept_dt": "20260414",
           "rcept_no": "20260414000025"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0222E0",
@@ -4717,8 +5426,8 @@
       "ipo_price": 2000,
       "ipo_shares": 5000000,
       "ipo_amount": 10000000000,
-      "deposit_ratio": 0.0,
-      "deposit_principal": 7,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 5240000,
       "krx_cross_check_match": true,
       "year1_deposit_rate": 3.0,
@@ -4833,6 +5542,158 @@
           "rcept_dt": "20260917",
           "rcept_no": "20260917000220"
         }
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
+    },
+    {
+      "code": "473000",
+      "name": "에스케이증권제12호스팩",
+      "market": "KOSDAQ",
+      "krx_dept": "관리종목(소속부없음)",
+      "listing_date": "2024-05-07",
+      "delisting_date": "2027-05-07",
+      "maturity_date": "2027-05-07",
+      "remaining_days": 163,
+      "corp_code": "01798722",
+      "base_price": 2000,
+      "ipo_price": 2000,
+      "ipo_shares": 3000000,
+      "ipo_amount": 6000000000,
+      "deposit_ratio": null,
+      "deposit_principal": null,
+      "krx_listed_shares": 3310000,
+      "krx_cross_check_match": true,
+      "year1_deposit_rate": 3.45,
+      "year2_deposit_rate": 2.6,
+      "year3_deposit_rate": 2.99,
+      "yearly_deposit_rates": [
+        3.45,
+        2.6,
+        2.99
+      ],
+      "deposit_interest_rate": 3.45,
+      "dart_deposit_rate": 3.45,
+      "dart_summary": "[20261118] 기타시장안내              (주권 상장폐지 우려 예고) / [20261110] 분기보고서 (2026.09) / [20261016] 기타시장안내(관리종목지정우려종목) / [20260811] 반기보고서 (2026.06) / [20260709] 주식등의대량보유상황보고서(약식) / [20260622] 주식등의대량보유상황보고서(약식) / [20260514] 분기보고서 (2026.03) / [20260430] 기업인수목적회사의예치ㆍ신탁계약내용변경",
+      "prospectus_report": "[기재정정]투자설명서",
+      "trust_amendment_reports": [
+        "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+        "기업인수목적회사의예치ㆍ신탁계약내용변경              "
+      ],
+      "current_price": 2090,
+      "open_price": 2085,
+      "high_price": 2095,
+      "low_price": 2085,
+      "prev_diff": 0,
+      "chg_rate": 0.0,
+      "change_rate": 0.0,
+      "volume": 13959,
+      "trading_value": 29184718,
+      "market_cap": 6917900000,
+      "trade_date": "20261124",
+      "liquidation_price": 2126.13,
+      "liquidation_price_source": "공시공모가(2,000원)+공시예치이율산식",
+      "liquidation_source": "공시공모가(2,000원)+공시예치이율산식",
+      "liquidation_note": null,
+      "fair_buy_price": 2107.35,
+      "is_fair_buy": "O",
+      "invest_type": "청산",
+      "yield_isa": 3.27,
+      "yield_general": 2.77,
+      "simple_yield": 1.73,
+      "deposit_rate": 1.9881,
+      "deposit_rate_after_tax": 1.9881,
+      "deposit_rate_gross": 2.35,
+      "is_suspended": false,
+      "trading_on_krx": true,
+      "has_liquidation_notice": true,
+      "merger_status": null,
+      "merger_target": null,
+      "merger_approved_at": null,
+      "latest_report": "기타시장안내              (주권 상장폐지 우려 예고)",
+      "latest_report_date": "2026-11-18",
+      "status": "일반",
+      "recent_disclosures": [
+        {
+          "report_nm": "기타시장안내              (주권 상장폐지 우려 예고)",
+          "rcept_dt": "20261118",
+          "rcept_no": "20261118900536"
+        },
+        {
+          "report_nm": "분기보고서 (2026.09)",
+          "rcept_dt": "20261110",
+          "rcept_no": "20261110000103"
+        },
+        {
+          "report_nm": "기타시장안내(관리종목지정우려종목)              ",
+          "rcept_dt": "20261016",
+          "rcept_no": "20261016900831"
+        },
+        {
+          "report_nm": "반기보고서 (2026.06)",
+          "rcept_dt": "20260811",
+          "rcept_no": "20260811000304"
+        },
+        {
+          "report_nm": "주식등의대량보유상황보고서(약식)",
+          "rcept_dt": "20260709",
+          "rcept_no": "20260709000683"
+        },
+        {
+          "report_nm": "주식등의대량보유상황보고서(약식)",
+          "rcept_dt": "20260622",
+          "rcept_no": "20260622000377"
+        },
+        {
+          "report_nm": "분기보고서 (2026.03)",
+          "rcept_dt": "20260514",
+          "rcept_no": "20260514000076"
+        },
+        {
+          "report_nm": "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+          "rcept_dt": "20260430",
+          "rcept_no": "20260430901495"
+        },
+        {
+          "report_nm": "정기주주총회결과              ",
+          "rcept_dt": "20260326",
+          "rcept_no": "20260326901118"
+        },
+        {
+          "report_nm": "사업보고서 (2025.12)",
+          "rcept_dt": "20260312",
+          "rcept_no": "20260312001239"
+        },
+        {
+          "report_nm": "의결권대리행사권유참고서류",
+          "rcept_dt": "20260311",
+          "rcept_no": "20260311003539"
+        },
+        {
+          "report_nm": "주주총회소집공고",
+          "rcept_dt": "20260311",
+          "rcept_no": "20260311003525"
+        },
+        {
+          "report_nm": "주주총회소집결의              ",
+          "rcept_dt": "20260306",
+          "rcept_no": "20260306900452"
+        },
+        {
+          "report_nm": "감사보고서제출              ",
+          "rcept_dt": "20260305",
+          "rcept_no": "20260305901912"
+        },
+        {
+          "report_nm": "매출액또는손익구조30%(대규모법인은15%)이상변동              ",
+          "rcept_dt": "20260209",
+          "rcept_no": "20260209900817"
+        }
+      ],
+      "is_eligible": false,
+      "ineligible_reasons": [
+        "administrative_issue",
+        "liquidation_notice_flag"
       ]
     },
     {
@@ -4978,7 +5839,9 @@
           "rcept_dt": "20251110",
           "rcept_no": "20251110000118"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0205H0",
@@ -5095,7 +5958,9 @@
           "rcept_dt": "20260826",
           "rcept_no": "20260826000506"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "477340",
@@ -5110,11 +5975,11 @@
       "base_price": 2000,
       "ipo_price": 2000,
       "ipo_shares": 7000000,
-      "ipo_amount": 1750000,
+      "ipo_amount": 14000000000,
       "deposit_ratio": 100.0,
-      "deposit_principal": 1750000,
+      "deposit_principal": 14000000000,
       "krx_listed_shares": 7510000,
-      "krx_cross_check_match": false,
+      "krx_cross_check_match": true,
       "year1_deposit_rate": 3.45,
       "year2_deposit_rate": 2.47,
       "year3_deposit_rate": 3.15,
@@ -5240,7 +6105,9 @@
           "rcept_dt": "20251113",
           "rcept_no": "20251113000321"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "481890",
@@ -5256,8 +6123,8 @@
       "ipo_price": 2000,
       "ipo_shares": 6000000,
       "ipo_amount": 12000000000,
-      "deposit_ratio": 0.0,
-      "deposit_principal": 100,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 6345000,
       "krx_cross_check_match": true,
       "year1_deposit_rate": 3.3,
@@ -5385,7 +6252,9 @@
           "rcept_dt": "20251111",
           "rcept_no": "20251111000034"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0054V0",
@@ -5401,8 +6270,8 @@
       "ipo_price": 2000,
       "ipo_shares": 5150000,
       "ipo_amount": 10300000000,
-      "deposit_ratio": 0.0,
-      "deposit_principal": 100,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 6216500,
       "krx_cross_check_match": true,
       "year1_deposit_rate": 3.0,
@@ -5527,7 +6396,9 @@
           "rcept_dt": "20251127",
           "rcept_no": "20251127000779"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0130H0",
@@ -5543,8 +6414,8 @@
       "ipo_price": 2000,
       "ipo_shares": 6350000,
       "ipo_amount": 12700000000,
-      "deposit_ratio": 0.0,
-      "deposit_principal": 11,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 7700000,
       "krx_cross_check_match": true,
       "year1_deposit_rate": 2.0,
@@ -5669,7 +6540,9 @@
           "rcept_dt": "20260211",
           "rcept_no": "20260211000823"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0197V0",
@@ -5685,8 +6558,8 @@
       "ipo_price": 2000,
       "ipo_shares": 8500000,
       "ipo_amount": 12700000000,
-      "deposit_ratio": 0.0,
-      "deposit_principal": 11,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 9050000,
       "krx_cross_check_match": false,
       "year1_deposit_rate": 2.0,
@@ -5786,7 +6659,9 @@
           "rcept_dt": "20260729",
           "rcept_no": "20260729000264"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0041J0",
@@ -5801,11 +6676,11 @@
       "base_price": 2000,
       "ipo_price": 2000,
       "ipo_shares": 4000000,
-      "ipo_amount": 1,
+      "ipo_amount": 8000000000,
       "deposit_ratio": null,
       "deposit_principal": null,
       "krx_listed_shares": 4110000,
-      "krx_cross_check_match": false,
+      "krx_cross_check_match": true,
       "year1_deposit_rate": 2.42,
       "year2_deposit_rate": 3.22,
       "year3_deposit_rate": null,
@@ -5930,6 +6805,158 @@
           "rcept_dt": "20250724",
           "rcept_no": "20250724000202"
         }
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
+    },
+    {
+      "code": "474490",
+      "name": "유안타제16호스팩",
+      "market": "KOSDAQ",
+      "krx_dept": "관리종목(소속부없음)",
+      "listing_date": "2024-05-02",
+      "delisting_date": "2027-05-02",
+      "maturity_date": "2027-05-02",
+      "remaining_days": 158,
+      "corp_code": "01804476",
+      "base_price": 2000,
+      "ipo_price": 2000,
+      "ipo_shares": 5150000,
+      "ipo_amount": 10300000000,
+      "deposit_ratio": 100.0,
+      "deposit_principal": 10300000000,
+      "krx_listed_shares": 5510000,
+      "krx_cross_check_match": true,
+      "year1_deposit_rate": 3.45,
+      "year2_deposit_rate": 2.6,
+      "year3_deposit_rate": 2.93,
+      "yearly_deposit_rates": [
+        3.45,
+        2.6,
+        2.93
+      ],
+      "deposit_interest_rate": 3.45,
+      "dart_deposit_rate": 3.45,
+      "dart_summary": "[20261118] 기타시장안내              (주권 상장폐지 우려 예고) / [20261113] 분기보고서 (2026.09) / [20261016] 기타시장안내(관리종목지정우려종목) / [20260814] 반기보고서 (2026.06) / [20260514] 분기보고서 (2026.03) / [20260429] 기업인수목적회사의예치ㆍ신탁계약내용변경 / [20260330] 정기주주총회결과 / [20260313] 주주총회소집공고",
+      "prospectus_report": "[기재정정]투자설명서",
+      "trust_amendment_reports": [
+        "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+        "기업인수목적회사의예치ㆍ신탁계약내용변경              "
+      ],
+      "current_price": 2090,
+      "open_price": 2085,
+      "high_price": 2095,
+      "low_price": 2085,
+      "prev_diff": 0,
+      "chg_rate": 0.0,
+      "change_rate": 0.0,
+      "volume": 2621,
+      "trading_value": 5478045,
+      "market_cap": 11515900000,
+      "trade_date": "20261124",
+      "liquidation_price": 2125.68,
+      "liquidation_price_source": "공시공모가(2,000원)+공시예치이율산식",
+      "liquidation_source": "공시공모가(2,000원)+공시예치이율산식",
+      "liquidation_note": null,
+      "fair_buy_price": 2107.55,
+      "is_fair_buy": "O",
+      "invest_type": "청산",
+      "yield_isa": 3.31,
+      "yield_general": 2.8,
+      "simple_yield": 1.71,
+      "deposit_rate": 1.9881,
+      "deposit_rate_after_tax": 1.9881,
+      "deposit_rate_gross": 2.35,
+      "is_suspended": false,
+      "trading_on_krx": true,
+      "has_liquidation_notice": true,
+      "merger_status": null,
+      "merger_target": null,
+      "merger_approved_at": null,
+      "latest_report": "기타시장안내              (주권 상장폐지 우려 예고)",
+      "latest_report_date": "2026-11-18",
+      "status": "일반",
+      "recent_disclosures": [
+        {
+          "report_nm": "기타시장안내              (주권 상장폐지 우려 예고)",
+          "rcept_dt": "20261118",
+          "rcept_no": "20261118900572"
+        },
+        {
+          "report_nm": "분기보고서 (2026.09)",
+          "rcept_dt": "20261113",
+          "rcept_no": "20261113000161"
+        },
+        {
+          "report_nm": "기타시장안내(관리종목지정우려종목)              ",
+          "rcept_dt": "20261016",
+          "rcept_no": "20261016900652"
+        },
+        {
+          "report_nm": "반기보고서 (2026.06)",
+          "rcept_dt": "20260814",
+          "rcept_no": "20260814000684"
+        },
+        {
+          "report_nm": "분기보고서 (2026.03)",
+          "rcept_dt": "20260514",
+          "rcept_no": "20260514000871"
+        },
+        {
+          "report_nm": "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+          "rcept_dt": "20260429",
+          "rcept_no": "20260429900289"
+        },
+        {
+          "report_nm": "정기주주총회결과              ",
+          "rcept_dt": "20260330",
+          "rcept_no": "20260330900581"
+        },
+        {
+          "report_nm": "주주총회소집공고",
+          "rcept_dt": "20260313",
+          "rcept_no": "20260313000602"
+        },
+        {
+          "report_nm": "감사보고서제출              ",
+          "rcept_dt": "20260311",
+          "rcept_no": "20260311902258"
+        },
+        {
+          "report_nm": "사업보고서 (2025.12)",
+          "rcept_dt": "20260311",
+          "rcept_no": "20260311004541"
+        },
+        {
+          "report_nm": "주주총회집중일개최사유신고              ",
+          "rcept_dt": "20260306",
+          "rcept_no": "20260306900240"
+        },
+        {
+          "report_nm": "주주총회소집결의              ",
+          "rcept_dt": "20260305",
+          "rcept_no": "20260305901457"
+        },
+        {
+          "report_nm": "주주명부폐쇄기간또는기준일설정              ",
+          "rcept_dt": "20251215",
+          "rcept_no": "20251215900392"
+        },
+        {
+          "report_nm": "분기보고서 (2025.09)",
+          "rcept_dt": "20251114",
+          "rcept_no": "20251114000252"
+        },
+        {
+          "report_nm": "반기보고서 (2025.06)",
+          "rcept_dt": "20250813",
+          "rcept_no": "20250813001181"
+        }
+      ],
+      "is_eligible": false,
+      "ineligible_reasons": [
+        "administrative_issue",
+        "liquidation_notice_flag"
       ]
     },
     {
@@ -5945,11 +6972,11 @@
       "base_price": 2000,
       "ipo_price": 2000,
       "ipo_shares": 50000000,
-      "ipo_amount": 1250000,
+      "ipo_amount": 100000000000,
       "deposit_ratio": 100.0,
-      "deposit_principal": 1250000,
+      "deposit_principal": 100000000000,
       "krx_listed_shares": 5310000,
-      "krx_cross_check_match": false,
+      "krx_cross_check_match": true,
       "year1_deposit_rate": 3.0,
       "year2_deposit_rate": 2.8,
       "year3_deposit_rate": null,
@@ -6074,7 +7101,9 @@
           "rcept_dt": "20250813",
           "rcept_no": "20250813000412"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "488060",
@@ -6089,11 +7118,11 @@
       "base_price": 2000,
       "ipo_price": 2000,
       "ipo_shares": 4500000,
-      "ipo_amount": 4500000,
-      "deposit_ratio": 200000.0,
+      "ipo_amount": 9000000000,
+      "deposit_ratio": 100.0,
       "deposit_principal": 9000000000,
       "krx_listed_shares": 4720000,
-      "krx_cross_check_match": false,
+      "krx_cross_check_match": true,
       "year1_deposit_rate": 3.3,
       "year2_deposit_rate": 2.57,
       "year3_deposit_rate": 3.59,
@@ -6219,7 +7248,9 @@
           "rcept_dt": "20251216",
           "rcept_no": "20251216900015"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0105P0",
@@ -6235,8 +7266,8 @@
       "ipo_price": 2000,
       "ipo_shares": 5000000,
       "ipo_amount": 10000000000,
-      "deposit_ratio": 0.0,
-      "deposit_principal": 16,
+      "deposit_ratio": 100.0,
+      "deposit_principal": 10000000000,
       "krx_listed_shares": 5660000,
       "krx_cross_check_match": true,
       "year1_deposit_rate": 3.0,
@@ -6361,7 +7392,9 @@
           "rcept_dt": "20251217",
           "rcept_no": "20251217000553"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "478110",
@@ -6376,11 +7409,11 @@
       "base_price": 2000,
       "ipo_price": 2000,
       "ipo_shares": 4000000,
-      "ipo_amount": 4000000,
+      "ipo_amount": 8000000000,
       "deposit_ratio": null,
       "deposit_principal": null,
       "krx_listed_shares": 5020000,
-      "krx_cross_check_match": false,
+      "krx_cross_check_match": true,
       "year1_deposit_rate": 3.35,
       "year2_deposit_rate": 2.42,
       "year3_deposit_rate": 3.22,
@@ -6506,6 +7539,304 @@
           "rcept_dt": "20250813",
           "rcept_no": "20250813001087"
         }
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
+    },
+    {
+      "code": "487720",
+      "name": "키움제10호스팩",
+      "market": "KOSDAQ",
+      "krx_dept": "SPAC(소속부없음)",
+      "listing_date": "2024-12-20",
+      "delisting_date": "2027-12-20",
+      "maturity_date": "2027-12-20",
+      "remaining_days": 390,
+      "corp_code": "01877126",
+      "base_price": 2000,
+      "ipo_price": 2000,
+      "ipo_shares": 3900000,
+      "ipo_amount": 7800000000,
+      "deposit_ratio": 100.0,
+      "deposit_principal": 7800000000,
+      "krx_listed_shares": 4230000,
+      "krx_cross_check_match": true,
+      "year1_deposit_rate": 3.5,
+      "year2_deposit_rate": null,
+      "year3_deposit_rate": null,
+      "yearly_deposit_rates": [
+        3.5,
+        null,
+        null
+      ],
+      "deposit_interest_rate": 3.5,
+      "dart_deposit_rate": 3.5,
+      "dart_summary": "[20261113] 분기보고서 (2026.09) / [20261103] [기재정정]주요사항보고서(회사합병결정) / [20261030] 주요사항보고서(회사합병결정) / [20261030] 주권매매거래정지              (SPAC 합병(예비심사청구대상)) / [20260814] 반기보고서 (2026.06) / [20260616] 주식등의대량보유상황보고서(약식) / [20260513] 분기보고서 (2026.03) / [20260325] 정기주주총회결과",
+      "prospectus_report": "[기재정정]투자설명서",
+      "trust_amendment_reports": [],
+      "current_price": 2195,
+      "open_price": 0,
+      "high_price": 0,
+      "low_price": 0,
+      "prev_diff": 0,
+      "chg_rate": 0.0,
+      "change_rate": 0.0,
+      "volume": 0,
+      "trading_value": 0,
+      "market_cap": 9284850000,
+      "trade_date": "20261124",
+      "liquidation_price": 2146.72,
+      "liquidation_price_source": "공시공모가(2,000원)+공시예치이율산식(미정연차전년도가정)",
+      "liquidation_source": "공시공모가(2,000원)+공시예치이율산식(미정연차전년도가정)",
+      "liquidation_note": "※ 미정인 2년차·3년차 예치이자율은 직전 연도 수치로 가정하여 계산한 잠정 청산가입니다.",
+      "fair_buy_price": 2094.46,
+      "is_fair_buy": "X",
+      "invest_type": "합병",
+      "yield_isa": -1.91,
+      "yield_general": -1.91,
+      "simple_yield": -2.2,
+      "deposit_rate": 1.9881,
+      "deposit_rate_after_tax": 1.9881,
+      "deposit_rate_gross": 2.35,
+      "is_suspended": false,
+      "trading_on_krx": true,
+      "has_liquidation_notice": true,
+      "merger_status": "합병추진",
+      "merger_target": null,
+      "merger_approved_at": "2026-11-03",
+      "latest_report": "분기보고서 (2026.09)",
+      "latest_report_date": "2026-11-13",
+      "status": "합병",
+      "recent_disclosures": [
+        {
+          "report_nm": "분기보고서 (2026.09)",
+          "rcept_dt": "20261113",
+          "rcept_no": "20261113000916"
+        },
+        {
+          "report_nm": "[기재정정]주요사항보고서(회사합병결정)",
+          "rcept_dt": "20261103",
+          "rcept_no": "20261103000313"
+        },
+        {
+          "report_nm": "주요사항보고서(회사합병결정)",
+          "rcept_dt": "20261030",
+          "rcept_no": "20261030000754"
+        },
+        {
+          "report_nm": "주권매매거래정지              (SPAC 합병(예비심사청구대상))",
+          "rcept_dt": "20261030",
+          "rcept_no": "20261030901414"
+        },
+        {
+          "report_nm": "반기보고서 (2026.06)",
+          "rcept_dt": "20260814",
+          "rcept_no": "20260814001401"
+        },
+        {
+          "report_nm": "주식등의대량보유상황보고서(약식)",
+          "rcept_dt": "20260616",
+          "rcept_no": "20260616000331"
+        },
+        {
+          "report_nm": "분기보고서 (2026.03)",
+          "rcept_dt": "20260513",
+          "rcept_no": "20260513000012"
+        },
+        {
+          "report_nm": "정기주주총회결과              ",
+          "rcept_dt": "20260325",
+          "rcept_no": "20260325900588"
+        },
+        {
+          "report_nm": "사업보고서 (2025.12)",
+          "rcept_dt": "20260311",
+          "rcept_no": "20260311003154"
+        },
+        {
+          "report_nm": "주주총회집중일개최사유신고              ",
+          "rcept_dt": "20260306",
+          "rcept_no": "20260306900194"
+        },
+        {
+          "report_nm": "의결권대리행사권유참고서류",
+          "rcept_dt": "20260306",
+          "rcept_no": "20260306000024"
+        },
+        {
+          "report_nm": "주주총회소집공고",
+          "rcept_dt": "20260306",
+          "rcept_no": "20260306000020"
+        },
+        {
+          "report_nm": "감사보고서제출              ",
+          "rcept_dt": "20260304",
+          "rcept_no": "20260304901489"
+        },
+        {
+          "report_nm": "주주총회소집결의              ",
+          "rcept_dt": "20260220",
+          "rcept_no": "20260220901013"
+        },
+        {
+          "report_nm": "매출액또는손익구조30%(대규모법인은15%)이상변동              ",
+          "rcept_dt": "20260209",
+          "rcept_no": "20260209900842"
+        }
+      ],
+      "is_eligible": false,
+      "ineligible_reasons": [
+        "liquidation_notice_flag",
+        "risk_disclosure:주권매매거래정지              (SPAC 합병(예비심사청구대상))"
+      ]
+    },
+    {
+      "code": "489480",
+      "name": "키움제11호스팩",
+      "market": "KOSDAQ",
+      "krx_dept": "SPAC(소속부없음)",
+      "listing_date": "2024-12-11",
+      "delisting_date": "2027-12-11",
+      "maturity_date": "2027-12-11",
+      "remaining_days": 381,
+      "corp_code": "01873272",
+      "base_price": 2000,
+      "ipo_price": 2000,
+      "ipo_shares": 5000000,
+      "ipo_amount": 10000000000,
+      "deposit_ratio": 100.0,
+      "deposit_principal": 10000000000,
+      "krx_listed_shares": 6600000,
+      "krx_cross_check_match": true,
+      "year1_deposit_rate": 3.2,
+      "year2_deposit_rate": 2.88,
+      "year3_deposit_rate": null,
+      "yearly_deposit_rates": [
+        3.2,
+        2.88,
+        null
+      ],
+      "deposit_interest_rate": 3.2,
+      "dart_deposit_rate": 3.2,
+      "dart_summary": "[20261112] 분기보고서 (2026.09) / [20260910] 주요사항보고서(회사합병결정) / [20260910] 주권매매거래정지              (SPAC 합병(예비심사청구대상)) / [20260825] 주식등의대량보유상황보고서(약식) / [20260813] 반기보고서 (2026.06) / [20260710] 주식등의대량보유상황보고서(약식) / [20260623] 주식등의대량보유상황보고서(약식) / [20260515] 분기보고서 (2026.03)",
+      "prospectus_report": "[기재정정]투자설명서",
+      "trust_amendment_reports": [
+        "기업인수목적회사의예치ㆍ신탁계약내용변경              "
+      ],
+      "current_price": 2200,
+      "open_price": 0,
+      "high_price": 0,
+      "low_price": 0,
+      "prev_diff": 0,
+      "chg_rate": 0.0,
+      "change_rate": 0.0,
+      "volume": 0,
+      "trading_value": 0,
+      "market_cap": 14520000000,
+      "trade_date": "20261124",
+      "liquidation_price": 2125.85,
+      "liquidation_price_source": "공시공모가(2,000원)+공시예치이율산식(미정연차전년도가정)",
+      "liquidation_source": "공시공모가(2,000원)+공시예치이율산식(미정연차전년도가정)",
+      "liquidation_note": "※ 미정인 3년차 예치이자율은 직전 연도 수치로 가정하여 계산한 잠정 청산가입니다.",
+      "fair_buy_price": 2082.06,
+      "is_fair_buy": "X",
+      "invest_type": "합병",
+      "yield_isa": -2.99,
+      "yield_general": -2.99,
+      "simple_yield": -3.37,
+      "deposit_rate": 1.9881,
+      "deposit_rate_after_tax": 1.9881,
+      "deposit_rate_gross": 2.35,
+      "is_suspended": false,
+      "trading_on_krx": true,
+      "has_liquidation_notice": true,
+      "merger_status": "합병추진",
+      "merger_target": null,
+      "merger_approved_at": "2026-09-10",
+      "latest_report": "분기보고서 (2026.09)",
+      "latest_report_date": "2026-11-12",
+      "status": "합병",
+      "recent_disclosures": [
+        {
+          "report_nm": "분기보고서 (2026.09)",
+          "rcept_dt": "20261112",
+          "rcept_no": "20261112000138"
+        },
+        {
+          "report_nm": "주요사항보고서(회사합병결정)",
+          "rcept_dt": "20260910",
+          "rcept_no": "20260910000331"
+        },
+        {
+          "report_nm": "주권매매거래정지              (SPAC 합병(예비심사청구대상))",
+          "rcept_dt": "20260910",
+          "rcept_no": "20260910900405"
+        },
+        {
+          "report_nm": "주식등의대량보유상황보고서(약식)",
+          "rcept_dt": "20260825",
+          "rcept_no": "20260825000372"
+        },
+        {
+          "report_nm": "반기보고서 (2026.06)",
+          "rcept_dt": "20260813",
+          "rcept_no": "20260813001090"
+        },
+        {
+          "report_nm": "주식등의대량보유상황보고서(약식)",
+          "rcept_dt": "20260710",
+          "rcept_no": "20260710000146"
+        },
+        {
+          "report_nm": "주식등의대량보유상황보고서(약식)",
+          "rcept_dt": "20260623",
+          "rcept_no": "20260623000303"
+        },
+        {
+          "report_nm": "분기보고서 (2026.03)",
+          "rcept_dt": "20260515",
+          "rcept_no": "20260515000157"
+        },
+        {
+          "report_nm": "정기주주총회결과              ",
+          "rcept_dt": "20260324",
+          "rcept_no": "20260324900982"
+        },
+        {
+          "report_nm": "사업보고서 (2025.12)",
+          "rcept_dt": "20260313",
+          "rcept_no": "20260313000071"
+        },
+        {
+          "report_nm": "감사보고서제출              ",
+          "rcept_dt": "20260306",
+          "rcept_no": "20260306901394"
+        },
+        {
+          "report_nm": "[기재정정]감사보고서제출              ",
+          "rcept_dt": "20260306",
+          "rcept_no": "20260306901344"
+        },
+        {
+          "report_nm": "주주총회소집공고",
+          "rcept_dt": "20260306",
+          "rcept_no": "20260306000551"
+        },
+        {
+          "report_nm": "주주총회소집결의              ",
+          "rcept_dt": "20260223",
+          "rcept_no": "20260223900316"
+        },
+        {
+          "report_nm": "매출액또는손익구조30%(대규모법인은15%)이상변동              ",
+          "rcept_dt": "20260209",
+          "rcept_no": "20260209901501"
+        }
+      ],
+      "is_eligible": false,
+      "ineligible_reasons": [
+        "liquidation_notice_flag",
+        "risk_disclosure:주권매매거래정지              (SPAC 합병(예비심사청구대상))"
       ]
     },
     {
@@ -6648,7 +7979,9 @@
           "rcept_dt": "20260213",
           "rcept_no": "20260213901573"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0131D0",
@@ -6785,6 +8118,159 @@
           "rcept_dt": "20260306",
           "rcept_no": "20260306000160"
         }
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
+    },
+    {
+      "code": "475250",
+      "name": "하나33호스팩",
+      "market": "KOSDAQ",
+      "krx_dept": "관리종목(소속부없음)",
+      "listing_date": "2024-04-24",
+      "delisting_date": "2027-04-24",
+      "maturity_date": "2027-04-24",
+      "remaining_days": 150,
+      "corp_code": "01807729",
+      "base_price": 2000,
+      "ipo_price": 2000,
+      "ipo_shares": 3500000,
+      "ipo_amount": 7000000000,
+      "deposit_ratio": null,
+      "deposit_principal": null,
+      "krx_listed_shares": 3700000,
+      "krx_cross_check_match": true,
+      "year1_deposit_rate": 3.32,
+      "year2_deposit_rate": 2.6,
+      "year3_deposit_rate": 2.55,
+      "yearly_deposit_rates": [
+        3.32,
+        2.6,
+        2.55
+      ],
+      "deposit_interest_rate": 3.32,
+      "dart_deposit_rate": 3.32,
+      "dart_summary": "[20261119] 기타경영사항(자율공시)              (청산 관련 주요사항 안내) / [20261118] 주권매매거래정지              (상장폐지 사유발생) / [20261116] 분기보고서 (2026.09) / [20261111] 기타시장안내              (주권 상장폐지 우려 예고) / [20261008] 기타시장안내(관리종목지정우려종목) / [20260814] 반기보고서 (2026.06) / [20260519] 주식등의대량보유상황보고서(약식) / [20260514] 분기보고서 (2026.03)",
+      "prospectus_report": "[기재정정]투자설명서",
+      "trust_amendment_reports": [
+        "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+        "기업인수목적회사의예치ㆍ신탁계약내용변경              "
+      ],
+      "current_price": 2095,
+      "open_price": 2090,
+      "high_price": 2095,
+      "low_price": 2090,
+      "prev_diff": 0,
+      "chg_rate": 0.0,
+      "change_rate": 0.0,
+      "volume": 40328,
+      "trading_value": 84458510,
+      "market_cap": 7751500000,
+      "trade_date": "20261124",
+      "liquidation_price": 2120.56,
+      "liquidation_price_source": "공시공모가(2,000원)+공시예치이율산식",
+      "liquidation_source": "공시공모가(2,000원)+공시예치이율산식",
+      "liquidation_note": null,
+      "fair_buy_price": 2104.04,
+      "is_fair_buy": "O",
+      "invest_type": "청산",
+      "yield_isa": 2.47,
+      "yield_general": 2.09,
+      "simple_yield": 1.22,
+      "deposit_rate": 1.9881,
+      "deposit_rate_after_tax": 1.9881,
+      "deposit_rate_gross": 2.35,
+      "is_suspended": false,
+      "trading_on_krx": true,
+      "has_liquidation_notice": true,
+      "merger_status": null,
+      "merger_target": null,
+      "merger_approved_at": null,
+      "latest_report": "기타경영사항(자율공시)              (청산 관련 주요사항 안내)",
+      "latest_report_date": "2026-11-19",
+      "status": "일반",
+      "recent_disclosures": [
+        {
+          "report_nm": "기타경영사항(자율공시)              (청산 관련 주요사항 안내)",
+          "rcept_dt": "20261119",
+          "rcept_no": "20261119900250"
+        },
+        {
+          "report_nm": "주권매매거래정지              (상장폐지 사유발생)",
+          "rcept_dt": "20261118",
+          "rcept_no": "20261118900641"
+        },
+        {
+          "report_nm": "분기보고서 (2026.09)",
+          "rcept_dt": "20261116",
+          "rcept_no": "20261116000078"
+        },
+        {
+          "report_nm": "기타시장안내              (주권 상장폐지 우려 예고)",
+          "rcept_dt": "20261111",
+          "rcept_no": "20261111900764"
+        },
+        {
+          "report_nm": "기타시장안내(관리종목지정우려종목)              ",
+          "rcept_dt": "20261008",
+          "rcept_no": "20261008900881"
+        },
+        {
+          "report_nm": "반기보고서 (2026.06)",
+          "rcept_dt": "20260814",
+          "rcept_no": "20260814000517"
+        },
+        {
+          "report_nm": "주식등의대량보유상황보고서(약식)",
+          "rcept_dt": "20260519",
+          "rcept_no": "20260519000009"
+        },
+        {
+          "report_nm": "분기보고서 (2026.03)",
+          "rcept_dt": "20260514",
+          "rcept_no": "20260514000598"
+        },
+        {
+          "report_nm": "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+          "rcept_dt": "20260421",
+          "rcept_no": "20260421900365"
+        },
+        {
+          "report_nm": "정기주주총회결과              ",
+          "rcept_dt": "20260320",
+          "rcept_no": "20260320901605"
+        },
+        {
+          "report_nm": "의결권대리행사권유참고서류",
+          "rcept_dt": "20260305",
+          "rcept_no": "20260305001427"
+        },
+        {
+          "report_nm": "주주총회소집공고",
+          "rcept_dt": "20260305",
+          "rcept_no": "20260305001393"
+        },
+        {
+          "report_nm": "사업보고서 (2025.12)",
+          "rcept_dt": "20260305",
+          "rcept_no": "20260305001318"
+        },
+        {
+          "report_nm": "감사보고서제출              ",
+          "rcept_dt": "20260305",
+          "rcept_no": "20260305901191"
+        },
+        {
+          "report_nm": "주주총회소집결의              ",
+          "rcept_dt": "20260226",
+          "rcept_no": "20260226900948"
+        }
+      ],
+      "is_eligible": false,
+      "ineligible_reasons": [
+        "administrative_issue",
+        "liquidation_notice_flag",
+        "risk_disclosure:주권매매거래정지              (상장폐지 사유발생)"
       ]
     },
     {
@@ -6801,8 +8287,8 @@
       "ipo_price": 2000,
       "ipo_shares": 4000000,
       "ipo_amount": 8000000000,
-      "deposit_ratio": 0.0,
-      "deposit_principal": 13,
+      "deposit_ratio": null,
+      "deposit_principal": 520000000,
       "krx_listed_shares": 4520000,
       "krx_cross_check_match": true,
       "year1_deposit_rate": 3.1,
@@ -6930,7 +8416,9 @@
           "rcept_dt": "20260305",
           "rcept_no": "20260305001643"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0041L0",
@@ -6946,8 +8434,8 @@
       "ipo_price": 2000,
       "ipo_shares": 5500000,
       "ipo_amount": 11000000000,
-      "deposit_ratio": 0.0,
-      "deposit_principal": 13,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 6030000,
       "krx_cross_check_match": true,
       "year1_deposit_rate": 2.25,
@@ -7074,7 +8562,9 @@
           "rcept_dt": "20260226",
           "rcept_no": "20260226900363"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0101C0",
@@ -7090,8 +8580,8 @@
       "ipo_price": 2000,
       "ipo_shares": 7000000,
       "ipo_amount": 14000000000,
-      "deposit_ratio": 0.0,
-      "deposit_principal": 13,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 7740000,
       "krx_cross_check_match": true,
       "year1_deposit_rate": 2.4,
@@ -7216,7 +8706,9 @@
           "rcept_dt": "20260226",
           "rcept_no": "20260226901345"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "479880",
@@ -7231,11 +8723,11 @@
       "base_price": 2000,
       "ipo_price": 2000,
       "ipo_shares": 6250000,
-      "ipo_amount": 15,
-      "deposit_ratio": 666.67,
-      "deposit_principal": 100,
+      "ipo_amount": 12500000000,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 6870000,
-      "krx_cross_check_match": false,
+      "krx_cross_check_match": true,
       "year1_deposit_rate": 3.32,
       "year2_deposit_rate": 2.4,
       "year3_deposit_rate": null,
@@ -7360,7 +8852,9 @@
           "rcept_dt": "20250623",
           "rcept_no": "20250623900137"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0164H0",
@@ -7375,11 +8869,11 @@
       "base_price": 2000,
       "ipo_price": 2000,
       "ipo_shares": 5500000,
-      "ipo_amount": 16,
-      "deposit_ratio": 625.0,
-      "deposit_principal": 100,
+      "ipo_amount": 11000000000,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 6750000,
-      "krx_cross_check_match": false,
+      "krx_cross_check_match": true,
       "year1_deposit_rate": 3.0,
       "year2_deposit_rate": null,
       "year3_deposit_rate": null,
@@ -7497,7 +8991,9 @@
           "rcept_dt": "20260526",
           "rcept_no": "20260526000479"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     },
     {
       "code": "0200G0",
@@ -7512,11 +9008,11 @@
       "base_price": 2000,
       "ipo_price": 2000,
       "ipo_shares": 7000000,
-      "ipo_amount": 17,
-      "deposit_ratio": 588.24,
-      "deposit_principal": 100,
+      "ipo_amount": 14000000000,
+      "deposit_ratio": null,
+      "deposit_principal": null,
       "krx_listed_shares": 8700000,
-      "krx_cross_check_match": false,
+      "krx_cross_check_match": true,
       "year1_deposit_rate": 3.0,
       "year2_deposit_rate": null,
       "year3_deposit_rate": null,
@@ -7619,6 +9115,157 @@
           "rcept_dt": "20260814",
           "rcept_no": "20260814004091"
         }
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
+    },
+    {
+      "code": "498390",
+      "name": "한화플러스제5호스팩",
+      "market": "KOSDAQ",
+      "krx_dept": "SPAC(소속부없음)",
+      "listing_date": "2025-03-20",
+      "delisting_date": "2028-03-20",
+      "maturity_date": "2028-03-20",
+      "remaining_days": 481,
+      "corp_code": "01881800",
+      "base_price": 2000,
+      "ipo_price": 2000,
+      "ipo_shares": 4750000,
+      "ipo_amount": 9500000000,
+      "deposit_ratio": 100.0,
+      "deposit_principal": 9500000000,
+      "krx_listed_shares": 4960000,
+      "krx_cross_check_match": true,
+      "year1_deposit_rate": 2.83,
+      "year2_deposit_rate": 2.93,
+      "year3_deposit_rate": null,
+      "yearly_deposit_rates": [
+        2.83,
+        2.93,
+        null
+      ],
+      "deposit_interest_rate": 2.83,
+      "dart_deposit_rate": 2.83,
+      "dart_summary": "[20261111] 의결권대리행사권유참고서류 / [20261111] 주주총회소집공고 / [20261109] 분기보고서 (2026.09) / [20261030] [기재정정]주요사항보고서(회사합병결정) / [20261027] [기재정정]주요사항보고서(회사합병결정) / [20261027] [기재정정]주주총회소집결의              (임시주주총회) / [20261016] [기재정정]주요사항보고서(회사합병결정) / [20261016] [기재정정]주주총회소집결의              (임시주주총회)",
+      "prospectus_report": "[기재정정]투자설명서",
+      "trust_amendment_reports": [
+        "기업인수목적회사의예치ㆍ신탁계약내용변경              "
+      ],
+      "current_price": 1917,
+      "open_price": 1934,
+      "high_price": 1934,
+      "low_price": 1840,
+      "prev_diff": 80,
+      "chg_rate": 4.35,
+      "change_rate": 4.35,
+      "volume": 42505,
+      "trading_value": 79706409,
+      "market_cap": 9508320000,
+      "trade_date": "20261124",
+      "liquidation_price": 2120.62,
+      "liquidation_price_source": "공시공모가(2,000원)+공시예치이율산식(미정연차전년도가정)",
+      "liquidation_source": "공시공모가(2,000원)+공시예치이율산식(미정연차전년도가정)",
+      "liquidation_note": "※ 미정인 3년차 예치이자율은 직전 연도 수치로 가정하여 계산한 잠정 청산가입니다.",
+      "fair_buy_price": 2067.75,
+      "is_fair_buy": "O",
+      "invest_type": "합병",
+      "yield_isa": 7.59,
+      "yield_general": 6.42,
+      "simple_yield": 10.62,
+      "deposit_rate": 1.9881,
+      "deposit_rate_after_tax": 1.9881,
+      "deposit_rate_gross": 2.35,
+      "is_suspended": false,
+      "trading_on_krx": true,
+      "has_liquidation_notice": true,
+      "merger_status": "합병추진",
+      "merger_target": null,
+      "merger_approved_at": "2026-10-30",
+      "latest_report": "의결권대리행사권유참고서류",
+      "latest_report_date": "2026-11-11",
+      "status": "합병",
+      "recent_disclosures": [
+        {
+          "report_nm": "의결권대리행사권유참고서류",
+          "rcept_dt": "20261111",
+          "rcept_no": "20261111000160"
+        },
+        {
+          "report_nm": "주주총회소집공고",
+          "rcept_dt": "20261111",
+          "rcept_no": "20261111000154"
+        },
+        {
+          "report_nm": "분기보고서 (2026.09)",
+          "rcept_dt": "20261109",
+          "rcept_no": "20261109000307"
+        },
+        {
+          "report_nm": "[기재정정]주요사항보고서(회사합병결정)",
+          "rcept_dt": "20261030",
+          "rcept_no": "20261030000346"
+        },
+        {
+          "report_nm": "[기재정정]주요사항보고서(회사합병결정)",
+          "rcept_dt": "20261027",
+          "rcept_no": "20261027000380"
+        },
+        {
+          "report_nm": "[기재정정]주주총회소집결의              (임시주주총회)",
+          "rcept_dt": "20261027",
+          "rcept_no": "20261027900653"
+        },
+        {
+          "report_nm": "[기재정정]주요사항보고서(회사합병결정)",
+          "rcept_dt": "20261016",
+          "rcept_no": "20261016000273"
+        },
+        {
+          "report_nm": "[기재정정]주주총회소집결의              (임시주주총회)",
+          "rcept_dt": "20261016",
+          "rcept_no": "20261016900552"
+        },
+        {
+          "report_nm": "[기재정정]주요사항보고서(회사합병결정)",
+          "rcept_dt": "20261007",
+          "rcept_no": "20261007000082"
+        },
+        {
+          "report_nm": "[기재정정]주요사항보고서(회사합병결정)",
+          "rcept_dt": "20260929",
+          "rcept_no": "20260929000098"
+        },
+        {
+          "report_nm": "주주명부폐쇄기간또는기준일설정              ",
+          "rcept_dt": "20260929",
+          "rcept_no": "20260929900179"
+        },
+        {
+          "report_nm": "주주총회소집결의              (임시주주총회)",
+          "rcept_dt": "20260929",
+          "rcept_no": "20260929900166"
+        },
+        {
+          "report_nm": "주권매매거래정지해제              (상장예비심사결과 통지(승인))",
+          "rcept_dt": "20260928",
+          "rcept_no": "20260928900936"
+        },
+        {
+          "report_nm": "[기재정정]반기보고서 (2026.06)",
+          "rcept_dt": "20260928",
+          "rcept_no": "20260928000077"
+        },
+        {
+          "report_nm": "[기재정정]분기보고서 (2026.03)",
+          "rcept_dt": "20260928",
+          "rcept_no": "20260928000065"
+        }
+      ],
+      "is_eligible": false,
+      "ineligible_reasons": [
+        "liquidation_notice_flag",
+        "risk_disclosure:주권매매거래정지해제              (상장예비심사결과 통지(승인))"
       ]
     },
     {
@@ -7634,11 +9281,11 @@
       "base_price": 2000,
       "ipo_price": 2000,
       "ipo_shares": 6000000,
-      "ipo_amount": 1500000,
+      "ipo_amount": 12000000000,
       "deposit_ratio": 100.0,
-      "deposit_principal": 1500000,
+      "deposit_principal": 12000000000,
       "krx_listed_shares": 6410000,
-      "krx_cross_check_match": false,
+      "krx_cross_check_match": true,
       "year1_deposit_rate": 3.5,
       "year2_deposit_rate": null,
       "year3_deposit_rate": null,
@@ -7746,7 +9393,9 @@
           "rcept_dt": "20260327",
           "rcept_no": "20260327000778"
         }
-      ]
+      ],
+      "is_eligible": true,
+      "ineligible_reasons": []
     }
   ]
 }
