@@ -1,10 +1,11 @@
 {
-  "updated_at": "2026-11-25 13:57:18 KST",
+  "updated_at": "2026-11-25 16:34:53 KST",
   "trade_date": "20261124",
   "deposit_rate_gross": 2.35,
   "deposit_rate_after_tax": 1.9881,
   "summary": {
     "target_spac_count": 65,
+    "krx_dept_matched_raw": 64,
     "total_spac_count": 64,
     "total_candidates": 64,
     "eligible_count": 55,
@@ -3862,9 +3863,11 @@
       ],
       "deposit_interest_rate": 2.25,
       "dart_deposit_rate": 2.25,
-      "dart_summary": "[20261113] 분기보고서 (2026.09) / [20260814] 반기보고서 (2026.06) / [20260708] 주식등의대량보유상황보고서(약식) / [20260515] 분기보고서 (2026.03) / [20260512] 주식등의대량보유상황보고서(약식) / [20260317] 정기주주총회결과 / [20260309] 사업보고서 (2025.12) / [20260304] 감사보고서제출",
+      "dart_summary": "[20261125] 기업인수목적회사의예치ㆍ신탁계약내용변경 / [20261113] 분기보고서 (2026.09) / [20260814] 반기보고서 (2026.06) / [20260708] 주식등의대량보유상황보고서(약식) / [20260515] 분기보고서 (2026.03) / [20260512] 주식등의대량보유상황보고서(약식) / [20260317] 정기주주총회결과 / [20260309] 사업보고서 (2025.12)",
       "prospectus_report": "[기재정정]투자설명서",
-      "trust_amendment_reports": [],
+      "trust_amendment_reports": [
+        "기업인수목적회사의예치ㆍ신탁계약내용변경              "
+      ],
       "current_price": 1975,
       "open_price": 1985,
       "high_price": 1988,
@@ -3894,10 +3897,15 @@
       "merger_status": null,
       "merger_target": null,
       "merger_approved_at": null,
-      "latest_report": "분기보고서 (2026.09)",
-      "latest_report_date": "2026-11-13",
+      "latest_report": "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+      "latest_report_date": "2026-11-25",
       "status": "일반",
       "recent_disclosures": [
+        {
+          "report_nm": "기업인수목적회사의예치ㆍ신탁계약내용변경              ",
+          "rcept_dt": "20261125",
+          "rcept_no": "20261125900504"
+        },
         {
           "report_nm": "분기보고서 (2026.09)",
           "rcept_dt": "20261113",
@@ -3967,11 +3975,6 @@
           "report_nm": "주식등의대량보유상황보고서(일반)",
           "rcept_dt": "20251205",
           "rcept_no": "20251205000423"
-        },
-        {
-          "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
-          "rcept_dt": "20251201",
-          "rcept_no": "20251201000324"
         }
       ],
       "is_eligible": true,
