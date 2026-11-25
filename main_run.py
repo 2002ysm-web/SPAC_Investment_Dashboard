@@ -32,7 +32,6 @@ EXCLUDE_DELISTING_NOTICE = os.environ.get("EXCLUDE_DELISTING_NOTICE", "true").st
 }
 
 TARGET_SPAC_COUNT = int(os.environ.get("TARGET_SPAC_COUNT", "65"))
-
 EXCLUDED_SPAC_CODES: set[str] = set()
 
 KST = timezone(timedelta(hours=9))
@@ -52,6 +51,7 @@ DEPOSIT_AFTER_TAX_FACTOR = 1.0 - DEPOSIT_INTEREST_TAX_RATE
 FINAL_YEAR_TAX_FACTOR = 0.845
 FINAL_YEAR_MONTH_RATIO = 6.0 / 12.0
 MERGER_THRESHOLD_DAYS = 365
+DEFAULT_SPAC_IPO_PRICE = 2000
 
 DEFAULT_DEPOSIT_RATES: dict[str, float] = {
     "2024-01": 3.67, "2024-02": 3.63, "2024-03": 3.58, "2024-04": 3.53,
@@ -216,10 +216,22 @@ def add_years_safe(dt: datetime, years: int) -> datetime:
         return dt.replace(year=dt.year + years, month=2, day=28)
 
 
+def normalize_krx_dept(dept_val: Any) -> str:
+    return re.sub(r"\s+", "", str(dept_val or "").strip()).upper()
+
+
 def is_krx_spac_dept(dept_val: Any) -> bool:
-    """KRX 소속부('SPAC') 기준으로만 스팩 여부를 판별합니다."""
-    dept = str(dept_val or "").strip().upper()
-    return "SPAC" in dept
+    """KRX 종목정보 소속부가 SPAC(소속부 없음)에 해당하는 종목만 True를 반환합니다."""
+    norm_dept = normalize_krx_dept(dept_val)
+    return norm_dept in {"SPAC(소속부없음)", "SPAC"} or norm_dept.startswith("SPAC(")
+
+
+def sanitize_spac_ipo_price(val: Any) -> int | None:
+    """일반 스팩 공모가(1,000~5,000원) 범위 외 값(전환·행사가 등 오파싱 값)을 걸러냅니다."""
+    p = parse_krw_amount(val)
+    if p is not None and 1000 <= p <= 5000:
+        return p
+    return None
 
 
 # =========================
@@ -322,7 +334,7 @@ def get_base_deposit_rate(ref_dt: datetime | None = None) -> tuple[float, float,
 
 
 # =========================
-# 2. KRX API 연동 (소속부 SPAC 필터링)
+# 2. KRX API 연동 (소속부 SPAC(소속부 없음) 필터링)
 # =========================
 def _extract_rows(payload: Any) -> list[dict[str, Any]]:
     if isinstance(payload, list):
@@ -476,7 +488,7 @@ def _merge_quote_rows(
 
 def get_krx_spac_market_data(
     ref_dt: datetime,
-) -> tuple[list[dict], dict[str, dict[str, Any]], str]:
+) -> tuple[list[dict], dict[str, dict[str, Any]], str, int]:
     candidate_dates = [
         (ref_dt - timedelta(days=offset)).strftime("%Y%m%d")
         for offset in range(0, 12)
@@ -526,7 +538,7 @@ def get_krx_spac_market_data(
 
     base_info_map: dict[str, dict[str, Any]] = {}
     if used_date:
-        for mkt_id in ("KSQ", "STK"):
+        for mkt_id in ("KSQ", "STK", "ALL"):
             base_rows = _fetch_krx_web_bld_rows(
                 session, "dbms/MDC/STAT/standard/MDCSTAT01901", used_date, mkt_id
             )
@@ -534,11 +546,13 @@ def get_krx_spac_market_data(
                 c = normalize_code(r.get("ISU_SRT_CD") or r.get("종목코드"))
                 if not c:
                     continue
+                prev_b = base_info_map.get(c, {})
+                dept_val = str(r.get("SECT_TP_NM") or r.get("소속부") or prev_b.get("SECT_TP_NM") or "").strip()
                 base_info_map[c] = {
-                    "SECT_TP_NM": str(r.get("SECT_TP_NM") or r.get("소속부") or "").strip(),
-                    "LIST_DD": str(r.get("LIST_DD") or r.get("상장일") or "").strip(),
-                    "LIST_SHRS": parse_krw_int(r.get("LIST_SHRS") or r.get("상장주식수")),
-                    "PARVAL": parse_krw_int(r.get("PARVAL") or r.get("액면가")),
+                    "SECT_TP_NM": dept_val,
+                    "LIST_DD": str(r.get("LIST_DD") or r.get("상장일") or prev_b.get("LIST_DD") or "").strip(),
+                    "LIST_SHRS": parse_krw_int(r.get("LIST_SHRS") or r.get("상장주식수")) or prev_b.get("LIST_SHRS", 0),
+                    "PARVAL": parse_krw_int(r.get("PARVAL") or r.get("액면가")) or prev_b.get("PARVAL", 0),
                 }
 
     info_by_code: dict[str, dict[str, Any]] = {}
@@ -558,7 +572,7 @@ def get_krx_spac_market_data(
 
     all_codes: list[str] = []
     seen_all_codes: set[str] = set()
-    for src in (info_rows, trade_rows, web_ksq_rows, web_stk_rows):
+    for src in (base_info_map.values(), info_rows, trade_rows, web_ksq_rows, web_stk_rows):
         for r in src:
             c = normalize_code(
                 r.get("ISU_SRT_CD") or r.get("종목코드") or r.get("ISU_CD") or r.get("code")
@@ -569,6 +583,7 @@ def get_krx_spac_market_data(
 
     spacs: list[dict] = []
     seen_codes: set[str] = set()
+    dept_matched_raw = 0
 
     for code in all_codes:
         if code in seen_codes or code in EXCLUDED_SPAC_CODES:
@@ -583,9 +598,9 @@ def get_krx_spac_market_data(
             or ""
         ).strip()
 
-        # KRX 소속부 'SPAC' 기준으로만 필터링
         if not is_krx_spac_dept(dept):
             continue
+        dept_matched_raw += 1
 
         name = str(
             info.get("ISU_ABBRV")
@@ -621,10 +636,10 @@ def get_krx_spac_market_data(
         })
 
     print(
-        f"[INFO] KRX 기준일={used_date or '미확인'}, 소속부 SPAC 필터링={len(spacs)}개 "
-        f"(목표={TARGET_SPAC_COUNT}개)"
+        f"[INFO] KRX 기준일={used_date or '미확인'}, 소속부 SPAC(소속부 없음)={len(spacs)}개 "
+        f"(목표={TARGET_SPAC_COUNT}개, 전체KRX종목={len(all_codes)}개)"
     )
-    return spacs, quote_by_code, used_date
+    return spacs, quote_by_code, used_date, dept_matched_raw
 
 
 def get_krx_quote_and_base(
@@ -797,16 +812,17 @@ def parse_prospectus_details(text: str) -> dict[str, Any]:
         return out
 
     price_patterns = [
-        r"(?:1주당\s*모집가액|모집가액|공모가액|공모가격|확정\s*공모가|공모가|발행가액)[^0-9]{0,20}([1-9][0-9,]{2,5})\s*원",
-        r"주당\s*(?:공모가|발행가|모집가)[^0-9]{0,20}([1-9][0-9,]{2,5})\s*원",
+        r"(?:1주당\s*모집가액|모집가액|공모가액|공모가격|확정\s*공모가|공모가|발행가액)[^0-9]{0,20}([1-9][0-9,]{2,4})\s*원",
+        r"주당\s*(?:공모가|발행가|모집가)[^0-9]{0,20}([1-9][0-9,]{2,4})\s*원",
     ]
     for pat in price_patterns:
-        m_price = re.search(pat, text)
-        if m_price:
-            p_val = parse_krw_amount(m_price.group(1))
-            if p_val is not None and 500 <= p_val <= 100000:
+        for m_price in re.finditer(pat, text):
+            p_val = sanitize_spac_ipo_price(m_price.group(1))
+            if p_val is not None:
                 out["ipo_price"] = p_val
                 break
+        if out["ipo_price"] is not None:
+            break
 
     shares_patterns = [
         r"(?:총\s*공모주식수|모집주식수|공모주식수|모집할\s*주식수|발행주식수)[^0-9]{0,20}([0-9][0-9,.]*(?:\s*(?:만|천))?\s*주)",
@@ -835,8 +851,8 @@ def parse_prospectus_details(text: str) -> dict[str, Any]:
     elif out["ipo_shares"] is None and out["ipo_amount"] and out["ipo_price"]:
         out["ipo_shares"] = round(out["ipo_amount"] / out["ipo_price"])
     elif out["ipo_price"] is None and out["ipo_amount"] and out["ipo_shares"]:
-        cand_price = round(out["ipo_amount"] / out["ipo_shares"])
-        if 500 <= cand_price <= 100000:
+        cand_price = sanitize_spac_ipo_price(round(out["ipo_amount"] / out["ipo_shares"]))
+        if cand_price is not None:
             out["ipo_price"] = cand_price
 
     m_ratio = re.search(
@@ -1064,17 +1080,15 @@ def cross_verify_spac_inputs(
     prev_rec: dict[str, Any],
 ) -> dict[str, Any]:
     krx_shares = parse_share_count(spac.get("krx_listed_shares") or market_meta.get("listed_shares"))
-    krx_par = parse_krw_amount(spac.get("krx_par_value") or market_meta.get("par_value"))
+    krx_par = sanitize_spac_ipo_price(spac.get("krx_par_value") or market_meta.get("par_value"))
 
-    ipo_price = parse_krw_amount(dart_terms.get("ipo_price"))
-    if ipo_price is None and krx_par and 500 <= krx_par <= 100000:
+    ipo_price = sanitize_spac_ipo_price(dart_terms.get("ipo_price"))
+    if ipo_price is None and krx_par is not None:
         ipo_price = krx_par
     if ipo_price is None:
-        prev_p = parse_krw_amount(prev_rec.get("ipo_price"))
-        if prev_p and 500 <= prev_p <= 100000:
-            ipo_price = prev_p
+        ipo_price = sanitize_spac_ipo_price(prev_rec.get("ipo_price"))
     if ipo_price is None:
-        ipo_price = 2000
+        ipo_price = DEFAULT_SPAC_IPO_PRICE
 
     ipo_shares = parse_share_count(dart_terms.get("ipo_shares"))
     if ipo_shares is None:
@@ -1150,9 +1164,9 @@ def extract_unit_price(text: str, base_price: int | None = None) -> int | None:
     clean_text = clean_html_text(text)
     if not clean_text:
         return None
-    ref_base = base_price if (base_price and base_price > 0) else 2000
-    min_plausible = max(1000, int(ref_base * 0.8))
-    max_plausible = int(ref_base * 1.25)
+    ref_base = sanitize_spac_ipo_price(base_price) or DEFAULT_SPAC_IPO_PRICE
+    min_plausible = max(1000, int(ref_base * 0.85))
+    max_plausible = int(ref_base * 1.15)
 
     patterns = [
         r"(?:1주당\s*청산\s*분배금|1주당\s*해산\s*분배금|주당\s*청산\s*분배금|주당\s*해산\s*분배금|청산\s*분배금|해산\s*분배금)[^0-9원]{0,20}([1-9][0-9,]{2,4})\s*원(?!\s*(?:만|억|조|주|명))",
@@ -1263,7 +1277,8 @@ def resolve_liquidation_price(
     verified: dict[str, Any],
     deposit_rate_after_tax: float,
 ) -> tuple[float | None, int | None, str, str | None]:
-    base_price = int(verified.get("ipo_price") or 2000)
+    base_price = sanitize_spac_ipo_price(verified.get("ipo_price")) or DEFAULT_SPAC_IPO_PRICE
+    max_liq = base_price * 1.15
     y1 = verified.get("year1_deposit_rate")
     y2 = verified.get("year2_deposit_rate")
     y3 = verified.get("year3_deposit_rate")
@@ -1275,17 +1290,17 @@ def resolve_liquidation_price(
     for d in liq_docs:
         title = d.get("report_nm", "")
         price = extract_unit_price(title, base_price=base_price)
-        if price is not None:
+        if price is not None and price <= max_liq:
             return float(price), base_price, f"공시제목:{title}", None
     for d in liq_docs[:2]:
         if not d.get("rcept_no"):
             continue
         doc_text = fetch_document_text(d["rcept_no"], max_files=15)
         price = extract_unit_price(doc_text, base_price=base_price)
-        if price is not None:
+        if price is not None and price <= max_liq:
             return float(price), base_price, f"공시본문:{d.get('report_nm', '')}", None
 
-    if base_price > 0 and y1 is not None:
+    if y1 is not None:
         assumed_years: list[str] = []
         calc_y1 = float(y1)
         if y2 is not None:
@@ -1310,6 +1325,15 @@ def resolve_liquidation_price(
             r2=r2_eff,
             r3=r3_eff,
         )
+        if liq_unit > max_liq:
+            liq_unit = calc_sheet_liquidation_unit_price(
+                base_price=base_price,
+                r1=deposit_rate_after_tax,
+                r2=deposit_rate_after_tax,
+                r3=deposit_rate_after_tax,
+            )
+            return liq_unit, base_price, f"공시공모가({base_price:,}원)+기준예금금리산식(이율이상치보정)", None
+
         if assumed_years:
             note = (
                 f"※ 미정인 {'·'.join(assumed_years)} 예치이자율은 직전 연도 수치로 가정하여 계산한 "
@@ -1318,17 +1342,14 @@ def resolve_liquidation_price(
             return liq_unit, base_price, f"공시공모가({base_price:,}원)+공시예치이율산식(미정연차전년도가정)", note
         return liq_unit, base_price, f"공시공모가({base_price:,}원)+공시예치이율산식", None
 
-    if base_price > 0:
-        liq_unit = calc_sheet_liquidation_unit_price(
-            base_price=base_price,
-            r1=deposit_rate_after_tax,
-            r2=deposit_rate_after_tax,
-            r3=deposit_rate_after_tax,
-        )
-        note = "※ 미정인 예치이자율은 기준 예금금리로 가정하여 계산한 잠정 청산가입니다."
-        return liq_unit, base_price, f"공시공모가({base_price:,}원)+기준예금금리산식", note
-
-    return None, base_price, "공시미확인", None
+    liq_unit = calc_sheet_liquidation_unit_price(
+        base_price=base_price,
+        r1=deposit_rate_after_tax,
+        r2=deposit_rate_after_tax,
+        r3=deposit_rate_after_tax,
+    )
+    note = "※ 미정인 예치이자율은 기준 예금금리로 가정하여 계산한 잠정 청산가입니다."
+    return liq_unit, base_price, f"공시공모가({base_price:,}원)+기준예금금리산식", note
 
 
 def extract_liquidation_record(spac: dict, disclosures: list[dict], base_price: int | None) -> dict | None:
@@ -1430,7 +1451,7 @@ def calc_fair_buy_status(
 
 
 def is_liquidation_type_fit(record: dict[str, Any], deposit_benchmark_rate: float) -> bool:
-    """청산형: 매수적정(O) + 수익률 예금금리 이상 + 청산까지 잔존일 수 1년(365일) 이내"""
+    """청산형: 매수적정(O) + 잔존일 수 1년(365일) 이내 + 수익률 예금금리 이상"""
     if record.get("is_fair_buy") != "O":
         return False
     rem_days = record.get("remaining_days")
@@ -1448,7 +1469,7 @@ def is_liquidation_type_fit(record: dict[str, Any], deposit_benchmark_rate: floa
 
 
 def is_merger_type_fit(record: dict[str, Any]) -> bool:
-    """합병형: 매수적정(O) + 수익률 0% 이상 + 청산까지 잔존일 수 1년(365일) 초과"""
+    """합병형: 매수적정(O) + 잔존일 수 1년(365일) 초과 + 수익률 0% 이상"""
     if record.get("is_fair_buy") != "O":
         return False
     rem_days = record.get("remaining_days")
@@ -1737,10 +1758,10 @@ def main() -> None:
     try:
         deposit_rate_after_tax, deposit_rate_gross, _ = get_base_deposit_rate(now_kst)
         corp_codes = get_dart_corp_codes()
-        spac_list, quote_by_code, trade_date = get_krx_spac_market_data(ref_dt)
+        spac_list, quote_by_code, trade_date, dept_matched_raw = get_krx_spac_market_data(ref_dt)
 
         if not spac_list:
-            print("[WARN] KRX SPAC 종목이 비어 있음 — 기존 데이터 유지")
+            print("[WARN] KRX SPAC(소속부 없음) 종목이 비어 있음 — 기존 데이터 유지")
             save_json(existing_spacs, OUTPUT_PATH, updated_at)
             save_json(existing_liqs, LIQUIDATIONS_PATH, updated_at)
             return
@@ -1785,6 +1806,7 @@ def main() -> None:
             "deposit_rate_after_tax": deposit_rate_after_tax,
             "summary": {
                 "target_spac_count": TARGET_SPAC_COUNT,
+                "krx_dept_matched_raw": dept_matched_raw,
                 "total_spac_count": len(spac_results),
                 "total_candidates": len(spac_results),
                 "eligible_count": len(eligible_items),
@@ -1799,7 +1821,7 @@ def main() -> None:
         save_json(liq_results, LIQUIDATIONS_PATH, updated_at)
 
         print(
-            f"[DONE] 전체스팩={len(spac_results)}개 (적격={len(eligible_items)}개) | "
+            f"[DONE] 전체스팩={len(spac_results)}개 (소속부매칭={dept_matched_raw}개, 적격={len(eligible_items)}개) | "
             f"청산형(잔존365일이내+매수적정+예금이상)={len(liquidation_type_items)}개 | "
             f"합병형(잔존365일초과+매수적정+0%이상)={len(merger_type_items)}개 | "
             f"매수적정O={fair_o_cnt}개"
