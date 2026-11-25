@@ -732,7 +732,6 @@ def get_recent_dart_disclosures(corp_code: str, days: int = 1460) -> list[dict]:
 def clean_html_text(text: str) -> str:
     if not text:
         return ""
-    # 표 셀/행 구분자를 유지하기 위해 닫는 td/th/tr 태그에 공백 및 파이프 구분자 부여
     clean = re.sub(r"</(?:td|th)\s*>", " | ", text, flags=re.IGNORECASE)
     clean = re.sub(r"</?(?:tr|p|div|li|br)\b[^>]*>", " ", clean, flags=re.IGNORECASE)
     clean = re.sub(r"<[^>]+>", " ", clean)
@@ -761,7 +760,7 @@ def _decode_doc_bytes(raw: bytes) -> str:
         return raw.decode("euc-kr", errors="ignore")
 
 
-def fetch_document_text(rcept_no: str, max_files: int = 30, keywords: tuple[str, ...] = ()) -> str:
+def fetch_document_text(rcept_no: str, max_files: int = 35, keywords: tuple[str, ...] = ()) -> str:
     """DART 문서 ZIP에서 본문 XML/HTML을 읽어 문자열로 반환합니다."""
     if not DART_API_KEY or not rcept_no:
         return ""
@@ -894,8 +893,8 @@ def parse_prospectus_details(text: str) -> dict[str, Any]:
     # 5. 1년차 예치이자율
     # ('제1부 모집 또는 매출에 관한 사항' -> '그 밖에 투자자보호를 위해 필요한 사항' -> '1주당 지급 예상금액' 라항 등 우선 탐색)
     y1_patterns = [
-        r"1주당\s*지급\s*예상금액[^%\d]{0,220}(?:이자율|이율|금리|예치|신탁)[^%\d]{0,35}(?:연\s*)?([0-9]+(?:\.[0-9]+)?)\s*%",
-        r"투자자보호를\s*위해\s*필요한\s*사항[^%\d]{0,300}(?:1주당\s*지급\s*예상금액|예치|이자율|이율|금리)[^%\d]{0,40}(?:연\s*)?([0-9]+(?:\.[0-9]+)?)\s*%",
+        r"1주당\s*지급\s*예상금액.{0,350}?(?:이자율|이율|금리|예치|신탁)[^%\d]{0,40}(?:연\s*)?([0-9]+(?:\.[0-9]+)?)\s*%",
+        r"투자자보호를\s*위해\s*필요한\s*사항.{0,450}?(?:1주당\s*지급\s*예상금액|예치|이자율|이율|금리)[^%\d]{0,45}(?:연\s*)?([0-9]+(?:\.[0-9]+)?)\s*%",
         r"(?:1년차|1차년도|최초\s*1년|1년\s*예치)[^%\d]{0,35}(?:연\s*)?([0-9]+(?:\.[0-9]+)?)\s*%",
         r"(?:예치이자율|예치이율|신탁이자율|예치금리|약정이자율|이자율)[^%\d]{0,30}(?:연\s*)?([0-9]+(?:\.[0-9]+)?)\s*%",
     ]
@@ -912,41 +911,57 @@ def parse_prospectus_details(text: str) -> dict[str, Any]:
 
 def parse_trust_amendment_rates(text: str) -> dict[int, float]:
     """'기업인수목적회사의 예치·신탁 계약 내용 변경' 공시에서 연차별(1, 2, 3년차) 예치이자율 파싱.
-    변경전(1년차) 및 변경후(2년차 등) 이자율을 추출합니다.
+    변경전(1년차)과 변경후(2년차 등) 이자율이 한 칸씩 밀리지 않도록 표/라벨 구조를 분리하여 추출합니다.
     """
     found: dict[int, float] = {}
     if not text:
         return found
 
-    # 변경전 / 전년도 / 1년차
-    m_prev = re.search(
-        r"(?:변경\s*전|기존|전년도|직전\s*연도|1년차|1차년도)[^%\d]{0,40}(?:연\s*)?([0-9]+(?:\.[0-9]+)?)\s*%",
+    # 1) 표 형태에서 '변경전 | 변경후' 헤더 이후 '이자율/이율/금리 | 3.30% | 2.82%' 순서로 나오는 경우
+    m_table_pair = re.search(
+        r"변경\s*전\s*\|\s*변경\s*후.{0,260}?(?:이자율|이율|금리)[^%\d]{0,40}(?:연\s*)?([0-9]+(?:\.[0-9]+)?)\s*%\s*\|\s*(?:연\s*)?([0-9]+(?:\.[0-9]+)?)\s*%",
         text,
     )
-    if m_prev:
-        v1 = _parse_rate_value(m_prev.group(1))
+    if m_table_pair:
+        v1 = _parse_rate_value(m_table_pair.group(1))
+        v2 = _parse_rate_value(m_table_pair.group(2))
         if v1 is not None:
             found[1] = v1
-
-    # 변경후 / 당해 연도 / 2년차
-    m_next = re.search(
-        r"(?:변경\s*후|신규|당해\s*연도|2년차|2차년도)[^%\d]{0,40}(?:연\s*)?([0-9]+(?:\.[0-9]+)?)\s*%",
-        text,
-    )
-    if m_next:
-        v2 = _parse_rate_value(m_next.group(1))
         if v2 is not None:
             found[2] = v2
 
+    # 2) 명시적 연차 표기 (1년차, 2년차, 3년차)
     for yr in (1, 2, 3):
+        other_years = "|".join(str(y) for y in (1, 2, 3) if y != yr)
         re_yr = re.search(
-            rf"(?:{yr}년차|{yr}차년도|제{yr}차)[^%\d]{{0,30}}(?:연\s*)?([0-9]+(?:\.[0-9]+)?)\s*%",
+            rf"(?:{yr}년차|{yr}차년도|제{yr}차)(?:(?!(?:{other_years})년차|변경\s*전|변경\s*후)[^%\d]){{0,35}}(?:연\s*)?([0-9]+(?:\.[0-9]+)?)\s*%",
             text,
         )
         if re_yr:
             vy = _parse_rate_value(re_yr.group(1))
             if vy is not None:
                 found[yr] = vy
+
+    # 3) 개별 '변경전' / '변경후' 라벨 (상대 라벨을 침범하지 않도록 경계 제한)
+    if 1 not in found:
+        m_prev = re.search(
+            r"(?:변경\s*전|기존|전년도|직전\s*연도)(?:(?!변경\s*후|신규|2년차|3년차)[^%\d]){0,45}(?:연\s*)?([0-9]+(?:\.[0-9]+)?)\s*%",
+            text,
+        )
+        if m_prev:
+            v1 = _parse_rate_value(m_prev.group(1))
+            if v1 is not None:
+                found[1] = v1
+
+    if 2 not in found:
+        m_next = re.search(
+            r"(?:변경\s*후|신규|당해\s*연도)(?:(?!변경\s*전|기존|1년차|3년차)[^%\d]){0,45}(?:연\s*)?([0-9]+(?:\.[0-9]+)?)\s*%",
+            text,
+        )
+        if m_next:
+            v2 = _parse_rate_value(m_next.group(1))
+            if v2 is not None:
+                found[2] = v2
 
     return found
 
@@ -989,7 +1004,7 @@ def extract_dart_spac_terms(disclosures: list[dict[str, Any]]) -> dict[str, Any]
     for doc in offering_docs[:2]:
         text = fetch_document_text(
             doc["rcept_no"],
-            max_files=35,
+            max_files=40,
             keywords=(
                 "모집가액",
                 "공모가",
@@ -1017,13 +1032,14 @@ def extract_dart_spac_terms(disclosures: list[dict[str, Any]]) -> dict[str, Any]
         ):
             break
 
-    # 2) '기업인수목적회사의 예치·신탁 계약 내용 변경' 공시 조회 (과거 -> 최신순 반영)
+    # 2) '기업인수목적회사의 예치·신탁 계약 내용 변경' 및 관련 예치·신탁 공시 조회 (원본 조건 유지)
     amend_list = [
         d for d in disclosures
         if d.get("rcept_no")
-        and ("예치" in str(d.get("report_nm") or ""))
-        and ("신탁" in str(d.get("report_nm") or ""))
-        and ("변경" in str(d.get("report_nm") or ""))
+        and (
+            (("예치" in str(d.get("report_nm") or "")) and ("신탁" in str(d.get("report_nm") or "")))
+            or ("예치금" in str(d.get("report_nm") or ""))
+        )
     ]
     amend_list.sort(key=lambda x: str(x.get("rcept_dt") or ""))
 
@@ -1033,10 +1049,9 @@ def extract_dart_spac_terms(disclosures: list[dict[str, Any]]) -> dict[str, Any]
         a_text = fetch_document_text(
             a_doc["rcept_no"],
             max_files=25,
-            keywords=("변경전", "변경 전", "변경후", "변경 후", "이자율", "이율", "금리", "년차"),
+            keywords=("변경전", "변경 전", "변경후", "변경 후", "이자율", "이율", "금리", "년차", "변경"),
         )
         a_rates = parse_trust_amendment_rates(a_text)
-        # 변경 공시에서 1년차(변경전) 이자율이 확인되면 이를 우선 반영 (투자설명서와 같으면 유지, 다르면 변경 반영)
         if 1 in a_rates:
             terms["amendment_year1_rate"] = a_rates[1]
         if 2 in a_rates:
@@ -1044,6 +1059,7 @@ def extract_dart_spac_terms(disclosures: list[dict[str, Any]]) -> dict[str, Any]
         if 3 in a_rates:
             terms["year3_deposit_rate"] = a_rates[3]
 
+    # 계약 내용 변경 공시의 1년차(변경전) 이자율과 투자설명서 1년차 이자율 비교 반영
     if terms["amendment_year1_rate"] is not None:
         terms["year1_deposit_rate"] = terms["amendment_year1_rate"]
     elif terms["prospectus_year1_rate"] is not None:
@@ -1057,89 +1073,15 @@ def extract_dart_spac_terms(disclosures: list[dict[str, Any]]) -> dict[str, Any]
     return terms
 
 
-def resolve_yearly_rates_with_carryforward(
-    dart_terms: dict[str, Any],
-    prev_rec: dict[str, Any],
-) -> dict[str, Any]:
-    """1·2·3년차 예치이자율을 산출합니다.
-    - 1년차: 계약내용변경(1년차/변경전) > 투자설명서(1년차) > 기존 저장값 순 반영
-    - 2년차/3년차: 공시 확정값이 없으면 직전 연차(2년차<-1년차, 3년차<-2년차 또는 1년차) 이자율을
-      잠정 반영해 임시 청산가를 산출하고, 공시에서 해당 연차 이자율이 확인되면 공시 값으로 대체합니다.
-    """
-    prev_meta = prev_rec.get("deposit_rate_meta") if isinstance(prev_rec.get("deposit_rate_meta"), dict) else {}
-
-    y1 = _parse_rate_value(dart_terms.get("year1_deposit_rate"))
-    y1_is_provisional = False
-    y1_source = (
-        "dart_amendment_y1"
-        if dart_terms.get("amendment_year1_rate") is not None
-        else "dart_prospectus_y1"
-    )
-    if y1 is None:
-        prev_y1 = _parse_rate_value(prev_rec.get("year1_deposit_rate"))
-        if prev_y1 is not None:
-            y1 = prev_y1
-            y1_is_provisional = bool(prev_meta.get("year1_provisional", False))
-            y1_source = str(prev_meta.get("year1_source") or "previous_record")
-
-    # 2년차: 공시 확정값 우선, 없으면 1년차 잠정 반영
-    raw_y2 = _parse_rate_value(dart_terms.get("year2_deposit_rate"))
-    if raw_y2 is not None:
-        y2 = raw_y2
-        y2_is_provisional = False
-        y2_source = "dart_amendment_y2"
-    elif y1 is not None:
-        y2 = y1
-        y2_is_provisional = True
-        y2_source = "provisional_from_year1"
-    else:
-        y2 = None
-        y2_is_provisional = False
-        y2_source = "unconfirmed"
-
-    # 3년차: 공시 확정값 우선, 없으면 직전 연차(2년차 -> 1년차) 잠정 반영
-    raw_y3 = _parse_rate_value(dart_terms.get("year3_deposit_rate"))
-    if raw_y3 is not None:
-        y3 = raw_y3
-        y3_is_provisional = False
-        y3_source = "dart_amendment_y3"
-    elif y2 is not None:
-        y3 = y2
-        y3_is_provisional = True
-        y3_source = "provisional_from_year2"
-    elif y1 is not None:
-        y3 = y1
-        y3_is_provisional = True
-        y3_source = "provisional_from_year1"
-    else:
-        y3 = None
-        y3_is_provisional = False
-        y3_source = "unconfirmed"
-
-    return {
-        "year1_deposit_rate": y1,
-        "year2_deposit_rate": y2,
-        "year3_deposit_rate": y3,
-        "yearly_deposit_rates": [y1, y2, y3],
-        "deposit_rate_meta": {
-            "year1_source": y1_source if y1 is not None else "unconfirmed",
-            "year1_provisional": y1_is_provisional,
-            "year2_source": y2_source,
-            "year2_provisional": y2_is_provisional,
-            "year3_source": y3_source,
-            "year3_provisional": y3_is_provisional,
-            "has_provisional_rate": bool(y1_is_provisional or y2_is_provisional or y3_is_provisional),
-        },
-    }
-
-
 def cross_verify_spac_inputs(
     spac: dict[str, Any],
     market_meta: dict[str, Any],
     dart_terms: dict[str, Any],
     prev_rec: dict[str, Any],
 ) -> dict[str, Any]:
-    """KRX SPAC 정보와 DART 공시 파싱 결과를 교차 검증합니다. (미확인 정보는 임의 추산하지 않음)"""
+    """KRX SPAC 정보와 DART 공시 파싱 결과를 교차 검증합니다.
+    (미정인 2년차·3년차 예치이자율은 값을 채워 넣지 않고 None으로 유지합니다.)
+    """
     krx_shares = parse_share_count(spac.get("krx_listed_shares") or market_meta.get("listed_shares"))
     krx_par = parse_krw_amount(spac.get("krx_par_value") or market_meta.get("par_value"))
 
@@ -1183,7 +1125,17 @@ def cross_verify_spac_inputs(
     if ipo_amount and ipo_price and ipo_shares:
         cross_check_match = (ipo_price * ipo_shares) == ipo_amount
 
-    rate_info = resolve_yearly_rates_with_carryforward(dart_terms, prev_rec)
+    y1 = _parse_rate_value(dart_terms.get("year1_deposit_rate"))
+    if y1 is None and prev_rec.get("year1_deposit_rate") is not None:
+        y1 = _parse_rate_value(prev_rec.get("year1_deposit_rate"))
+
+    y2 = _parse_rate_value(dart_terms.get("year2_deposit_rate"))
+    if y2 is None and prev_rec.get("year2_deposit_rate") is not None:
+        y2 = _parse_rate_value(prev_rec.get("year2_deposit_rate"))
+
+    y3 = _parse_rate_value(dart_terms.get("year3_deposit_rate"))
+    if y3 is None and prev_rec.get("year3_deposit_rate") is not None:
+        y3 = _parse_rate_value(prev_rec.get("year3_deposit_rate"))
 
     return {
         "ipo_price": ipo_price,
@@ -1193,7 +1145,10 @@ def cross_verify_spac_inputs(
         "deposit_principal": deposit_principal,
         "krx_listed_shares": krx_shares,
         "krx_cross_check_match": cross_check_match,
-        **rate_info,
+        "year1_deposit_rate": y1,
+        "year2_deposit_rate": y2,
+        "year3_deposit_rate": y3,
+        "yearly_deposit_rates": [y1, y2, y3],
     }
 
 
@@ -1310,18 +1265,21 @@ def resolve_liquidation_price(
     disclosures: list[dict],
     verified: dict[str, Any],
     deposit_rate_after_tax: float,
-) -> tuple[float | None, int | None, str]:
+) -> tuple[float | None, int | None, str, str | None]:
+    """청산가 산출:
+    - 2년차/3년차 예치이자율이 미정(None)인 경우 저장 필드는 None으로 두되,
+      청산가 계산 시에만 직전 연차 예치이자율을 가정하여 산출하고 하단 주석(liquidation_note)을 남깁니다.
+    """
     base_price = verified.get("ipo_price")
     y1 = verified.get("year1_deposit_rate")
     y2 = verified.get("year2_deposit_rate")
     y3 = verified.get("year3_deposit_rate")
-    rate_meta = verified.get("deposit_rate_meta") or {}
 
     for d in disclosures:
         title = d.get("report_nm", "")
         price = extract_unit_price(title)
         if price is not None:
-            return float(price), base_price, f"공시제목:{title}"
+            return float(price), base_price, f"공시제목:{title}", None
 
     liq_docs = [
         d for d in disclosures
@@ -1331,20 +1289,40 @@ def resolve_liquidation_price(
         doc_text = fetch_document_text(d["rcept_no"], max_files=10)
         price = extract_unit_price(doc_text)
         if price is not None:
-            return float(price), base_price, f"공시본문:{d.get('report_nm', '')}"
+            return float(price), base_price, f"공시본문:{d.get('report_nm', '')}", None
 
     if base_price is not None and base_price > 0 and y1 is not None:
-        r1_eff = float(y1) * DEPOSIT_AFTER_TAX_FACTOR
-        r2_eff = float(y2) * DEPOSIT_AFTER_TAX_FACTOR if y2 is not None else None
-        r3_eff = float(y3) * DEPOSIT_AFTER_TAX_FACTOR if y3 is not None else None
+        assumed_years: list[str] = []
+        calc_y1 = float(y1)
+        if y2 is not None:
+            calc_y2 = float(y2)
+        else:
+            calc_y2 = calc_y1
+            assumed_years.append("2년차")
+
+        if y3 is not None:
+            calc_y3 = float(y3)
+        else:
+            calc_y3 = calc_y2
+            assumed_years.append("3년차")
+
+        r1_eff = calc_y1 * DEPOSIT_AFTER_TAX_FACTOR
+        r2_eff = calc_y2 * DEPOSIT_AFTER_TAX_FACTOR
+        r3_eff = calc_y3 * DEPOSIT_AFTER_TAX_FACTOR
+
         liq_unit = calc_sheet_liquidation_unit_price(
             base_price=int(base_price),
             r1=r1_eff,
             r2=r2_eff,
             r3=r3_eff,
         )
-        suffix = "(잠정금리반영)" if rate_meta.get("has_provisional_rate") else "(확정공시금리반영)"
-        return liq_unit, int(base_price), f"공시공모가({int(base_price):,}원)+공시예치이율산식{suffix}"
+        if assumed_years:
+            note = (
+                f"※ 미정인 {'·'.join(assumed_years)} 예치이자율은 직전 연도 수치로 가정하여 계산한 "
+                "잠정 청산가이며, 추후 공시 시 확정 금리로 대체됩니다."
+            )
+            return liq_unit, int(base_price), f"공시공모가({int(base_price):,}원)+공시예치이율산식(미정연차전년도가정)", note
+        return liq_unit, int(base_price), f"공시공모가({int(base_price):,}원)+공시예치이율산식", None
 
     if base_price is not None and base_price > 0:
         liq_unit = calc_sheet_liquidation_unit_price(
@@ -1353,9 +1331,10 @@ def resolve_liquidation_price(
             r2=deposit_rate_after_tax,
             r3=deposit_rate_after_tax,
         )
-        return liq_unit, int(base_price), f"공시공모가({int(base_price):,}원)+기준예금금리산식"
+        note = "※ 공시 예치이자율 미확인으로 기준 예금금리를 가정하여 계산한 잠정 청산가입니다."
+        return liq_unit, int(base_price), f"공시공모가({int(base_price):,}원)+기준예금금리산식", note
 
-    return None, base_price, "공시미확인"
+    return None, base_price, "공시미확인", None
 
 
 def extract_liquidation_record(spac: dict, disclosures: list[dict]) -> dict | None:
@@ -1572,7 +1551,7 @@ def build_spac_record(
     listing_date = spac.get("listing_date") or str(prev_rec.get("listing_date") or "")
     delisting_date = infer_delisting_date(listing_date) or str(prev_rec.get("delisting_date") or "")
 
-    s_liq_price, c_base_price, liq_source = resolve_liquidation_price(
+    s_liq_price, c_base_price, liq_source, liq_note = resolve_liquidation_price(
         disclosures, verified, deposit_rate_after_tax
     )
     liq_record = extract_liquidation_record(spac, disclosures)
@@ -1648,7 +1627,6 @@ def build_spac_record(
         "year2_deposit_rate": verified.get("year2_deposit_rate"),
         "year3_deposit_rate": verified.get("year3_deposit_rate"),
         "yearly_deposit_rates": verified.get("yearly_deposit_rates"),
-        "deposit_rate_meta": verified.get("deposit_rate_meta"),
         "deposit_interest_rate": effective_deposit_rate,
         "dart_deposit_rate": effective_y1,
         "dart_summary": dart_summary,
@@ -1668,6 +1646,7 @@ def build_spac_record(
         "liquidation_price": liq_display,
         "liquidation_price_source": liq_source,
         "liquidation_source": liq_source,
+        "liquidation_note": liq_note,
         "fair_buy_price": fair_buy_price,
         "is_fair_buy": is_fair_buy,
         "invest_type": invest_type,
