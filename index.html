@@ -48,7 +48,6 @@
                 </div>
             </div>
             <div class="flex items-center gap-3 flex-wrap">
-                <!-- 탭 전환 버튼 -->
                 <div class="bg-slate-200/80 p-1 rounded-xl flex gap-1">
                     <button id="tab-btn-dashboard" onclick="switchTab('dashboard')" class="px-3.5 py-2 rounded-lg text-xs font-extrabold transition-all bg-white text-indigo-600 shadow-sm">
                         📊 종목 분석
@@ -73,8 +72,8 @@
             <!-- Summary Stats Bar -->
             <div class="grid grid-cols-3 gap-3 mb-8">
                 <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">전체 스팩 수</span>
-                    <div id="stat-total-count" class="text-xl font-extrabold text-slate-800">- 개</div>
+                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">전체 스팩 수 <span class="block text-slate-400 font-normal">(일반거래 기준)</span></span>
+                    <div id="stat-total-count" class="text-xl font-extrabold text-slate-800 mt-1">- 개</div>
                 </div>
                 <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
                     <span class="text-[11px] font-bold text-indigo-600 uppercase tracking-wider block mb-1">합병형 <span class="block text-slate-400 font-normal">(매수적정, 0%↑)</span></span>
@@ -578,7 +577,6 @@
     <!-- 종목 상세 산출 근거 카드 모달 -->
     <div id="spac-detail-modal" onclick="if(event.target === this) closeSpacDetailModal()" class="fixed inset-0 bg-slate-900/55 backdrop-blur-sm hidden flex items-center justify-center z-50 px-4 py-6 overflow-y-auto">
         <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-2xl w-full p-5 sm:p-6 my-auto max-h-[90vh] overflow-y-auto text-center">
-            <!-- 카드 헤더 -->
             <div class="relative pb-4 border-b border-slate-200 flex items-center justify-center">
                 <div class="text-center">
                     <h3 id="detail-modal-name" class="text-xl font-extrabold text-slate-900">-</h3>
@@ -587,9 +585,7 @@
                 <button type="button" onclick="closeSpacDetailModal()" class="absolute right-0 top-0 w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-sm flex items-center justify-center transition-colors">✕</button>
             </div>
 
-            <!-- 카드 본문 그리드 (전체 가운데 정렬) -->
             <div class="mt-4 space-y-4 text-center">
-                <!-- 기본 일정 및 상태 -->
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                     <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-center">
                         <span class="text-[11px] font-bold text-slate-400 block">상장일</span>
@@ -609,7 +605,6 @@
                     </div>
                 </div>
 
-                <!-- 청산가 계산 요소 (한 줄 정렬: 공모금 / 공모주식수 / 청산단가) -->
                 <div class="bg-indigo-50/40 border border-indigo-200/70 rounded-xl p-4 space-y-3 text-center">
                     <h4 class="text-xs font-extrabold text-indigo-900 uppercase tracking-wider text-center">📐 청산가 계산 요소</h4>
                     <div class="grid grid-cols-3 gap-2.5">
@@ -627,7 +622,6 @@
                         </div>
                     </div>
 
-                    <!-- 청산단가 산식 및 신탁금 산식 표시 -->
                     <div class="bg-white/90 border border-indigo-100 rounded-lg px-3 py-2 text-[11px] text-slate-600 space-y-1 text-center">
                         <div>
                             <span class="font-bold text-indigo-700">청산단가 산식:</span>
@@ -639,10 +633,9 @@
                         </div>
                     </div>
 
-                    <!-- 연차별 예치이율 및 신탁금 추이 -->
                     <div class="bg-white border border-indigo-100 rounded-lg overflow-hidden">
                         <div class="px-3 py-2 bg-indigo-50/70 border-b border-indigo-100 text-[11px] font-bold text-indigo-900 text-center">
-                            연차별 예치이율 및 신탁금 추이 (DART 공시 반영)
+                            연차별 예치이율 및 신탁금 추이 (DART 공시 반영 · 미공시 연차는 직전/기준금리 추정 반영)
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-xs text-center">
@@ -660,7 +653,6 @@
                     </div>
                 </div>
 
-                <!-- 수익률 및 매수적정 평가 -->
                 <div class="bg-emerald-50/40 border border-emerald-200/80 rounded-xl p-4 space-y-3 text-center">
                     <h4 class="text-xs font-extrabold text-emerald-900 uppercase tracking-wider text-center">🎯 예상 수익률 및 매수적정 평가</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
@@ -677,7 +669,6 @@
                             <div id="detail-fair-buy" class="text-sm font-extrabold text-slate-800 mt-1">-</div>
                         </div>
                     </div>
-                    <!-- 매수적정가 산식 표시 -->
                     <div class="bg-white/90 border border-emerald-100 rounded-lg px-3 py-2 text-[11px] text-slate-600 text-center">
                         <span class="font-bold text-emerald-700">매수적정가 산식:</span>
                         <code class="font-mono text-slate-800">공모가 + (청산가 − 공모가) × (오늘 − 상장일) ÷ (상장폐지일 − 상장일)</code>
@@ -736,8 +727,8 @@
 
         const DEPOSIT_NET_FACTOR = 0.845;
         const GENERAL_TAX_RATE = 0.154;
-        const TRUST_FEE_RATE = 0.001; // 신탁 수수료 0.1%
-        const TRUST_NET_INTEREST_FACTOR = (1 - TRUST_FEE_RATE) * (1 - GENERAL_TAX_RATE); // (1 - 0.001) * (1 - 0.154)
+        const TRUST_FEE_RATE = 0.001;
+        const TRUST_NET_INTEREST_FACTOR = (1 - TRUST_FEE_RATE) * (1 - GENERAL_TAX_RATE);
         const MERGER_THRESHOLD_DAYS = 365;
         const SEED_KEY = 'spac_seed_applied_v3';
         const EXCLUDED_SPAC_CODES = new Set(['206400']);
@@ -891,16 +882,26 @@
         }
 
         function normName(n) {
-            return String(n || '').replace(/\s+/g, '').replace(/^KB/i, '케이비').replace(/^IBKS/i, '아이비케이에스').toLowerCase();
+            return String(n || '')
+                .replace(/\s+/g, '')
+                .replace(/기업인수목적/g, '')
+                .replace(/스팩/g, '')
+                .replace(/^KB/i, '케이비')
+                .replace(/^IBKS/i, '아이비케이에스')
+                .replace(/^DB/i, '디비')
+                .toLowerCase();
         }
+
         function findSpacByName(name) {
             const k = normName(name);
             return allItems.find(s => s.name === name) || allItems.find(s => normName(s.name) === k);
         }
+
         function getHoldingHolder(item) {
             const h = String(item?.account || item?.accountHolder || item?.holder || '남편').trim();
             return h === '아내' ? '아내' : '남편';
         }
+
         function getHoldingUniqueKey(item) {
             return [
                 getHoldingHolder(item),
@@ -911,6 +912,7 @@
                 String(item.buy_date || '')
             ].join('|');
         }
+
         function deduplicateHoldings(items) {
             const seen = new Set();
             const out = [];
@@ -925,12 +927,14 @@
             }
             return out;
         }
+
         function saveHoldings() {
             holdingItems = deduplicateHoldings(holdingItems);
             try {
                 localStorage.setItem('spac_holding_items_v5', JSON.stringify(holdingItems));
             } catch (e) {}
         }
+
         function savePerformance() {
             try {
                 localStorage.setItem('spac_performance_items_v3', JSON.stringify(performanceItems));
@@ -979,7 +983,7 @@
 
         function parseKoreanAmount(raw) {
             if (raw === null || raw === undefined || raw === '') return null;
-            if (typeof raw === 'number') return Number.isFinite(raw) ? raw : null;
+            if (typeof raw === 'number') return Number.isFinite(raw) && raw > 0 ? raw : null;
             const str = String(raw).replace(/,/g, '').trim();
             if (!str) return null;
             const eokMatch = str.match(/^(\d+(?:\.\d+)?)\s*억(?:\s*(\d+(?:\.\d+)?)\s*만)?/);
@@ -1025,13 +1029,13 @@
 
         function getDelistingDateValue(item) {
             if (!item || typeof item !== 'object') return '';
-            const raw = item.delisting_date || item.liquidation_date || item.maturity_date || item.maturityDate || '';
+            const raw = item.delisting_date || item.liquidation_date || item.maturity_date || item.maturityDate || item.delist_dd || '';
             return normalizeDateStr(raw);
         }
 
         function getListingDateValue(item) {
             if (!item || typeof item !== 'object') return '';
-            const direct = item.listing_date || item.listingDate || item.ipo_date || item.ipoDate || item.listed_date || item.krx_list_dd || '';
+            const direct = item.listing_date || item.listingDate || item.ipo_date || item.ipoDate || item.listed_date || item.krx_list_dd || item.list_dd || '';
             if (direct) return normalizeDateStr(direct);
 
             const delist = getDelistingDateValue(item);
@@ -1096,6 +1100,12 @@
             const raw = String(item?.invest_type ?? item?.investType ?? item?.type ?? item?.category ?? '').trim();
             if (raw.includes('합병')) return '합병';
             return '청산';
+        }
+
+        function getFallbackGrossDepositRate() {
+            const latestKey = Object.keys(bokDepositRates).sort().pop();
+            const latestRate = latestKey ? toFiniteNumber(bokDepositRates[latestKey]) : null;
+            return latestRate !== null && latestRate > 0 ? latestRate : 2.5;
         }
 
         function parseSpacDisclosureData(item) {
@@ -1181,6 +1191,9 @@
             const effectiveRatio = depositRatio !== null ? depositRatio : 100;
             if (depositPrincipal === null && ipoAmount !== null && ipoAmount > 0) {
                 depositPrincipal = Math.round(ipoAmount * (effectiveRatio / 100));
+            }
+            if ((depositPrincipal === null || depositPrincipal <= 0) && ipoShares !== null && ipoShares > 0) {
+                depositPrincipal = Math.round(ipoPrice * ipoShares * (effectiveRatio / 100));
             }
 
             const scheduleEntries = [];
@@ -1336,7 +1349,7 @@
                 }
             }
 
-            const finalSchedule = scheduleEntries.length > 0
+            const rawSchedule = scheduleEntries.length > 0
                 ? scheduleEntries
                 : [1, 2, 3].map(y => ({
                     label: `${y}년차`,
@@ -1345,19 +1358,33 @@
                     rate: yearlyRates[y - 1]
                 }));
 
-            let runningTrust = depositPrincipal;
-            let canComputeAllYears = depositPrincipal !== null && depositPrincipal > 0;
-            const trustRows = finalSchedule.map(seg => {
-                if (seg.rate === null || !Number.isFinite(seg.rate)) {
-                    canComputeAllYears = false;
-                    return {
-                        label: seg.label,
-                        fractionYears: seg.fractionYears,
-                        rate: null,
-                        trust: null
-                    };
+            const fallbackRate = getFallbackGrossDepositRate();
+            let lastKnownRate = null;
+            const resolvedSchedule = rawSchedule.map(seg => {
+                const disclosedRate = seg.rate;
+                if (disclosedRate !== null && Number.isFinite(disclosedRate)) {
+                    lastKnownRate = disclosedRate;
+                    return { ...seg, rate: disclosedRate, isEstimated: false };
                 }
-                if (canComputeAllYears && runningTrust !== null) {
+                const estRate = lastKnownRate !== null ? lastKnownRate : fallbackRate;
+                return { ...seg, rate: estRate, isEstimated: true };
+            });
+
+            const effectiveShares = (ipoShares !== null && ipoShares > 0)
+                ? ipoShares
+                : (depositPrincipal !== null && depositPrincipal > 0 && ipoPrice > 0
+                    ? Math.round(depositPrincipal / (ipoPrice * (effectiveRatio / 100)))
+                    : null);
+
+            const effectivePrincipal = (depositPrincipal !== null && depositPrincipal > 0)
+                ? depositPrincipal
+                : (effectiveShares !== null && effectiveShares > 0
+                    ? Math.round(ipoPrice * effectiveShares * (effectiveRatio / 100))
+                    : null);
+
+            let runningTrust = effectivePrincipal;
+            const trustRows = resolvedSchedule.map(seg => {
+                if (runningTrust !== null && runningTrust > 0 && seg.rate !== null) {
                     const grossInterest = runningTrust * (seg.rate / 100) * seg.fractionYears;
                     const afterFeeAndTaxInterest = grossInterest * TRUST_NET_INTEREST_FACTOR;
                     runningTrust = Math.round(runningTrust + afterFeeAndTaxInterest);
@@ -1365,6 +1392,7 @@
                         label: seg.label,
                         fractionYears: seg.fractionYears,
                         rate: seg.rate,
+                        isEstimated: seg.isEstimated,
                         trust: runningTrust
                     };
                 }
@@ -1372,23 +1400,31 @@
                     label: seg.label,
                     fractionYears: seg.fractionYears,
                     rate: seg.rate,
+                    isEstimated: seg.isEstimated,
                     trust: null
                 };
             });
 
-            let resolvedLiqPrice = toFiniteNumber(item.liquidation_price ?? item.liquidationPrice);
+            const rawItemLiq = toFiniteNumber(item.liquidation_price ?? item.liquidationPrice);
+            let resolvedLiqPrice = null;
             let recomputedFromSchedule = false;
-            if (canComputeAllYears && runningTrust !== null && ipoShares !== null && ipoShares > 0) {
-                resolvedLiqPrice = Math.round(runningTrust / ipoShares);
+
+            if (runningTrust !== null && runningTrust > 0 && effectiveShares !== null && effectiveShares > 0) {
+                resolvedLiqPrice = Math.round(runningTrust / effectiveShares);
+                recomputedFromSchedule = true;
+            } else if (rawItemLiq !== null && rawItemLiq > 0) {
+                resolvedLiqPrice = Math.round(rawItemLiq);
+            } else if (ipoPrice > 0) {
+                resolvedLiqPrice = Math.round(ipoPrice * (1 + (fallbackRate / 100) * TRUST_NET_INTEREST_FACTOR * 2));
                 recomputedFromSchedule = true;
             }
 
             return {
                 ipoPrice,
-                ipoShares,
-                ipoAmount,
+                ipoShares: effectiveShares,
+                ipoAmount: ipoAmount ?? (effectiveShares && ipoPrice ? Math.round(effectiveShares * ipoPrice) : null),
                 depositRatio: effectiveRatio,
-                depositPrincipal,
+                depositPrincipal: effectivePrincipal,
                 trustRows,
                 liquidationPrice: resolvedLiqPrice,
                 recomputedFromSchedule
@@ -1399,13 +1435,24 @@
             const P = toFiniteNumber(parPrice);
             const L = toFiniteNumber(liqPrice);
             if (P === null || P <= 0 || L === null || L <= 0) return null;
-            const listDt = parseDateOnly(listingDateStr);
+
             const delistDt = parseDateOnly(delistingDateStr);
             const todayDt = parseDateOnly(getTodayStr());
-            if (!listDt || !delistDt || !todayDt) return null;
+            if (!todayDt) return Math.round((P + L) / 2);
+
+            let listDt = parseDateOnly(listingDateStr);
+            if (!listDt && delistDt) {
+                listDt = new Date(Date.UTC(delistDt.getUTCFullYear() - 3, delistDt.getUTCMonth(), delistDt.getUTCDate()));
+            }
+            if (!listDt && !delistDt) {
+                return Math.round((P + L) / 2);
+            }
+            if (!delistDt && listDt) {
+                delistDt = new Date(Date.UTC(listDt.getUTCFullYear() + 3, listDt.getUTCMonth(), listDt.getUTCDate()));
+            }
 
             const totalDays = (delistDt.getTime() - listDt.getTime()) / (1000 * 60 * 60 * 24);
-            if (totalDays <= 0) return null;
+            if (totalDays <= 0) return L;
 
             const elapsedDays = Math.max(0, Math.min(totalDays, (todayDt.getTime() - listDt.getTime()) / (1000 * 60 * 60 * 24)));
             return Math.round(P + (L - P) * (elapsedDays / totalDays));
@@ -1459,7 +1506,7 @@
 
         function computeFallbackYieldFromSpac(item, accountType) {
             const curPrice = toFiniteNumber(item?.current_price ?? item?.currentPrice);
-            const liqPrice = toFiniteNumber(item?.liquidation_price ?? item?.liquidationPrice);
+            const liqPrice = toFiniteNumber(item?._parsedDisclosure?.liquidationPrice ?? item?.liquidation_price ?? item?.liquidationPrice);
             const targetDateStr = getDelistingDateValue(item) || item?.expected_date;
             if (curPrice && curPrice > 0 && liqPrice && liqPrice > 0) {
                 const grossRatio = liqPrice / curPrice;
@@ -1482,7 +1529,6 @@
             if (!item) return null;
             const isIsa = accountType === 'isa';
 
-            // 연차별 공시 이율로 청산가를 재계산한 경우 기존 JSON의 구(舊) 수익률과 불일치하지 않도록 재계산된 청산가 기준으로 산출
             if (item._parsedDisclosure && item._parsedDisclosure.recomputedFromSchedule) {
                 return computeFallbackYieldFromSpac(item, accountType);
             }
@@ -1558,17 +1604,17 @@
             }
             document.getElementById('detail-ipo-amount').innerText = ipoAmount !== null ? `${ipoAmount.toLocaleString()}원` : '미확인';
             document.getElementById('detail-ipo-shares').innerText = ipoShares !== null ? `${ipoShares.toLocaleString()}주` : '미확인';
-            document.getElementById('detail-liquidation-price').innerText = liqPrice !== null ? `${liqPrice.toLocaleString()}원` : '미확인';
+            document.getElementById('detail-liquidation-price').innerText = liqPrice !== null && liqPrice > 0 ? `${liqPrice.toLocaleString()}원` : '미확인';
 
             const yearlyBody = document.getElementById('detail-yearly-trust-body');
             yearlyBody.innerHTML = trustRows.map(r => {
-                const isUnannounced = r.rate === null;
+                const isEstimated = Boolean(r.isEstimated);
                 const safeLabel = escapeHtml(r.label);
-                const rateHtml = isUnannounced
-                    ? `<span class="inline-block bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded font-bold text-[11px]">미정</span>`
-                    : `<span class="text-indigo-700 font-bold">연 ${Number(r.rate).toFixed(2)}%</span>`;
+                const rateHtml = r.rate !== null
+                    ? `<span class="${isEstimated ? 'text-amber-700' : 'text-indigo-700'} font-bold">연 ${Number(r.rate).toFixed(2)}%${isEstimated ? ' (추정)' : ''}</span>`
+                    : `<span class="inline-block bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded font-bold text-[11px]">미정</span>`;
                 return `
-                    <tr class="${isUnannounced ? 'bg-amber-50/40' : ''}">
+                    <tr class="${isEstimated ? 'bg-amber-50/40' : ''}">
                         <td class="py-2 px-3 font-bold text-slate-800 text-center">${safeLabel}</td>
                         <td class="py-2 px-3 text-center">${rateHtml}</td>
                         <td class="py-2 px-3 font-bold text-slate-900 text-center">${r.trust !== null ? `${r.trust.toLocaleString()}원` : '미정'}</td>
@@ -2367,20 +2413,21 @@
 
         function updateSummaryStats(items) {
             const baseAfterTaxRate = getCurrentBaseDepositRate() ?? 0;
-            document.getElementById('stat-total-count').innerText = items.length + ' 개';
+            const normalItems = items.filter(i => i.status === '일반');
+            document.getElementById('stat-total-count').innerText = normalItems.length + ' 개';
 
-            const mergerFairCount = items.filter(i => {
+            const mergerFairCount = normalItems.filter(i => {
                 if (i.invest_type !== '합병' || i.is_fair_buy !== 'O') return false;
                 const yIsa = resolveAccountYield(i, 'isa');
                 const yGen = resolveAccountYield(i, 'general');
-                return (yIsa !== null && yIsa >= 0) || (yGen !== null && yGen >= 0);
+                return (yIsa !== null && Number.isFinite(yIsa) && yIsa >= 0) || (yGen !== null && Number.isFinite(yGen) && yGen >= 0);
             }).length;
 
-            const liqFairCount = items.filter(i => {
+            const liqFairCount = normalItems.filter(i => {
                 if (i.invest_type !== '청산' || i.is_fair_buy !== 'O') return false;
                 const yIsa = resolveAccountYield(i, 'isa');
                 const yGen = resolveAccountYield(i, 'general');
-                return (yIsa !== null && yIsa >= baseAfterTaxRate) || (yGen !== null && yGen >= baseAfterTaxRate);
+                return (yIsa !== null && Number.isFinite(yIsa) && yIsa >= baseAfterTaxRate) || (yGen !== null && Number.isFinite(yGen) && yGen >= baseAfterTaxRate);
             }).length;
 
             document.getElementById('stat-merger-count').innerText = mergerFairCount + ' 개';
@@ -2461,7 +2508,7 @@
                     yieldEl.innerHTML = '-';
                 }
             }
-            if (liqEl) liqEl.innerText = liqPrice !== null ? liqPrice.toLocaleString() + '원' : '미확인';
+            if (liqEl) liqEl.innerText = liqPrice !== null && liqPrice > 0 ? liqPrice.toLocaleString() + '원' : '미확인';
         }
 
         function sortData(column) {
@@ -2590,7 +2637,7 @@
 
                 const curPrice = toFiniteNumber(item.current_price);
                 const liqPrice = toFiniteNumber(item.liquidation_price);
-                const liqText = liqPrice !== null ? liqPrice.toLocaleString() + '원' : '미확인';
+                const liqText = liqPrice !== null && liqPrice > 0 ? liqPrice.toLocaleString() + '원' : '미확인';
 
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80 transition-colors";
@@ -2630,4 +2677,3 @@
     </script>
 </body>
 </html>
-```[cite: 4]
