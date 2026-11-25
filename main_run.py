@@ -213,7 +213,10 @@ def fetch_ecos_deposit_rate(ref_dt: datetime) -> tuple[str | None, float | None,
                     valid_rows.append((ym_fmt, float(val)))
             if valid_rows:
                 valid_rows.sort(key=lambda x: x[0])
-                print(f"[INFO] ECOS 정기예금 금리 자동 갱신: 최신={valid_rows[-1][0]} ({valid_rows[-1][1]}%), {len(valid_rows)}개월 확보")
+                print(
+                    f"[INFO] ECOS 정기예금 금리 자동 갱신: 최신={valid_rows[-1][0]} "
+                    f"({valid_rows[-1][1]}%), {len(valid_rows)}개월 확보"
+                )
                 return valid_rows[-1][0], valid_rows[-1][1], fetched_map
         except Exception:
             continue
@@ -728,6 +731,17 @@ def extract_pay_date(text: str, fallback_rcept_dt: str = "") -> str:
     return dt_fb.strftime("%Y-%m-%d") if dt_fb else ""
 
 
+def extract_listing_date_from_disclosures(disclosures: list[dict]) -> str:
+    """상장일 누락 시 DART 공시에서 주권상장/신규상장 관련 일자를 보조 추출합니다."""
+    for d in reversed(disclosures):
+        title = str(d.get("report_nm") or "")
+        if any(k in title for k in ("주권상장", "신규상장", "상장일")):
+            dt = parse_date_yyyymmdd(d.get("rcept_dt"))
+            if dt:
+                return dt.strftime("%Y-%m-%d")
+    return ""
+
+
 def extract_merger_meta(disclosures: list[dict]) -> dict[str, str | None]:
     meta: dict[str, str | None] = {
         "merger_status": None,
@@ -1065,7 +1079,11 @@ def build_spac_record(
         for d in disclosures[:15]
     )
 
-    listing_date = spac.get("listing_date") or str(prev_rec.get("listing_date") or "")
+    listing_date = (
+        spac.get("listing_date")
+        or str(prev_rec.get("listing_date") or "")
+        or extract_listing_date_from_disclosures(disclosures)
+    )
     delisting_date = infer_delisting_date(listing_date) or str(prev_rec.get("delisting_date") or "")
 
     s_liq_price, c_base_price, liq_source = resolve_liquidation_price(
@@ -1251,4 +1269,34 @@ def main() -> None:
         valid_prices = sum(1 for r in spac_results if (r.get("current_price") or 0) > 0)
         resolved_liq_cnt = sum(1 for r in spac_results if r.get("liquidation_price") is not None)
         fair_o_cnt = sum(1 for r in spac_results if r.get("is_fair_buy") == "O")
-        
+
+        meta = {
+            "trade_date": trade_date,
+            "deposit_rate_gross": deposit_rate_gross,
+            "deposit_rate_after_tax": deposit_rate_after_tax,
+            "summary": {
+                "total_candidates": len(spac_list),
+                "eligible_count": len(spac_results),
+                "valid_prices": valid_prices,
+                "resolved_liquidation_count": resolved_liq_cnt,
+                "fair_buy_o_count": fair_o_cnt,
+            },
+        }
+        save_json(spac_results, OUTPUT_PATH, updated_at, extra_meta=meta)
+        save_json(liq_results, LIQUIDATIONS_PATH, updated_at)
+
+        print(
+            f"[DONE] 총 {len(spac_results)}개 반영 "
+            f"(유효시세={valid_prices}, 청산가산출={resolved_liq_cnt}, 적정매수O={fair_o_cnt})"
+        )
+    except Exception as exc:
+        print(f"[ERROR] 메인 실행 실패 — 기존 데이터 유지: {exc}")
+        traceback.print_exc()
+        if existing_spacs:
+            save_json(existing_spacs, OUTPUT_PATH, updated_at)
+        if existing_liqs:
+            save_json(existing_liqs, LIQUIDATIONS_PATH, updated_at)
+
+
+if __name__ == "__main__":
+    main()
