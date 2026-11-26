@@ -624,26 +624,26 @@
 
                     <div class="bg-white/90 border border-indigo-100 rounded-lg px-3 py-2 text-[11px] text-slate-600 space-y-1 text-center">
                         <div>
-                            <span class="font-bold text-indigo-700">청산단가 산식:</span>
+                            <span class="font-bold text-indigo-700">청산단가 :</span>
                             <code class="font-mono text-slate-800">만기(3년차) 신탁금 ÷ 공모주식수</code>
                         </div>
                         <div>
-                            <span class="font-bold text-indigo-700">신탁금 산식:</span>
-                            <code id="detail-trust-formula-code" class="font-mono text-slate-800">세후 이자 (전년도 신탁금 × 예치 이자율 × (1 − 신탁수수료 0.1%) × (1 − 소득세 15.4%))</code>
+                            <span class="font-bold text-indigo-700">신탁금 :</span>
+                            <code id="detail-trust-formula-code" class="font-mono text-slate-800">전년도 신탁금 × 예치이율 × (1 − 신탁수수료(0.1%)) × (1 − (소득세 15.4%))</code>
                         </div>
                     </div>
 
                     <div class="bg-white border border-indigo-100 rounded-lg overflow-hidden">
                         <div class="px-3 py-2 bg-indigo-50/70 border-b border-indigo-100 text-[11px] font-bold text-indigo-900 text-center">
-                            연차별 예치이율 및 신탁금 추이
+                            연차별 예치이율 및 신탁금
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-xs text-center">
                                 <thead>
                                     <tr class="border-b border-slate-100 text-slate-400">
                                         <th class="py-2 px-3 font-bold text-center">구분</th>
-                                        <th class="py-2 px-3 font-bold text-center">예치 이자율</th>
-                                        <th class="py-2 px-3 font-bold text-center">신탁금 (수수료·소득세 차감 후)</th>
+                                        <th class="py-2 px-3 font-bold text-center">예치이율</th>
+                                        <th class="py-2 px-3 font-bold text-center">신탁금</th>
                                     </tr>
                                 </thead>
                                 <tbody id="detail-yearly-trust-body" class="divide-y divide-slate-100 text-slate-700 font-medium">
@@ -652,7 +652,7 @@
                         </div>
                         <div class="px-3 py-2 bg-slate-50 border-t border-slate-100 text-[11px] text-slate-500 text-center space-y-0.5">
                             <div>※ DART 공시 반영 · 미공시 연차는 직전/기준금리 추정 반영</div>
-                            <div>※ 3년차 예치 이자율은 청산분배를 위해 중도해지하는 경우가 많으므로 보수적으로 6개월치만 반영하여 청산단가를 계산합니다.</div>
+                            <div>※ 3년차 예치이율은 청산분배를 위해 중도해지하는 경우가 많으므로 보수적으로 6개월치만 반영하여 청산단가를 계산합니다.</div>
                         </div>
                     </div>
                 </div>
