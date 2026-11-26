@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-27 07:21:54 KST",
+  "updated_at": "2026-11-27 07:38:30 KST",
   "trade_date": "20261125",
   "deposit_rate_gross": 3.62,
   "deposit_rate_after_tax": 3.0625,
@@ -12,7 +12,7 @@
     "merger_type_count": 40,
     "valid_prices": 70,
     "resolved_liquidation_count": 70,
-    "fair_buy_o_count": 64
+    "fair_buy_o_count": 67
   },
   "count": 54,
   "items": [
