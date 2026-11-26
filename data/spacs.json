@@ -1,11 +1,11 @@
 {
-  "updated_at": "2026-11-26 19:40:04 KST",
+  "updated_at": "2026-11-26 22:47:56 KST",
   "trade_date": "20261125",
   "deposit_rate_gross": 3.62,
   "deposit_rate_after_tax": 3.0625,
   "summary": {
     "krx_dept_matched_raw": 70,
-    "total_spac_count": 56,
+    "total_spac_count": 55,
     "total_candidates": 70,
     "eligible_count": 55,
     "liquidation_type_count": 14,
@@ -3295,7 +3295,7 @@
       "deposit_rate_gross": 3.62,
       "is_suspended": false,
       "trading_on_krx": true,
-      "has_liquidation_notice": false,
+      "has_liquidation_notice": true,
       "merger_status": null,
       "merger_target": null,
       "merger_approved_at": null,
@@ -3382,7 +3382,9 @@
       "is_eligible": false,
       "ineligible_reasons": [
         "not_krx_spac_dept",
-        "administrative_issue"
+        "administrative_issue",
+        "liquidation_notice_flag",
+        "risk_disclosure:기타시장안내(관리종목지정우려종목)"
       ],
       "is_liquidation_type": false,
       "is_merger_type": false,
@@ -5166,7 +5168,7 @@
         "not_krx_spac_dept",
         "administrative_issue",
         "liquidation_notice_flag",
-        "risk_disclosure:주권매매거래정지              (상장폐지 사유발생)"
+        "risk_disclosure:기타경영사항(자율공시)              (청산 관련 주요사항 안내)"
       ],
       "is_liquidation_type": false,
       "is_merger_type": false,
@@ -9114,7 +9116,7 @@
         "not_krx_spac_dept",
         "administrative_issue",
         "liquidation_notice_flag",
-        "risk_disclosure:주권매매거래정지              (상장폐지 사유발생)"
+        "risk_disclosure:기타경영사항(자율공시)              (청산 관련 주요사항 안내)"
       ],
       "is_liquidation_type": false,
       "is_merger_type": false,
