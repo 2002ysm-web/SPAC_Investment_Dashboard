@@ -1,11 +1,11 @@
 {
-  "updated_at": "2026-11-26 18:32:32 KST",
+  "updated_at": "2026-11-26 19:40:04 KST",
   "trade_date": "20261125",
   "deposit_rate_gross": 3.62,
   "deposit_rate_after_tax": 3.0625,
   "summary": {
     "krx_dept_matched_raw": 70,
-    "total_spac_count": 70,
+    "total_spac_count": 56,
     "total_candidates": 70,
     "eligible_count": 55,
     "liquidation_type_count": 14,
