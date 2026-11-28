@@ -1,0 +1,2416 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPAC Investment Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        input[type="date"] {
+            display: block;
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+            height: 42px;
+            line-height: 42px;
+            padding: 0 12px;
+            box-sizing: border-box;
+            text-align: left;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        input[type="date"]::-webkit-date-and-time-value {
+            text-align: left;
+            min-height: 0;
+            height: 42px;
+            line-height: 42px;
+            margin: 0;
+        }
+        input[type="date"]::-webkit-datetime-edit,
+        input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+            padding: 0;
+            line-height: 42px;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator { margin: 0; padding: 0; }
+        #toast-auto { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 60; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans">
+    <div class="max-w-7xl mx-auto px-4 py-10">
+        <!-- Header & Main Tab Navigation -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-slate-200 pb-6">
+            <div>
+                <div class="flex items-center gap-3 flex-wrap">
+                    <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">🚀 SPAC Investment Dashboard</h1>
+                    <span id="deposit-rate-badge" class="bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                        기준 예금금리(세후): 연 --%
+                    </span>
+                </div>
+            </div>
+            <div class="flex items-center gap-3 flex-wrap">
+                <div class="bg-slate-200/80 p-1 rounded-xl flex gap-1">
+                    <button id="tab-btn-dashboard" onclick="switchTab('dashboard')" class="px-3.5 py-2 rounded-lg text-xs font-extrabold transition-all bg-white text-indigo-600 shadow-sm">
+                        📊 종목 분석
+                    </button>
+                    <button id="tab-btn-holdings" onclick="switchTab('holdings')" class="px-3.5 py-2 rounded-lg text-xs font-extrabold transition-all text-slate-600 hover:text-slate-900">
+                        📂 보유 종목 🔒
+                    </button>
+                    <button id="tab-btn-performance" onclick="switchTab('performance')" class="px-3.5 py-2 rounded-lg text-xs font-extrabold transition-all text-slate-600 hover:text-slate-900">
+                        💰 성과 관리 🔒
+                    </button>
+                </div>
+                <div id="update-time" class="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200 text-xs font-semibold text-slate-600">
+                    데이터 로딩 중...
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- TAB 1: 종목 분석 뷰                                        -->
+        <!-- ========================================================= -->
+        <div id="view-dashboard">
+            <!-- Summary Stats Bar -->
+            <div class="grid grid-cols-3 gap-3 mb-8">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">전체 스팩 수</span>
+                    <div id="stat-total-count" class="text-xl font-extrabold text-slate-800 mt-1">- 개</div>
+                </div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <span class="text-[11px] font-bold text-indigo-600 uppercase tracking-wider block mb-1">합병형 <span class="block text-slate-400 font-normal">(매수적정, 일반, 0%↑)</span></span>
+                    <div id="stat-merger-count" class="text-xl font-extrabold text-indigo-600 mt-1">- 개</div>
+                </div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <span class="text-[11px] font-bold text-blue-600 uppercase tracking-wider block mb-1">청산형 <span class="block text-slate-400 font-normal">(매수적정, 일반, 예금↑)</span></span>
+                    <div id="stat-liq-count" class="text-xl font-extrabold text-blue-600 mt-1">- 개</div>
+                </div>
+            </div>
+
+            <!-- Recommendations Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                <!-- 1. 합병형 추천 -->
+                <div class="bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-900 text-white p-6 rounded-2xl shadow-lg border border-indigo-500/25">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-base font-bold tracking-tight text-indigo-200">🤝 합병형 추천</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded">예금 이상 (ISA)</span>
+                                <h3 id="rec-merger-high-isa-name" class="text-sm font-bold mt-2 mb-2 truncate">-</h3>
+                            </div>
+                            <div class="space-y-1 text-xs text-slate-300">
+                                <div class="flex justify-between"><span>현재가</span><span id="rec-merger-high-isa-price" class="font-bold text-white">-</span></div>
+                                <div class="flex justify-between items-start"><span>수익률</span><span id="rec-merger-high-isa-yield" class="font-bold text-emerald-400 text-right">-</span></div>
+                                <div class="flex justify-between"><span>청산가</span><span id="rec-merger-high-isa-liq" class="font-bold text-white">-</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded">예금 이상 (일반)</span>
+                                <h3 id="rec-merger-high-gen-name" class="text-sm font-bold mt-2 mb-2 truncate">-</h3>
+                            </div>
+                            <div class="space-y-1 text-xs text-slate-300">
+                                <div class="flex justify-between"><span>현재가</span><span id="rec-merger-high-gen-price" class="font-bold text-white">-</span></div>
+                                <div class="flex justify-between items-start"><span>수익률</span><span id="rec-merger-high-gen-yield" class="font-bold text-emerald-400 text-right">-</span></div>
+                                <div class="flex justify-between"><span>청산가</span><span id="rec-merger-high-gen-liq" class="font-bold text-white">-</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded">0%~예금미만 (ISA)</span>
+                                <h3 id="rec-merger-mid-isa-name" class="text-sm font-bold mt-2 mb-2 truncate">-</h3>
+                            </div>
+                            <div class="space-y-1 text-xs text-slate-300">
+                                <div class="flex justify-between"><span>현재가</span><span id="rec-merger-mid-isa-price" class="font-bold text-white">-</span></div>
+                                <div class="flex justify-between items-start"><span>수익률</span><span id="rec-merger-mid-isa-yield" class="font-bold text-emerald-400 text-right">-</span></div>
+                                <div class="flex justify-between"><span>청산가</span><span id="rec-merger-mid-isa-liq" class="font-bold text-white">-</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded">0%~예금미만 (일반)</span>
+                                <h3 id="rec-merger-mid-gen-name" class="text-sm font-bold mt-2 mb-2 truncate">-</h3>
+                            </div>
+                            <div class="space-y-1 text-xs text-slate-300">
+                                <div class="flex justify-between"><span>현재가</span><span id="rec-merger-mid-gen-price" class="font-bold text-white">-</span></div>
+                                <div class="flex justify-between items-start"><span>수익률</span><span id="rec-merger-mid-gen-yield" class="font-bold text-emerald-400 text-right">-</span></div>
+                                <div class="flex justify-between"><span>청산가</span><span id="rec-merger-mid-gen-liq" class="font-bold text-white">-</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. 청산형 추천 -->
+                <div class="bg-gradient-to-br from-blue-950 via-slate-900 to-slate-900 text-white p-6 rounded-2xl shadow-lg border border-blue-500/25">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-base font-bold tracking-tight text-blue-200">🛡️ 청산형 추천</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded">예금 이상 (ISA)</span>
+                                <h3 id="rec-liq-high-isa-name" class="text-sm font-bold mt-2 mb-2 truncate">-</h3>
+                            </div>
+                            <div class="space-y-1 text-xs text-slate-300">
+                                <div class="flex justify-between"><span>현재가</span><span id="rec-liq-high-isa-price" class="font-bold text-white">-</span></div>
+                                <div class="flex justify-between items-start"><span>수익률</span><span id="rec-liq-high-isa-yield" class="font-bold text-emerald-400 text-right">-</span></div>
+                                <div class="flex justify-between"><span>청산가</span><span id="rec-liq-high-isa-liq" class="font-bold text-white">-</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded">예금 이상 (일반)</span>
+                                <h3 id="rec-liq-high-gen-name" class="text-sm font-bold mt-2 mb-2 truncate">-</h3>
+                            </div>
+                            <div class="space-y-1 text-xs text-slate-300">
+                                <div class="flex justify-between"><span>현재가</span><span id="rec-liq-high-gen-price" class="font-bold text-white">-</span></div>
+                                <div class="flex justify-between items-start"><span>수익률</span><span id="rec-liq-high-gen-yield" class="font-bold text-emerald-400 text-right">-</span></div>
+                                <div class="flex justify-between"><span>청산가</span><span id="rec-liq-high-gen-liq" class="font-bold text-white">-</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded">0%~예금미만 (ISA)</span>
+                                <h3 id="rec-liq-mid-isa-name" class="text-sm font-bold mt-2 mb-2 truncate">-</h3>
+                            </div>
+                            <div class="space-y-1 text-xs text-slate-300">
+                                <div class="flex justify-between"><span>현재가</span><span id="rec-liq-mid-isa-price" class="font-bold text-white">-</span></div>
+                                <div class="flex justify-between items-start"><span>수익률</span><span id="rec-liq-mid-isa-yield" class="font-bold text-emerald-400 text-right">-</span></div>
+                                <div class="flex justify-between"><span>청산가</span><span id="rec-liq-mid-isa-liq" class="font-bold text-white">-</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex flex-col justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded">0%~예금미만 (일반)</span>
+                                <h3 id="rec-liq-mid-gen-name" class="text-sm font-bold mt-2 mb-2 truncate">-</h3>
+                            </div>
+                            <div class="space-y-1 text-xs text-slate-300">
+                                <div class="flex justify-between"><span>현재가</span><span id="rec-liq-mid-gen-price" class="font-bold text-white">-</span></div>
+                                <div class="flex justify-between items-start"><span>수익률</span><span id="rec-liq-mid-gen-yield" class="font-bold text-emerald-400 text-right">-</span></div>
+                                <div class="flex justify-between"><span>청산가</span><span id="rec-liq-mid-gen-liq" class="font-bold text-white">-</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters & Search Bar -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4 items-center">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">투자 유형</label>
+                    <select id="filter-type" onchange="applyFilters()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                        <option value="all">전체</option>
+                        <option value="합병">합병</option>
+                        <option value="청산">청산</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">매수 적정</label>
+                    <select id="filter-fair" onchange="applyFilters()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                        <option value="all">전체</option>
+                        <option value="O">적정</option>
+                        <option value="X">부적정</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">거래 상태</label>
+                    <select id="filter-status" onchange="applyFilters()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                        <option value="all">전체</option>
+                        <option value="일반" selected>일반</option>
+                        <option value="정지">정지</option>
+                        <option value="합병">합병</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">투자 계좌</label>
+                    <select id="filter-account" onchange="applyFilters()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                        <option value="isa" selected>ISA</option>
+                        <option value="general">일반</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">청산 연도</label>
+                    <select id="filter-delisting-year" onchange="applyFilters()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                        <option value="all" selected>전체</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                        <option value="2029">2029</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">예상 수익률</label>
+                    <select id="filter-yield-range" onchange="applyFilters()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                        <option value="all" selected>전체</option>
+                        <option value="above_deposit">예금 이상</option>
+                        <option value="low_positive">0% 이상 ~ 예금 미만</option>
+                        <option value="negative">0% 미만</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">종목 검색</label>
+                    <input type="text" id="search-input" onkeyup="applyFilters()" placeholder="종목명 입력..." class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700">
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-5 py-2.5 bg-indigo-50/60 border-b border-slate-200/80 flex items-center justify-between flex-wrap gap-2 text-[11px] text-slate-600">
+                    <span>💡 <strong>종목명</strong>을 클릭하면 상세 정보 카드가 열립니다.</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <thead>
+                            <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200 select-none">
+                                <th onclick="sortData('name')" class="py-3.5 px-5 font-bold cursor-pointer hover:bg-slate-200 transition-colors min-w-[210px] text-center">종목명 <span id="sort-icon-name" class="text-slate-400">↕</span></th>
+                                <th onclick="sortData('current_price')" class="py-3.5 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-right">현재가 <span id="sort-icon-current_price" class="text-slate-400">↕</span></th>
+                                <th onclick="sortData('liquidation_price')" class="py-3.5 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-right">
+                                    <span class="inline-flex items-center justify-end gap-1">
+                                        청산가
+                                        <span title="청산가 산식: 만기 세후 신탁금 ÷ 공모주식수" class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-slate-600 text-[10px] font-extrabold cursor-help">?</span>
+                                        <span id="sort-icon-liquidation_price" class="text-slate-400">↕</span>
+                                    </span>
+                                </th>
+                                <th onclick="sortData('yield')" class="py-3.5 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-right"><span id="yield-header-col">예상수익률</span> <span id="sort-icon-yield" class="text-slate-400">↕</span></th>
+                                <th onclick="sortData('delisting_date')" class="py-3.5 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-center">청산일 <span id="sort-icon-delisting_date" class="text-slate-400">↕</span></th>
+                                <th onclick="sortData('status')" class="py-3.5 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-center">상태 <span id="sort-icon-status" class="text-slate-400">↕</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="spac-table-body" class="divide-y divide-slate-100 text-sm font-medium text-slate-700">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- TAB 2: 보유 종목 뷰                                        -->
+        <!-- ========================================================= -->
+        <div id="view-holdings" class="hidden">
+            <div id="holdings-lock-screen" class="bg-white p-10 rounded-2xl shadow-sm border border-slate-200 text-center max-w-md mx-auto my-20">
+                <div class="text-4xl mb-4">🔒</div>
+                <h2 class="text-xl font-extrabold text-slate-800 mb-2">보유 종목 탭 보호</h2>
+                <p class="text-xs text-slate-500 mb-6">보유 종목에 접근하려면 비밀번호를 입력해주세요.</p>
+                <form onsubmit="unlockPrivateTabs(event, 'holdings')" class="space-y-4">
+                    <input type="password" id="holdings-password-input" placeholder="비밀번호 4자리 입력" maxlength="4" class="w-full px-4 py-3 text-center text-lg tracking-widest border border-slate-300 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                    <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors shadow-sm">잠금 해제</button>
+                </form>
+            </div>
+
+            <div id="holdings-content" class="hidden">
+                <div class="space-y-3 mb-6">
+                    <div class="grid grid-cols-2 gap-3 sm:gap-4">
+                        <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
+                            <span class="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">매수금</span>
+                            <div id="hold-total-buy" class="text-2xl sm:text-4xl font-black text-slate-800 truncate">- 원</div>
+                        </div>
+                        <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
+                            <span class="text-[11px] sm:text-xs font-bold text-indigo-600 uppercase tracking-wider block mb-1">평가금액</span>
+                            <div id="hold-total-eval" class="text-2xl sm:text-4xl font-black text-indigo-600 truncate">- 원</div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 sm:gap-4">
+                        <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
+                            <span class="text-[11px] sm:text-xs font-bold text-emerald-600 uppercase tracking-wider block mb-1">단순 수익률</span>
+                            <div id="hold-total-simple" class="text-2xl sm:text-4xl font-black text-emerald-600 truncate">- %</div>
+                        </div>
+                        <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
+                            <span class="text-[11px] sm:text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">연환산 수익률</span>
+                            <div id="hold-total-annual" class="text-2xl sm:text-4xl font-black text-blue-600 truncate">- %</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="text-base font-bold text-slate-800">📥 등록하기</h2>
+                            <p class="text-xs text-slate-400 mt-0.5">수수료 등이 모두 포함된 총 매수금액과 매수량을 입력하면 평단가 기준으로 평가손익이 자동 계산됩니다.</p>
+                        </div>
+                        <button onclick="lockPrivateTabs()" class="text-xs text-rose-500 hover:underline font-semibold">🔒 잠금</button>
+                    </div>
+                    <form onsubmit="addHoldingItem(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">계좌 명의</label>
+                                <select id="hold-input-holder" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                                    <option value="남편" selected>남편</option>
+                                    <option value="아내">아내</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">계좌 구분</label>
+                                <select id="hold-input-account" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                                    <option value="ISA" selected>ISA</option>
+                                    <option value="일반">일반</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">종목명</label>
+                                <input type="text" id="hold-input-name" list="spac-name-list" placeholder="종목명 입력 또는 선택" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                                <datalist id="spac-name-list"></datalist>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매수금</label>
+                                <input type="number" id="hold-input-amount" placeholder="예: 2005000" min="1" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매수량</label>
+                                <input type="number" id="hold-input-quantity" placeholder="예: 1000" min="1" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매수일</label>
+                                <input type="date" id="hold-input-date" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                            </div>
+                        </div>
+                        <div>
+                            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-colors shadow-sm">➕ 보유 종목</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-center">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">계좌 명의</label>
+                        <select id="hold-filter-holder" onchange="renderHoldings()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                            <option value="all" selected>전체</option>
+                            <option value="남편">남편</option>
+                            <option value="아내">아내</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">계좌 구분</label>
+                        <select id="hold-filter-account" onchange="renderHoldings()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                            <option value="all" selected>전체</option>
+                            <option value="ISA">ISA</option>
+                            <option value="일반">일반</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">청산 연도</label>
+                        <select id="hold-filter-delisting-year" onchange="renderHoldings()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                            <option value="all" selected>전체</option>
+                            <option value="2027">2027</option>
+                            <option value="2028">2028</option>
+                            <option value="2029">2029</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">예금 이상</label>
+                        <select id="hold-filter-benchmark" onchange="renderHoldings()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                            <option value="all" selected>전체</option>
+                            <option value="beat">달성</option>
+                            <option value="miss">미달</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">거래 상태</label>
+                        <select id="hold-filter-status" onchange="renderHoldings()" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                            <option value="all" selected>전체</option>
+                            <option value="일반">일반</option>
+                            <option value="정지">정지</option>
+                            <option value="합병">합병</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">종목 검색</label>
+                        <input type="text" id="hold-search-input" onkeyup="renderHoldings()" placeholder="종목명 검색..." class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700">
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200 select-none">
+                                    <th onclick="sortHoldingData('holder')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-center">명의 <span id="hold-sort-icon-holder" class="text-slate-400">↕</span></th>
+                                    <th onclick="sortHoldingData('acct')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-center">계좌 <span id="hold-sort-icon-acct" class="text-slate-400">↕</span></th>
+                                    <th onclick="sortHoldingData('name')" class="py-4 px-5 font-bold cursor-pointer hover:bg-slate-200 transition-colors">종목명 <span id="hold-sort-icon-name" class="text-slate-400">↕</span></th>
+                                    <th onclick="sortHoldingData('buy_amount')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors">매수금 <span id="hold-sort-icon-buy_amount" class="text-slate-400">↕</span></th>
+                                    <th onclick="sortHoldingData('eval_amount')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors">평가금(손익) <span id="hold-sort-icon-eval_amount" class="text-slate-400">↕</span></th>
+                                    <th onclick="sortHoldingData('annualYield')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors">수익률(연환산/단순) <span id="hold-sort-icon-annualYield" class="text-slate-400">↕</span></th>
+                                    <th onclick="sortHoldingData('spacStatus')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors text-center">상태 <span id="hold-sort-icon-spacStatus" class="text-slate-400">↕</span></th>
+                                    <th class="py-4 px-4 font-bold text-center">관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="holdings-table-body" class="divide-y divide-slate-100 text-sm font-medium text-slate-700">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- TAB 3: 성과 관리 뷰                                        -->
+        <!-- ========================================================= -->
+        <div id="view-performance" class="hidden">
+            <div id="perf-lock-screen" class="bg-white p-10 rounded-2xl shadow-sm border border-slate-200 text-center max-w-md mx-auto my-20">
+                <div class="text-4xl mb-4">🔒</div>
+                <h2 class="text-xl font-extrabold text-slate-800 mb-2">성과 관리 탭 보호</h2>
+                <p class="text-xs text-slate-500 mb-6">성과 관리 탭에 접근하려면 비밀번호를 입력해주세요.</p>
+                <form onsubmit="unlockPrivateTabs(event, 'performance')" class="space-y-4">
+                    <input type="password" id="perf-password-input" placeholder="비밀번호 4자리 입력" maxlength="4" class="w-full px-4 py-3 text-center text-lg tracking-widest border border-slate-300 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                    <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors shadow-sm">잠금 해제</button>
+                </form>
+            </div>
+
+            <div id="perf-content" class="hidden">
+                <div class="space-y-3 mb-6">
+                    <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">손익금액</span>
+                        <div id="perf-total-pnl" class="text-3xl sm:text-4xl font-black text-slate-800 truncate">- 원</div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 sm:gap-4">
+                        <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
+                            <span class="text-[11px] sm:text-xs font-bold text-emerald-600 uppercase tracking-wider block mb-1">단순 수익률</span>
+                            <div id="perf-avg-simple" class="text-2xl sm:text-4xl font-black text-emerald-600 truncate">- %</div>
+                        </div>
+                        <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
+                            <span class="text-[11px] sm:text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">연환산 수익률</span>
+                            <div id="perf-avg-annual" class="text-2xl sm:text-4xl font-black text-blue-600 truncate">- %</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="text-base font-bold text-slate-800">📝 추가하기</h2>
+                            <p class="text-xs text-slate-400 mt-0.5">매수일을 입력하면 해당 시점의 한국은행 정기예금 금리(세후 기준)가 자동 조회되어 비교됩니다.</p>
+                        </div>
+                        <button onclick="lockPrivateTabs()" class="text-xs text-rose-500 hover:underline font-semibold">🔒 잠금</button>
+                    </div>
+                    <form onsubmit="addPerformanceItem(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">종목명</label>
+                                <input type="text" id="input-name" placeholder="예: 엔에이치스팩31호" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">유형</label>
+                                <select id="input-type" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                                    <option value="청산">청산</option>
+                                    <option value="매도">매도</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매수금</label>
+                                <input type="number" id="input-buy-amount" placeholder="2000000" min="1" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매수일</label>
+                                <input type="date" id="input-buy-date" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매도금</label>
+                                <input type="number" id="input-sell-amount" placeholder="2050000" min="0" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매도일</label>
+                                <input type="date" id="input-sell-date" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                            </div>
+                        </div>
+                        <div>
+                            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-colors shadow-sm">➕ 성과 내역</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4 items-center justify-between">
+                    <div class="flex gap-4 items-center flex-wrap">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">수익 연도</label>
+                            <select id="perf-filter-year" onchange="renderPerformance()" class="h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                                <option value="all" selected>전체</option>
+                                <option value="2026">2026</option>
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">투자 유형</label>
+                            <select id="perf-filter-type" onchange="renderPerformance()" class="h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                                <option value="all" selected>전체</option>
+                                <option value="청산">청산</option>
+                                <option value="매도">매도</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">예금 이상</label>
+                            <select id="perf-filter-benchmark" onchange="renderPerformance()" class="h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                                <option value="all" selected>전체</option>
+                                <option value="beat">달성</option>
+                                <option value="miss">미달</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="w-full md:w-72">
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">종목 검색</label>
+                        <input type="text" id="perf-search-input" onkeyup="renderPerformance()" placeholder="종목명 검색..." class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700">
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200 select-none">
+                                    <th onclick="sortPerformanceData('name')" class="py-4 px-5 font-bold cursor-pointer hover:bg-slate-200 transition-colors">종목명 <span id="perf-sort-icon-name" class="text-slate-400">↕</span></th>
+                                    <th onclick="sortPerformanceData('type')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors">유형 <span id="perf-sort-icon-type" class="text-slate-400">↕</span></th>
+                                    <th onclick="sortPerformanceData('buy_amount')" class="py-4 px-5 font-bold cursor-pointer hover:bg-slate-200 transition-colors">매수금 <span id="perf-sort-icon-buy_amount" class="text-slate-400">↕</span></th>
+                                    <th onclick="sortPerformanceData('buy_date')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors">매수일 <span id="perf-sort-icon-buy_date" class="text-slate-400">↕</span></th>
+                                    <th onclick="sortPerformanceData('sell_amount')" class="py-4 px-5 font-bold cursor-pointer hover:bg-slate-200 transition-colors">매도금(손익) <span id="perf-sort-icon-sell_amount" class="text-slate-400">↕</span></th>
+                                    <th onclick="sortPerformanceData('sell_date')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors">매도일 <span id="perf-sort-icon-sell_date" class="text-slate-400">↕</span></th>
+                                    <th onclick="sortPerformanceData('annualYield')" class="py-4 px-4 font-bold cursor-pointer hover:bg-slate-200 transition-colors">수익률(연환산/단순) <span id="perf-sort-icon-annualYield" class="text-slate-400">↕</span></th>
+                                    <th class="py-4 px-4 font-bold text-center">관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="perf-table-body" class="divide-y divide-slate-100 text-sm font-medium text-slate-700">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 종목 상세 산출 근거 카드 모달 (합병 및 주식매수청구권 정보 전용) -->
+    <div id="spac-detail-modal" onclick="if(event.target === this) closeSpacDetailModal()" class="fixed inset-0 bg-slate-900/55 backdrop-blur-sm hidden flex items-center justify-center z-50 px-4 py-6 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-2xl w-full p-5 sm:p-6 my-auto max-h-[90vh] overflow-y-auto text-center">
+            <div class="relative pb-4 border-b border-slate-200 flex items-center justify-center">
+                <div class="text-center">
+                    <h3 id="detail-modal-name" class="text-xl font-extrabold text-slate-900">-</h3>
+                    <span id="detail-modal-code" class="text-xs font-mono text-slate-400 block mt-0.5"></span>
+                </div>
+                <button type="button" onclick="closeSpacDetailModal()" class="absolute right-0 top-0 w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-sm flex items-center justify-center transition-colors">✕</button>
+            </div>
+
+            <div class="mt-4 space-y-4 text-center">
+                <div id="detail-merger-section" class="bg-amber-50/40 border border-amber-200/80 rounded-xl p-4 space-y-3 text-center">
+                    <h4 class="text-xs font-extrabold text-amber-900 uppercase tracking-wider text-center">🤝 합병 및 주식매수청구권 정보</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <div class="bg-white border border-amber-100 rounded-lg p-2.5 text-center">
+                            <span class="text-[11px] font-bold text-slate-400 block">매수청구가 (1차)</span>
+                            <span id="detail-first-offer-price" class="text-xs sm:text-sm font-extrabold text-indigo-700 mt-0.5 block">-</span>
+                        </div>
+                        <div class="bg-white border border-amber-100 rounded-lg p-2.5 text-center">
+                            <span class="text-[11px] font-bold text-slate-400 block">매수청구가 (2차)</span>
+                            <span id="detail-second-appraisal-price" class="text-xs sm:text-sm font-extrabold text-emerald-700 mt-0.5 block">-</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        <div class="bg-white border border-amber-100 rounded-lg p-2.5 text-center">
+                            <span class="text-[11px] font-bold text-slate-400 block">반대 표시 기간</span>
+                            <span id="detail-opposing-period" class="text-xs font-bold text-slate-800 mt-0.5 block">-</span>
+                        </div>
+                        <div class="bg-white border border-amber-100 rounded-lg p-2.5 text-center">
+                            <span class="text-[11px] font-bold text-slate-400 block">주주총회일</span>
+                            <span id="detail-general-meeting-date" class="text-xs font-bold text-slate-800 mt-0.5 block">-</span>
+                        </div>
+                        <div class="bg-white border border-amber-100 rounded-lg p-2.5 text-center">
+                            <span class="text-[11px] font-bold text-slate-400 block">매수청구권 행사기간</span>
+                            <span id="detail-exercise-period" class="text-xs font-bold text-slate-800 mt-0.5 block">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-5 flex justify-center">
+                <button type="button" onclick="closeSpacDetailModal()" class="px-6 py-2.5 text-xs font-bold text-white bg-slate-800 hover:bg-slate-900 rounded-xl transition-colors">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 매도/청산 기록 모달 -->
+    <div id="sell-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center z-50 px-4">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-md w-full p-6">
+            <h3 class="text-lg font-extrabold text-slate-800 mb-1">💰 매도/청산 기록</h3>
+            <p id="sell-modal-subtitle" class="text-xs text-slate-500 mb-5">실제 매도/청산된 금액을 입력하면 성과 관리 탭으로 자동 이관됩니다.</p>
+            <form onsubmit="confirmSellHolding(event)" class="space-y-4">
+                <input type="hidden" id="sell-modal-index">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">구분</label>
+                    <select id="sell-modal-type" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl bg-white font-medium text-slate-700">
+                        <option value="매도">매도</option>
+                        <option value="청산">청산</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매도/청산금액</label>
+                    <input type="number" id="sell-modal-amount" min="0" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-bold text-slate-800" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">매도/청산일</label>
+                    <input type="date" id="sell-modal-date" class="w-full h-[42px] px-3.5 text-sm border border-slate-300 rounded-xl font-medium text-slate-700" required>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeSellModal()" class="px-4 py-2.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">취소</button>
+                    <button type="submit" class="px-5 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors shadow-sm">성과 관리로 이관</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-auto" class="hidden bg-slate-900 text-white text-sm font-semibold px-4 py-3 rounded-xl shadow-lg"></div>
+    <script>
+        let allItems = [];
+        let holdingItems = [];
+        let performanceItems = [];
+        let isUnlocked = false;
+
+        let holdingSortColumn = 'name';
+        let holdingSortDirection = 'asc';
+
+        let perfSortColumn = 'sell_date';
+        let perfSortDirection = 'desc';
+
+        const DEPOSIT_NET_FACTOR = 0.845;
+        const GENERAL_TAX_RATE = 0.154;
+        const TRUST_FEE_RATE = 0.001;
+        const TRUST_NET_INTEREST_FACTOR = (1 - TRUST_FEE_RATE) * (1 - GENERAL_TAX_RATE);
+        const MERGER_THRESHOLD_DAYS = 365;
+        const SEED_KEY = 'spac_seed_applied_v3';
+        const EXCLUDED_SPAC_CODES = new Set(['206400']);
+
+        function escapeHtml(val) {
+            if (val === null || val === undefined) return '';
+            return String(val)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function syncBodyScrollLock() {
+            const detailOpen = !document.getElementById('spac-detail-modal').classList.contains('hidden');
+            const sellOpen = !document.getElementById('sell-modal').classList.contains('hidden');
+            document.body.classList.toggle('overflow-hidden', detailOpen || sellOpen);
+        }
+
+        let bokDepositRates = {
+            "2024-01": 3.67, "2024-02": 3.63, "2024-03": 3.58, "2024-04": 3.53,
+            "2024-05": 3.55, "2024-06": 3.51, "2024-07": 3.41, "2024-08": 3.35,
+            "2024-09": 3.40, "2024-10": 3.37, "2024-11": 3.35, "2024-12": 3.22,
+            "2025-01": 3.07, "2025-02": 2.97, "2025-03": 2.84, "2025-04": 2.71,
+            "2025-05": 2.63, "2025-06": 2.58, "2025-07": 2.55, "2025-08": 2.52,
+            "2025-09": 2.50, "2025-10": 2.48, "2025-11": 2.45, "2025-12": 2.45,
+            "2026-01": 2.42, "2026-02": 2.40, "2026-03": 2.40, "2026-04": 2.38,
+            "2026-05": 2.38, "2026-06": 2.35, "2026-07": 2.35, "2026-08": 2.35,
+            "2026-09": 2.35, "2026-10": 2.35, "2026-11": 2.35
+        };
+
+        function calcBuyAmount(settlementAmount, boughtQty, remainQty) {
+            if (!settlementAmount || !boughtQty || boughtQty <= 0 || !remainQty || remainQty <= 0) return 0;
+            return Math.round((settlementAmount / boughtQty) * remainQty);
+        }
+
+        const SEED_HOLDINGS = [
+            {"account": "남편", "acct": "일반", "name": "유진스팩11호", "buy_amount": 2119750, "quantity": 1024, "buy_date": "2026-02-24"},
+            {"account": "남편", "acct": "일반", "name": "유진스팩10호", "buy_amount": 33840, "quantity": 16, "buy_date": "2026-02-23"},
+            {"account": "남편", "acct": "일반", "name": "유진스팩11호", "buy_amount": 7878700, "quantity": 3806, "buy_date": "2026-02-25"},
+            {"account": "남편", "acct": "일반", "name": "에스케이증권제12호스팩", "buy_amount": 125965, "quantity": 61, "buy_date": "2026-02-23"},
+            {"account": "남편", "acct": "일반", "name": "에스케이증권제13호스팩", "buy_amount": 9999600, "quantity": 4854, "buy_date": "2026-02-23"},
+            {"account": "남편", "acct": "일반", "name": "하나33호스팩", "buy_amount": 5973990, "quantity": 2819, "buy_date": "2026-02-23"},
+            {"account": "남편", "acct": "일반", "name": "에스케이증권제12호스팩", "buy_amount": 9879310, "quantity": 4784, "buy_date": "2026-02-24"},
+            {"account": "남편", "acct": "일반", "name": "미래에셋비전스팩4호", "buy_amount": 9998460, "quantity": 4761, "buy_date": "2026-02-23"},
+            {"account": "남편", "acct": "일반", "name": "신한제14호스팩", "buy_amount": 9994920, "quantity": 4728, "buy_date": "2026-02-23"},
+            {"account": "남편", "acct": "일반", "name": "디비금융제13호스팩", "buy_amount": 1014010, "quantity": 484, "buy_date": "2026-02-24"},
+            {"account": "남편", "acct": "일반", "name": "미래에셋비전스팩7호", "buy_amount": 6552030, "quantity": 3196, "buy_date": "2026-02-23"},
+            {"account": "남편", "acct": "일반", "name": "유진스팩10호", "buy_amount": 9968760, "quantity": 4680, "buy_date": "2026-02-24"},
+            {"account": "남편", "acct": "일반", "name": "한화플러스제5호스팩", "buy_amount": 10000260, "quantity": 4878, "buy_date": "2026-02-23"},
+            {"account": "남편", "acct": "일반", "name": "하나34호스팩", "buy_amount": 9532980, "quantity": 4583, "buy_date": "2026-02-23"},
+            {"account": "남편", "acct": "일반", "name": "디비금융제13호스팩", "buy_amount": 8916640, "quantity": 4256, "buy_date": "2026-02-23"},
+            {"account": "남편", "acct": "일반", "name": "키움제11호스팩", "buy_amount": 9670480, "quantity": 4583, "buy_date": "2026-02-23"},
+            {"account": "남편", "acct": "일반", "name": "신한제15호스팩", "buy_amount": 9998460, "quantity": 4830, "buy_date": "2026-02-23"},
+            {"account": "남편", "acct": "일반", "name": "이베스트스팩6호", "buy_amount": 10000350, "quantity": 4914, "buy_date": "2026-02-24"},
+            {"account": "남편", "acct": "일반", "name": "키움제10호스팩", "buy_amount": 9998230, "quantity": 4750, "buy_date": "2026-02-23"},
+            {"account": "남편", "acct": "일반", "name": "미래에셋비전스팩6호", "buy_amount": 9999600, "quantity": 4854, "buy_date": "2026-02-23"},
+            {"account": "남편", "acct": "일반", "name": "KB제31호스팩", "buy_amount": 707595, "quantity": 341, "buy_date": "2026-02-24"},
+            {"account": "남편", "acct": "일반", "name": "하나33호스팩", "buy_amount": 3999390, "quantity": 1882, "buy_date": "2026-02-25"},
+            {"account": "남편", "acct": "일반", "name": "미래에셋비전스팩7호", "buy_amount": 436660, "quantity": 213, "buy_date": "2026-02-25"},
+            {"account": "남편", "acct": "일반", "name": "하나34호스팩", "buy_amount": 437860, "quantity": 210, "buy_date": "2026-02-25"},
+            {"account": "남편", "acct": "일반", "name": "KB제31호스팩", "buy_amount": 9298405, "quantity": 4481, "buy_date": "2026-02-25"},
+            {"account": "남편", "acct": "일반", "name": "유안타제17호스팩", "buy_amount": 10000350, "quantity": 4914, "buy_date": "2026-02-25"},
+            {"account": "남편", "acct": "일반", "name": "키움제11호스팩", "buy_amount": 10500, "quantity": 5, "buy_date": "2026-02-26"},
+            {"account": "남편", "acct": "일반", "name": "미래에셋비전스팩7호", "buy_amount": 41000, "quantity": 20, "buy_date": "2026-03-03"},
+            {"account": "남편", "acct": "일반", "name": "하나33호스팩", "buy_amount": 189520, "quantity": 92, "buy_date": "2026-07-22"},
+            {"account": "남편", "acct": "일반", "name": "신한제16호스팩", "buy_amount": 3160110, "quantity": 1580, "buy_date": "2026-09-29"},
+            {"account": "남편", "acct": "ISA", "name": "한국제15호스팩", "buy_amount": 801010, "quantity": 390, "buy_date": "2026-07-20"},
+            {"account": "남편", "acct": "ISA", "name": "유안타제15호스팩", "buy_amount": 2119610, "quantity": 1027, "buy_date": "2026-02-12"},
+            {"account": "남편", "acct": "ISA", "name": "신한제13호스팩", "buy_amount": 292360, "quantity": 137, "buy_date": "2026-03-24"},
+            {"account": "남편", "acct": "ISA", "name": "유안타제16호스팩", "buy_amount": 2253100, "quantity": 1097, "buy_date": "2026-03-26"},
+            {"account": "남편", "acct": "ISA", "name": "에이치엠씨제7호스팩", "buy_amount": 1963405, "quantity": 963, "buy_date": "2026-03-26"},
+            {"account": "남편", "acct": "ISA", "name": "신한제14호스팩", "buy_amount": 2518055, "quantity": 1229, "buy_date": "2026-04-17"},
+            {"account": "남편", "acct": "ISA", "name": "유안타제17호스팩", "buy_amount": 1073350, "quantity": 533, "buy_date": "2026-05-04"},
+            {"account": "남편", "acct": "ISA", "name": "유안타제17호스팩", "buy_amount": 32220, "quantity": 16, "buy_date": "2026-05-07"},
+            {"account": "남편", "acct": "ISA", "name": "유안타제17호스팩", "buy_amount": 978700, "quantity": 486, "buy_date": "2026-05-12"},
+            {"account": "남편", "acct": "ISA", "name": "유진스팩11호", "buy_amount": 2030, "quantity": 1, "buy_date": "2026-05-15"},
+            {"account": "남편", "acct": "ISA", "name": "키움제11호스팩", "buy_amount": 2302715, "quantity": 1135, "buy_date": "2026-05-18"},
+            {"account": "남편", "acct": "ISA", "name": "키움제10호스팩", "buy_amount": 3189720, "quantity": 1580, "buy_date": "2026-05-19"},
+            {"account": "남편", "acct": "ISA", "name": "신한제15호스팩", "buy_amount": 2503710, "quantity": 1222, "buy_date": "2026-05-19"},
+            {"account": "남편", "acct": "ISA", "name": "디비금융제13호스팩", "buy_amount": 2503720, "quantity": 1225, "buy_date": "2026-05-19"},
+            {"account": "남편", "acct": "ISA", "name": "하나34호스팩", "buy_amount": 2503700, "quantity": 1228, "buy_date": "2026-05-27"},
+            {"account": "남편", "acct": "ISA", "name": "KB제30호스팩", "buy_amount": 2202525, "quantity": 1075, "buy_date": "2026-05-29"},
+            {"account": "남편", "acct": "ISA", "name": "유진스팩11호", "buy_amount": 20380, "quantity": 10, "buy_date": "2026-05-29"},
+            {"account": "남편", "acct": "ISA", "name": "교보17호스팩", "buy_amount": 1112215, "quantity": 535, "buy_date": "2026-05-29"},
+            {"account": "남편", "acct": "ISA", "name": "유진스팩11호", "buy_amount": 2095940, "quantity": 1018, "buy_date": "2026-06-01"},
+            {"account": "남편", "acct": "ISA", "name": "교보17호스팩", "buy_amount": 998835, "quantity": 473, "buy_date": "2026-06-01"},
+            {"account": "남편", "acct": "ISA", "name": "한국제15호스팩", "buy_amount": 1201510, "quantity": 585, "buy_date": "2026-06-26"},
+            {"account": "남편", "acct": "ISA", "name": "KB제31호스팩", "buy_amount": 2002660, "quantity": 992, "buy_date": "2026-07-14"},
+            {"account": "남편", "acct": "ISA", "name": "교보16호스팩", "buy_amount": 1201060, "quantity": 592, "buy_date": "2026-06-26"},
+            {"account": "남편", "acct": "ISA", "name": "KB제30호스팩", "buy_amount": 1254870, "quantity": 617, "buy_date": "2026-06-26"},
+            {"account": "남편", "acct": "ISA", "name": "엔에이치스팩31호", "buy_amount": 1209930, "quantity": 582, "buy_date": "2026-07-16"},
+            {"account": "남편", "acct": "ISA", "name": "대신밸런스제19호스팩", "buy_amount": 2003295, "quantity": 973, "buy_date": "2026-07-16"},
+            {"account": "남편", "acct": "ISA", "name": "신한제13호스팩", "buy_amount": 1583790, "quantity": 760, "buy_date": "2026-07-20"},
+            {"account": "남편", "acct": "ISA", "name": "엔에이치스팩31호", "buy_amount": 800665, "quantity": 387, "buy_date": "2026-07-20"},
+            {"account": "남편", "acct": "ISA", "name": "에스케이증권제13호스팩", "buy_amount": 1017385, "quantity": 499, "buy_date": "2026-07-22"},
+            {"account": "남편", "acct": "ISA", "name": "에스케이증권제13호스팩", "buy_amount": 1122670, "quantity": 552, "buy_date": "2026-08-05"},
+            {"account": "남편", "acct": "ISA", "name": "교보16호스팩", "buy_amount": 801010, "quantity": 390, "buy_date": "2026-08-05"},
+            {"account": "남편", "acct": "ISA", "name": "유진스팩11호", "buy_amount": 2003580, "quantity": 990, "buy_date": "2026-08-11"},
+            {"account": "남편", "acct": "ISA", "name": "교보17호스팩", "buy_amount": 2002455, "quantity": 987, "buy_date": "2026-08-11"},
+            {"account": "남편", "acct": "ISA", "name": "디비금융제13호스팩", "buy_amount": 419965, "quantity": 207, "buy_date": "2026-08-11"},
+            {"account": "남편", "acct": "ISA", "name": "신한제14호스팩", "buy_amount": 1651380, "quantity": 818, "buy_date": "2026-08-12"},
+            {"account": "남편", "acct": "ISA", "name": "디비금융제13호스팩", "buy_amount": 1100950, "quantity": 544, "buy_date": "2026-08-12"},
+            {"account": "남편", "acct": "ISA", "name": "신한제15호스팩", "buy_amount": 1542150, "quantity": 762, "buy_date": "2026-08-13"},
+            {"account": "남편", "acct": "ISA", "name": "KB제30호스팩", "buy_amount": 107790, "quantity": 53, "buy_date": "2026-08-21"},
+            {"account": "남편", "acct": "ISA", "name": "유안타제17호스팩", "buy_amount": 1027030, "quantity": 510, "buy_date": "2026-08-21"},
+            {"account": "남편", "acct": "ISA", "name": "유안타제17호스팩", "buy_amount": 1742500, "quantity": 861, "buy_date": "2026-08-24"},
+            {"account": "남편", "acct": "ISA", "name": "대신밸런스제19호스팩", "buy_amount": 1677790, "quantity": 809, "buy_date": "2026-09-30"},
+            {"account": "남편", "acct": "ISA", "name": "하나34호스팩", "buy_amount": 186650, "quantity": 92, "buy_date": "2026-09-30"},
+            {"account": "남편", "acct": "ISA", "name": "키움제10호스팩", "buy_amount": 1803000, "quantity": 880, "buy_date": "2026-09-30"},
+            {"account": "남편", "acct": "ISA", "name": "신한제15호스팩", "buy_amount": 1000965, "quantity": 491, "buy_date": "2026-09-30"},
+            {"account": "남편", "acct": "ISA", "name": "신한제14호스팩", "buy_amount": 850140, "quantity": 418, "buy_date": "2026-10-06"},
+            {"account": "남편", "acct": "ISA", "name": "교보17호스팩", "buy_amount": 901790, "quantity": 438, "buy_date": "2026-10-06"},
+            {"account": "남편", "acct": "ISA", "name": "하나34호스팩", "buy_amount": 294310, "quantity": 144, "buy_date": "2026-10-07"},
+            {"account": "남편", "acct": "ISA", "name": "KB제31호스팩", "buy_amount": 2072480, "quantity": 1019, "buy_date": "2026-10-13"},
+            {"account": "아내", "acct": "ISA", "name": "에스케이증권제13호스팩", "buy_amount": calcBuyAmount(1999020, 986, 986), "quantity": 986, "buy_date": "2026-01-07"},
+            {"account": "아내", "acct": "ISA", "name": "에이치엠씨제7호스팩", "buy_amount": calcBuyAmount(583025, 289, 289), "quantity": 289, "buy_date": "2026-01-08"},
+            {"account": "아내", "acct": "ISA", "name": "한화플러스제5호스팩", "buy_amount": calcBuyAmount(2029025, 991, 808), "quantity": 808, "buy_date": "2026-02-25"},
+            {"account": "아내", "acct": "ISA", "name": "유안타제17호스팩", "buy_amount": calcBuyAmount(3085020, 1533, 1533), "quantity": 1533, "buy_date": "2026-05-19"},
+            {"account": "아내", "acct": "ISA", "name": "키움제11호스팩", "buy_amount": calcBuyAmount(3084625, 1529, 1529), "quantity": 1529, "buy_date": "2026-05-21"},
+            {"account": "아내", "acct": "ISA", "name": "신한제15호스팩", "buy_amount": calcBuyAmount(3083715, 1521, 1521), "quantity": 1521, "buy_date": "2026-06-04"},
+            {"account": "아내", "acct": "ISA", "name": "교보16호스팩", "buy_amount": calcBuyAmount(999515, 493, 493), "quantity": 493, "buy_date": "2026-06-30"},
+            {"account": "아내", "acct": "ISA", "name": "KB제30호스팩", "buy_amount": calcBuyAmount(1058890, 521, 521), "quantity": 521, "buy_date": "2026-06-30"},
+            {"account": "아내", "acct": "ISA", "name": "교보16호스팩", "buy_amount": calcBuyAmount(385210, 190, 190), "quantity": 190, "buy_date": "2026-07-16"},
+            {"account": "아내", "acct": "ISA", "name": "디비금융제13호스팩", "buy_amount": calcBuyAmount(2002190, 990, 990), "quantity": 990, "buy_date": "2026-07-16"},
+            {"account": "아내", "acct": "ISA", "name": "키움제10호스팩", "buy_amount": calcBuyAmount(1080660, 537, 537), "quantity": 537, "buy_date": "2026-07-21"},
+            {"account": "아내", "acct": "ISA", "name": "교보17호스팩", "buy_amount": calcBuyAmount(361115, 179, 179), "quantity": 179, "buy_date": "2026-07-21"},
+            {"account": "아내", "acct": "ISA", "name": "KB제30호스팩", "buy_amount": calcBuyAmount(999950, 492, 492), "quantity": 492, "buy_date": "2026-07-22"},
+            {"account": "아내", "acct": "ISA", "name": "키움제10호스팩", "buy_amount": calcBuyAmount(2010, 1, 1), "quantity": 1, "buy_date": "2026-07-22"},
+            {"account": "아내", "acct": "ISA", "name": "신한제14호스팩", "buy_amount": calcBuyAmount(985635, 491, 491), "quantity": 491, "buy_date": "2026-07-24"},
+            {"account": "아내", "acct": "ISA", "name": "키움제10호스팩", "buy_amount": calcBuyAmount(1000630, 496, 496), "quantity": 496, "buy_date": "2026-07-24"},
+            {"account": "아내", "acct": "ISA", "name": "교보17호스팩", "buy_amount": calcBuyAmount(1650290, 816, 816), "quantity": 816, "buy_date": "2026-07-24"},
+            {"account": "아내", "acct": "ISA", "name": "대신밸런스제19호스팩", "buy_amount": calcBuyAmount(1999700, 966, 966), "quantity": 966, "buy_date": "2026-08-18"},
+            {"account": "아내", "acct": "ISA", "name": "유진스팩11호", "buy_amount": calcBuyAmount(1999880, 990, 990), "quantity": 990, "buy_date": "2026-08-18"},
+            {"account": "아내", "acct": "ISA", "name": "교보16호스팩", "buy_amount": calcBuyAmount(477380, 234, 234), "quantity": 234, "buy_date": "2026-08-19"},
+            {"account": "아내", "acct": "ISA", "name": "유진스팩11호", "buy_amount": calcBuyAmount(999940, 495, 495), "quantity": 495, "buy_date": "2026-08-19"},
+            {"account": "아내", "acct": "ISA", "name": "KB제30호스팩", "buy_amount": calcBuyAmount(998800, 492, 492), "quantity": 492, "buy_date": "2026-08-25"},
+            {"account": "아내", "acct": "ISA", "name": "키움제10호스팩", "buy_amount": calcBuyAmount(1078065, 535, 535), "quantity": 535, "buy_date": "2026-08-25"},
+            {"account": "아내", "acct": "ISA", "name": "디비금융제13호스팩", "buy_amount": calcBuyAmount(941665, 465, 465), "quantity": 465, "buy_date": "2026-08-25"},
+            {"account": "아내", "acct": "ISA", "name": "신한제14호스팩", "buy_amount": calcBuyAmount(1057090, 522, 522), "quantity": 522, "buy_date": "2026-08-26"},
+            {"account": "아내", "acct": "ISA", "name": "교보17호스팩", "buy_amount": calcBuyAmount(998800, 492, 492), "quantity": 492, "buy_date": "2026-08-26"},
+            {"account": "아내", "acct": "ISA", "name": "유안타제17호스팩", "buy_amount": calcBuyAmount(2056450, 1018, 1018), "quantity": 1018, "buy_date": "2026-08-28"},
+            {"account": "아내", "acct": "ISA", "name": "하나34호스팩", "buy_amount": calcBuyAmount(2634635, 1301, 1301), "quantity": 1301, "buy_date": "2026-10-02"}
+        ];
+
+        function toAfterTaxDepositRate(preTaxRate) {
+            const r = toFiniteNumber(preTaxRate);
+            if (r === null) return null;
+            return r * DEPOSIT_NET_FACTOR;
+        }
+
+        function normName(n) {
+            return String(n || '')
+                .replace(/\s+/g, '')
+                .replace(/기업인수목적/g, '')
+                .replace(/스팩/g, '')
+                .replace(/^KB/i, '케이비')
+                .replace(/^IBKS/i, '아이비케이에스')
+                .replace(/^DB/i, '디비')
+                .toLowerCase();
+        }
+
+        function findSpacByName(name) {
+            const k = normName(name);
+            return allItems.find(s => s.name === name) || allItems.find(s => normName(s.name) === k);
+        }
+
+        function getHoldingHolder(item) {
+            const h = String(item?.account || item?.accountHolder || item?.holder || '남편').trim();
+            return h === '아내' ? '아내' : '남편';
+        }
+
+        function getHoldingUniqueKey(item) {
+            return [
+                getHoldingHolder(item),
+                item.acct || '일반',
+                normName(item.name),
+                Number(item.buy_amount || 0),
+                Number(item.quantity || 0),
+                String(item.buy_date || '')
+            ].join('|');
+        }
+
+        function deduplicateHoldings(items) {
+            const seen = new Set();
+            const out = [];
+            for (const item of items) {
+                if (!item) continue;
+                const normalized = { ...item, account: getHoldingHolder(item) };
+                const key = getHoldingUniqueKey(normalized);
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    out.push(normalized);
+                }
+            }
+            return out;
+        }
+
+        function saveHoldings() {
+            holdingItems = deduplicateHoldings(holdingItems);
+            try {
+                localStorage.setItem('spac_holding_items_v5', JSON.stringify(holdingItems));
+            } catch (e) {}
+        }
+
+        function savePerformance() {
+            try {
+                localStorage.setItem('spac_performance_items_v3', JSON.stringify(performanceItems));
+            } catch (e) {}
+        }
+
+        function applySeedHoldings() {
+            holdingItems = deduplicateHoldings(holdingItems);
+            try {
+                if (localStorage.getItem(SEED_KEY)) {
+                    saveHoldings();
+                    return;
+                }
+            } catch (e) { return; }
+            holdingItems = deduplicateHoldings(holdingItems.concat(SEED_HOLDINGS.map(r => ({ ...r, account: getHoldingHolder(r) }))));
+            saveHoldings();
+            try {
+                localStorage.setItem(SEED_KEY, new Date().toISOString());
+            } catch (e) {}
+        }
+
+        function showToast(msg) {
+            const el = document.getElementById('toast-auto');
+            if (!el) return;
+            el.innerText = msg;
+            el.classList.remove('hidden');
+            clearTimeout(window.__toastTimer);
+            window.__toastTimer = setTimeout(() => el.classList.add('hidden'), 6000);
+        }
+
+        function hasConfirmedLiquidationNotice(liqItem) {
+            if (!liqItem || typeof liqItem !== 'object') return false;
+            const reportNm = String(liqItem.report_nm || '').trim();
+            if (!reportNm) return false;
+            return ['청산', '해산', '분배금', '예치금 반환'].some(k => reportNm.includes(k));
+        }
+
+        function toFiniteNumber(val) {
+            if (val === null || val === undefined || val === '') return null;
+            if (typeof val === 'number') return Number.isFinite(val) ? val : null;
+            const cleaned = String(val).replace(/,/g, '').replace(/%/g, '').replace(/%p/g, '').trim();
+            if (!cleaned || cleaned === '-' || cleaned === '미확인' || cleaned === '미정' || cleaned === 'N/A' || cleaned === 'null') return null;
+            const num = Number(cleaned);
+            return Number.isFinite(num) ? num : null;
+        }
+
+        function parseKoreanAmount(raw) {
+            if (raw === null || raw === undefined || raw === '') return null;
+            if (typeof raw === 'number') return Number.isFinite(raw) && raw > 0 ? raw : null;
+            const str = String(raw).replace(/,/g, '').trim();
+            if (!str) return null;
+            const eokMatch = str.match(/^(\d+(?:\.\d+)?)\s*억(?:\s*(\d+(?:\.\d+)?)\s*만)?/);
+            if (eokMatch) {
+                const eok = Number(eokMatch[1]) * 100000000;
+                const man = eokMatch[2] ? Number(eokMatch[2]) * 10000 : 0;
+                return Math.round(eok + man);
+            }
+            const manMatch = str.match(/^(\d+(?:\.\d+)?)\s*만/);
+            if (manMatch) {
+                return Math.round(Number(manMatch[1]) * 10000);
+            }
+            const num = Number(str.replace(/[^\d.-]/g, ''));
+            return Number.isFinite(num) && num > 0 ? num : null;
+        }
+
+        function parseDateOnly(dateStr) {
+            if (!dateStr) return null;
+            const cleaned = String(dateStr).trim();
+            const match = cleaned.match(/^(\d{4})[-./]?(\d{2})[-./]?(\d{2})/);
+            if (match) {
+                const dt = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+                return Number.isNaN(dt.getTime()) ? null : dt;
+            }
+            const parsed = new Date(cleaned);
+            if (Number.isNaN(parsed.getTime())) return null;
+            return new Date(Date.UTC(parsed.getUTCFullYear(), parsed.getUTCMonth(), parsed.getUTCDate()));
+        }
+
+        function formatDateISO(dt) {
+            if (!dt || Number.isNaN(dt.getTime())) return '-';
+            const yyyy = dt.getUTCFullYear();
+            const mm = String(dt.getUTCMonth() + 1).padStart(2, '0');
+            const dd = String(dt.getUTCDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
+        function normalizeDateStr(dateStr) {
+            const dt = parseDateOnly(dateStr);
+            if (dt) return formatDateISO(dt);
+            return dateStr ? String(dateStr).trim() : '';
+        }
+
+        function getDelistingDateValue(item) {
+            if (!item || typeof item !== 'object') return '';
+            const raw = item.delisting_date || item.liquidation_date || item.maturity_date || item.maturityDate || item.delist_dd || '';
+            return normalizeDateStr(raw);
+        }
+
+        function getListingDateValue(item) {
+            if (!item || typeof item !== 'object') return '';
+            const direct = item.listing_date || item.listingDate || item.ipo_date || item.ipoDate || item.listed_date || item.krx_list_dd || item.list_dd || '';
+            if (direct) return normalizeDateStr(direct);
+
+            const delist = getDelistingDateValue(item);
+            const delistDt = parseDateOnly(delist);
+            if (delistDt) {
+                const estListDt = new Date(Date.UTC(delistDt.getUTCFullYear() - 3, delistDt.getUTCMonth(), delistDt.getUTCDate()));
+                return formatDateISO(estListDt);
+            }
+            return '';
+        }
+
+        function getDaysUntilDelisting(dateStr) {
+            const target = parseDateOnly(dateStr);
+            if (!target) return null;
+            const today = parseDateOnly(getTodayStr());
+            if (!today) return null;
+            const diffMs = target.getTime() - today.getTime();
+            return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        }
+
+        function isExpiredOrDelistedSpac(item) {
+            if (!item || typeof item !== 'object') return true;
+            const rawStatus = String(item.status || '').trim();
+            if (rawStatus === '상장폐지') return true;
+
+            const remDays = toFiniteNumber(item.remaining_days ?? item.remainingDays);
+            if (remDays !== null && remDays <= 0) return true;
+
+            const delistingDate = getDelistingDateValue(item);
+            if (delistingDate) {
+                const daysLeft = getDaysUntilDelisting(delistingDate);
+                if (daysLeft !== null && daysLeft <= 0) return true;
+            }
+
+            return false;
+        }
+
+        function normalizeStatus(status) {
+            const s = String(status || '').trim();
+            if (!s || s === '정상' || s === '정상거래') return '일반';
+            if (s === '거래정지') return '정지';
+            if (s === '합병진행') return '합병';
+            return s;
+        }
+
+        function normalizeInvestType(item) {
+            const delistingDate = getDelistingDateValue(item);
+            const daysLeft = getDaysUntilDelisting(delistingDate);
+            if (daysLeft !== null) {
+                return daysLeft >= MERGER_THRESHOLD_DAYS ? '합병' : '청산';
+            }
+            const raw = String(item?.invest_type ?? item?.investType ?? item?.type ?? item?.category ?? '').trim();
+            if (raw.includes('합병')) return '합병';
+            return '청산';
+        }
+
+        function getFallbackGrossDepositRate() {
+            const latestKey = Object.keys(bokDepositRates).sort().pop();
+            const latestRate = latestKey ? toFiniteNumber(bokDepositRates[latestKey]) : null;
+            return latestRate !== null && latestRate > 0 ? latestRate : 2.5;
+        }
+
+        function parseSpacDisclosureData(item) {
+            const sources = [
+                item,
+                item.dart_disclosure,
+                item.dart_info,
+                item.prospectus,
+                item.krx_info,
+                item.deposit_info,
+                item.trust_info,
+                item.disclosure_info,
+                item.ipo_info,
+                item.rates
+            ].filter(o => o && typeof o === 'object');
+
+            let ipoPrice = null;
+            let ipoShares = null;
+            let ipoAmount = null;
+            let depositRatio = null;
+            let depositPrincipal = null;
+
+            for (const src of sources) {
+                if (ipoPrice === null) {
+                    ipoPrice = parseKoreanAmount(src.ipo_price ?? src.public_offering_price ?? src.offer_price ?? src.par_price ?? src.par_value);
+                }
+                if (ipoShares === null) {
+                    ipoShares = parseKoreanAmount(src.ipo_shares ?? src.offering_shares ?? src.public_shares ?? src.shares ?? src.krx_listed_shares);
+                }
+                if (ipoAmount === null) {
+                    ipoAmount = parseKoreanAmount(src.ipo_amount ?? src.offering_amount ?? src.public_amount ?? src.offering_total);
+                }
+                if (depositRatio === null) {
+                    const r = toFiniteNumber(src.deposit_ratio ?? src.trust_ratio);
+                    if (r !== null && r > 0 && r <= 110) depositRatio = r;
+                }
+                if (depositPrincipal === null) {
+                    depositPrincipal = parseKoreanAmount(src.deposit_principal ?? src.trust_principal ?? src.deposit_amount);
+                }
+            }
+
+            const trustAmendments = Array.isArray(item.trust_amendments) ? item.trust_amendments : [];
+            const recentDisclosures = Array.isArray(item.recent_disclosures) ? item.recent_disclosures : [];
+            const allDisclosures = [...trustAmendments, ...recentDisclosures];
+
+            for (const d of allDisclosures) {
+                const txt = `${d?.report_nm || ''} ${d?.summary || ''} ${d?.content || ''} ${d?.note || ''}`;
+                if (ipoPrice === null) {
+                    const mPrice = txt.match(/(?:모집가액|공모가액|공모가|발행가액)\s*[:：]?\s*([\d,]+)\s*원/);
+                    if (mPrice) ipoPrice = parseKoreanAmount(mPrice[1]);
+                }
+                if (ipoShares === null) {
+                    const mShares = txt.match(/(?:모집주식수|공모주식수|발행주식수)\s*[:：]?\s*([\d,]+)\s*주/);
+                    if (mShares) ipoShares = parseKoreanAmount(mShares[1]);
+                }
+                if (ipoAmount === null) {
+                    const mAmt = txt.match(/(?:모집총액|공모금액|공모총액)\s*[:：]?\s*([\d,.]+\s*(?:억|만)?\s*원?)/);
+                    if (mAmt) ipoAmount = parseKoreanAmount(mAmt[1]);
+                }
+                if (depositRatio === null) {
+                    const mRatio = txt.match(/(?:예치비율|공모자금의)\s*[:：]?\s*(\d+(?:\.\d+)?)\s*%/);
+                    if (mRatio) {
+                        const rVal = toFiniteNumber(mRatio[1]);
+                        if (rVal !== null && rVal >= 90 && rVal <= 105) depositRatio = rVal;
+                    }
+                }
+            }
+
+            if (ipoPrice === null || ipoPrice <= 0) {
+                if (ipoAmount !== null && ipoShares !== null && ipoShares > 0) {
+                    ipoPrice = Math.round(ipoAmount / ipoShares);
+                } else {
+                    ipoPrice = 2000;
+                }
+            }
+
+            if (ipoShares !== null && ipoShares > 0 && ipoAmount === null) {
+                ipoAmount = Math.round(ipoPrice * ipoShares);
+            } else if (ipoAmount !== null && ipoAmount > 0 && ipoShares === null) {
+                ipoShares = Math.round(ipoAmount / ipoPrice);
+            }
+
+            const effectiveRatio = depositRatio !== null ? depositRatio : 100;
+            if (depositPrincipal === null && ipoAmount !== null && ipoAmount > 0) {
+                depositPrincipal = Math.round(ipoAmount * (effectiveRatio / 100));
+            }
+            if ((depositPrincipal === null || depositPrincipal <= 0) && ipoShares !== null && ipoShares > 0) {
+                depositPrincipal = Math.round(ipoPrice * ipoShares * (effectiveRatio / 100));
+            }
+
+            const scheduleEntries = [];
+            const scheduleArrays = [
+                item.deposit_schedule,
+                item.trust_schedule,
+                item.rate_periods,
+                item.deposit_periods,
+                item.half_yearly_rates,
+                item.deposit_info?.schedule,
+                item.trust_info?.schedule,
+                item.dart_disclosure?.deposit_schedule
+            ];
+
+            for (const arr of scheduleArrays) {
+                if (Array.isArray(arr) && arr.length > 0) {
+                    arr.forEach((seg, idx) => {
+                        if (!seg || typeof seg !== 'object') return;
+                        const rateVal = toFiniteNumber(seg.rate ?? seg.interest_rate ?? seg.deposit_rate ?? seg.yield);
+                        if (rateVal === null || rateVal <= 0 || rateVal >= 15) return;
+                        const months = toFiniteNumber(seg.months ?? seg.period_months ?? seg.duration_months);
+                        const days = toFiniteNumber(seg.days ?? seg.period_days);
+                        let fractionYears = 1.0;
+                        if (months !== null && months > 0) fractionYears = months / 12;
+                        else if (days !== null && days > 0) fractionYears = days / 365;
+                        else if (String(seg.period || seg.label || '').includes('6개월')) fractionYears = 0.5;
+
+                        const yrIdx = toFiniteNumber(seg.year ?? seg.year_index) ?? Math.min(3, Math.floor(idx * fractionYears) + 1);
+                        const label = String(seg.label || seg.period || (fractionYears === 0.5 ? `${yrIdx}년차(${idx % 2 === 0 ? '상반기 6개월' : '하반기 6개월'})` : `${yrIdx}년차`)).trim();
+                        scheduleEntries.push({
+                            label,
+                            yearIndex: Math.min(3, Math.max(1, Math.round(yrIdx))),
+                            fractionYears,
+                            rate: rateVal
+                        });
+                    });
+                    if (scheduleEntries.length > 0) break;
+                }
+            }
+
+            const yearlyRates = [null, null, null];
+
+            const prospectusRate = toFiniteNumber(
+                item.prospectus?.year1_rate ??
+                item.prospectus?.deposit_rate ??
+                item.dart_disclosure?.prospectus_rate ??
+                item.ipo_deposit_rate
+            );
+            if (prospectusRate !== null && prospectusRate > 0 && prospectusRate < 15) {
+                yearlyRates[0] = prospectusRate;
+            }
+
+            const arrCandidates = [
+                item.yearly_deposit_rates,
+                item.deposit_rates_by_year,
+                item.trust_interest_rates,
+                item.deposit_interest_rates,
+                item.interest_rates,
+                item.yearly_rates,
+                item.dart_disclosure?.yearly_deposit_rates
+            ];
+            for (const arr of arrCandidates) {
+                if (Array.isArray(arr) && arr.length > 0) {
+                    for (let i = 0; i < Math.min(3, arr.length); i++) {
+                        const entry = arr[i];
+                        const val = toFiniteNumber(typeof entry === 'object' && entry !== null
+                            ? (entry.rate ?? entry.interest_rate ?? entry.deposit_rate ?? entry.yield)
+                            : entry);
+                        if (val !== null && val > 0 && val < 15) {
+                            yearlyRates[i] = val;
+                        }
+                    }
+                }
+            }
+
+            const yearKeyGroups = [
+                ['year1_rate', 'rate_1y', 'rate_1', 'first_year_rate', 'y1_rate', '1년차', '1차년도'],
+                ['year2_rate', 'rate_2y', 'rate_2', 'second_year_rate', 'y2_rate', '2년차', '2차년도'],
+                ['year3_rate', 'rate_3y', 'rate_3', 'third_year_rate', 'y3_rate', '3년차', '3차년도']
+            ];
+            for (const src of sources) {
+                for (let idx = 0; idx < 3; idx++) {
+                    if (yearlyRates[idx] !== null) continue;
+                    for (const k of yearKeyGroups[idx]) {
+                        const val = toFiniteNumber(src[k]);
+                        if (val !== null && val > 0 && val < 15) {
+                            yearlyRates[idx] = val;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (yearlyRates[0] === null) {
+                const singleCandidates = [
+                    item.spac_deposit_rate,
+                    item.trust_rate,
+                    item.interest_rate,
+                    item.deposit_interest_rate,
+                    item.trust_interest_rate,
+                    item.applied_deposit_rate,
+                    item.deposit_info?.rate,
+                    item.trust_info?.rate,
+                    item.dart_disclosure?.deposit_rate
+                ];
+                for (const c of singleCandidates) {
+                    const val = toFiniteNumber(c);
+                    if (val !== null && val > 0 && val < 15) {
+                        yearlyRates[0] = val;
+                        break;
+                    }
+                }
+            }
+
+            const amendmentDisclosures = allDisclosures
+                .filter(d => {
+                    const nm = String(d?.report_nm || '');
+                    return (nm.includes('예치') && nm.includes('신탁') && nm.includes('변경')) || trustAmendments.includes(d);
+                })
+                .sort((a, b) => String(a?.rcept_dt || a?.date || '').localeCompare(String(b?.rcept_dt || b?.date || '')));
+
+            for (const d of amendmentDisclosures) {
+                const txt = `${d?.report_nm || ''} ${d?.summary || ''} ${d?.content || ''} ${d?.note || ''}`;
+                if (!txt.trim()) continue;
+
+                const amendY1 = toFiniteNumber(d?.year1_rate ?? d?.prev_rate ?? d?.before_rate);
+                const amendY2 = toFiniteNumber(d?.year2_rate ?? d?.new_rate ?? d?.after_rate);
+                const amendY3 = toFiniteNumber(d?.year3_rate);
+                if (amendY1 !== null && amendY1 > 0 && amendY1 < 15) yearlyRates[0] = amendY1;
+                if (amendY2 !== null && amendY2 > 0 && amendY2 < 15) yearlyRates[1] = amendY2;
+                if (amendY3 !== null && amendY3 > 0 && amendY3 < 15) yearlyRates[2] = amendY3;
+
+                const mBefore = txt.match(/(?:변경\s*전|기존|전년도|1년차|1차년도)[^%\d]{0,22}(?:연\s*)?(\d+(?:\.\d+)?)\s*%/);
+                if (mBefore) {
+                    const v1 = toFiniteNumber(mBefore[1]);
+                    if (v1 !== null && v1 > 0 && v1 < 15) yearlyRates[0] = v1;
+                }
+                const mAfter = txt.match(/(?:변경\s*후|신규|당해연도|2년차|2차년도)[^%\d]{0,22}(?:연\s*)?(\d+(?:\.\d+)?)\s*%/);
+                if (mAfter) {
+                    const v2 = toFiniteNumber(mAfter[1]);
+                    if (v2 !== null && v2 > 0 && v2 < 15) yearlyRates[1] = v2;
+                }
+
+                for (let y = 1; y <= 3; y++) {
+                    const reYear = new RegExp(`(?:${y}년차|${y}차년도|제${y}차)[^%\d]{0,18}(?:연\s*)?(\d+(?:\.\d+)?)\s*%`);
+                    const mYr = txt.match(reYear);
+                    if (mYr) {
+                        const rVal = toFiniteNumber(mYr[1]);
+                        if (rVal !== null && rVal > 0 && rVal < 15) {
+                            yearlyRates[y - 1] = rVal;
+                        }
+                    }
+                }
+            }
+
+            const rawSchedule = scheduleEntries.length > 0
+                ? scheduleEntries
+                : [1, 2, 3].map(y => ({
+                    label: `${y}년차`,
+                    yearIndex: y,
+                    fractionYears: y === 3 ? 0.5 : 1.0,
+                    rate: yearlyRates[y - 1]
+                }));
+
+            const fallbackRate = getFallbackGrossDepositRate();
+            let lastKnownRate = null;
+            const resolvedSchedule = rawSchedule.map(seg => {
+                const isUndisclosed = (seg.rate === null || !Number.isFinite(seg.rate));
+                const effFractionYears = seg.yearIndex === 3 ? 0.5 : seg.fractionYears;
+                if (!isUndisclosed) {
+                    lastKnownRate = seg.rate;
+                    return { ...seg, fractionYears: effFractionYears, rate: seg.rate, isUndisclosed: false, calcRate: seg.rate };
+                }
+                const calcRate = lastKnownRate !== null ? lastKnownRate : fallbackRate;
+                return { ...seg, fractionYears: effFractionYears, rate: null, isUndisclosed: true, calcRate };
+            });
+
+            const effectiveShares = (ipoShares !== null && ipoShares > 0)
+                ? ipoShares
+                : (depositPrincipal !== null && depositPrincipal > 0 && ipoPrice > 0
+                    ? Math.round(depositPrincipal / (ipoPrice * (effectiveRatio / 100)))
+                    : null);
+
+            const effectivePrincipal = (depositPrincipal !== null && depositPrincipal > 0)
+                ? depositPrincipal
+                : (effectiveShares !== null && effectiveShares > 0
+                    ? Math.round(ipoPrice * effectiveShares * (effectiveRatio / 100))
+                    : null);
+
+            let runningTrust = effectivePrincipal;
+            const trustRows = resolvedSchedule.map(seg => {
+                if (runningTrust !== null && runningTrust > 0 && seg.calcRate !== null) {
+                    const grossInterest = runningTrust * (seg.calcRate / 100) * seg.fractionYears;
+                    const afterFeeAndTaxInterest = grossInterest * TRUST_NET_INTEREST_FACTOR;
+                    runningTrust = Math.round(runningTrust + afterFeeAndTaxInterest);
+                    return {
+                        label: seg.label,
+                        fractionYears: seg.fractionYears,
+                        rate: seg.rate,
+                        calcRate: seg.calcRate,
+                        isUndisclosed: seg.isUndisclosed,
+                        trust: runningTrust
+                    };
+                }
+                return {
+                    label: seg.label,
+                    fractionYears: seg.fractionYears,
+                    rate: seg.rate,
+                    calcRate: seg.calcRate,
+                    isUndisclosed: seg.isUndisclosed,
+                    trust: null
+                };
+            });
+
+            const backendLiqPrice = toFiniteNumber(item?.liquidation_price ?? item?.liquidationPrice);
+            const maxAllowedLiq = ipoPrice > 0 ? ipoPrice * 1.15 : 6000;
+            const minAllowedLiq = ipoPrice > 0 ? ipoPrice * 0.95 : 900;
+
+            let resolvedLiqPrice = null;
+            let recomputedFromSchedule = false;
+
+            if (backendLiqPrice !== null && backendLiqPrice >= minAllowedLiq && backendLiqPrice <= maxAllowedLiq) {
+                resolvedLiqPrice = Math.round(backendLiqPrice);
+                recomputedFromSchedule = false;
+            } else if (runningTrust !== null && runningTrust > 0 && effectiveShares !== null && effectiveShares > 0) {
+                const cand = Math.round(runningTrust / effectiveShares);
+                if (cand >= minAllowedLiq && cand <= maxAllowedLiq) {
+                    resolvedLiqPrice = cand;
+                    recomputedFromSchedule = true;
+                }
+            }
+
+            if (resolvedLiqPrice === null && ipoPrice > 0) {
+                const effGross = (yearlyRates[0] ?? yearlyRates[1] ?? yearlyRates[2] ?? fallbackRate);
+                const effNet = (effGross / 100) * TRUST_NET_INTEREST_FACTOR;
+                resolvedLiqPrice = Math.round(ipoPrice * Math.pow(1 + effNet, 2) * (1 + effNet * 0.5));
+                recomputedFromSchedule = true;
+            }
+
+            return {
+                ipoPrice,
+                ipoShares: effectiveShares,
+                ipoAmount: ipoAmount ?? (effectiveShares && ipoPrice ? Math.round(effectiveShares * ipoPrice) : null),
+                depositRatio: effectiveRatio,
+                depositPrincipal: effectivePrincipal,
+                trustRows,
+                liquidationPrice: resolvedLiqPrice,
+                recomputedFromSchedule
+            };
+        }
+
+        function computeAccruedFairPrice(parPrice, liqPrice, listingDateStr, delistingDateStr) {
+            const P = toFiniteNumber(parPrice);
+            const L = toFiniteNumber(liqPrice);
+            if (P === null || P <= 0 || L === null || L <= 0) return null;
+
+            const delistDt = parseDateOnly(delistingDateStr);
+            const todayDt = parseDateOnly(getTodayStr());
+            if (!todayDt) return Math.round((P + L) / 2);
+
+            let listDt = parseDateOnly(listingDateStr);
+            if (!listDt && delistDt) {
+                listDt = new Date(Date.UTC(delistDt.getUTCFullYear() - 3, delistDt.getUTCMonth(), delistDt.getUTCDate()));
+            }
+            if (!listDt && !delistDt) {
+                return Math.round((P + L) / 2);
+            }
+            if (!delistDt && listDt) {
+                delistDt = new Date(Date.UTC(listDt.getUTCFullYear() + 3, listDt.getUTCMonth(), listDt.getUTCDate()));
+            }
+
+            const totalDays = (delistDt.getTime() - listDt.getTime()) / (1000 * 60 * 60 * 24);
+            if (totalDays <= 0) return L;
+
+            const elapsedDays = Math.max(0, Math.min(totalDays, (todayDt.getTime() - listDt.getTime()) / (1000 * 60 * 60 * 24)));
+            return Math.round(P + (L - P) * (elapsedDays / totalDays));
+        }
+
+        function evaluateFairBuy(item, parsedDisclosure) {
+            const curPrice = toFiniteNumber(item?.current_price ?? item?.currentPrice);
+            const listingDate = getListingDateValue(item);
+            const delistingDate = getDelistingDateValue(item);
+            const parPrice = toFiniteNumber(item?.base_price ?? item?.ipo_price) ?? parsedDisclosure?.ipoPrice ?? 2000;
+            const liqPrice = parsedDisclosure?.liquidationPrice ?? toFiniteNumber(item?.liquidation_price ?? item?.liquidationPrice);
+
+            const backendFair = toFiniteNumber(item?.fair_buy_price ?? item?.fairPrice);
+            const fairPrice = (backendFair !== null && backendFair > 0 && !parsedDisclosure?.recomputedFromSchedule)
+                ? backendFair
+                : computeAccruedFairPrice(parPrice, liqPrice, listingDate, delistingDate);
+            if (fairPrice === null || curPrice === null || curPrice <= 0) {
+                return { fairPrice: null, isFairBuy: null };
+            }
+            return {
+                fairPrice,
+                isFairBuy: curPrice <= fairPrice ? 'O' : 'X'
+            };
+        }
+
+        function getCurrentBaseDepositRate() {
+            const first = allItems.length > 0 ? allItems[0] : null;
+            const afterTaxFromItem = first ? toFiniteNumber(first.deposit_rate_after_tax ?? first.deposit_rate) : null;
+            if (afterTaxFromItem !== null && afterTaxFromItem > 0) {
+                return afterTaxFromItem;
+            }
+            const grossFromItem = first ? toFiniteNumber(first.deposit_rate_gross) : null;
+            if (grossFromItem !== null && grossFromItem > 0) {
+                return toAfterTaxDepositRate(grossFromItem);
+            }
+            const latestKey = Object.keys(bokDepositRates).sort().pop();
+            const fromMap = latestKey ? toFiniteNumber(bokDepositRates[latestKey]) : null;
+            return toAfterTaxDepositRate(fromMap !== null ? fromMap : 3.21);
+        }
+
+        function calculateSingleAnnualYield(buyAmount, sellAmount, buyDate, sellDate) {
+            if (!buyAmount || buyAmount <= 0 || sellAmount === null || sellAmount === undefined || sellAmount < 0) return -100;
+            const bDt = buyDate instanceof Date ? buyDate : parseDateOnly(buyDate);
+            const sDt = sellDate instanceof Date ? sellDate : parseDateOnly(sellDate);
+            if (!bDt || !sDt) return 0;
+            const diffDays = (sDt.getTime() - bDt.getTime()) / (1000 * 60 * 60 * 24);
+            if (diffDays <= 0) {
+                return ((sellAmount - buyAmount) / buyAmount) * 100;
+            }
+            const days = Math.max(1, diffDays);
+            const ratio = sellAmount / buyAmount;
+            return (Math.pow(ratio, 365.0 / days) - 1) * 100;
+        }
+
+        function computeFallbackYieldFromSpac(item, accountType) {
+            const curPrice = toFiniteNumber(item?.current_price ?? item?.currentPrice);
+            const liqPrice = toFiniteNumber(item?._parsedDisclosure?.liquidationPrice ?? item?.liquidation_price ?? item?.liquidationPrice);
+            const targetDateStr = getDelistingDateValue(item) || item?.expected_date;
+            if (curPrice && curPrice > 0 && liqPrice && liqPrice > 0) {
+                const grossRatio = liqPrice / curPrice;
+                const afterTaxPrice = accountType === 'general' && liqPrice > curPrice
+                    ? curPrice + (liqPrice - curPrice) * (1 - GENERAL_TAX_RATE)
+                    : liqPrice;
+                const netRatio = afterTaxPrice / curPrice;
+                if (targetDateStr) {
+                    const diffDays = getDaysUntilDelisting(targetDateStr);
+                    if (diffDays !== null && diffDays >= 1) {
+                        return (Math.pow(netRatio, 365.0 / diffDays) - 1) * 100;
+                    }
+                }
+                return (grossRatio - 1) * 100;
+            }
+            return null;
+        }
+
+        function resolveAccountYield(item, accountType) {
+            if (!item) return null;
+            const isIsa = accountType === 'isa';
+
+            if (item._parsedDisclosure && item._parsedDisclosure.recomputedFromSchedule) {
+                return computeFallbackYieldFromSpac(item, accountType);
+            }
+
+            const directCandidates = isIsa
+                ? [item.yield_isa, item.isa_yield, item.expected_yield_isa, item.rates?.isaAnnualized]
+                : [item.yield_general, item.general_yield, item.expected_yield_general, item.rates?.generalAnnualized];
+
+            for (const c of directCandidates) {
+                const n = toFiniteNumber(c);
+                if (n !== null) return n;
+            }
+
+            const genericCandidates = [item.expected_yield, item.annual_yield, item.yield, item.return_rate];
+            for (const g of genericCandidates) {
+                const n = toFiniteNumber(g);
+                if (n !== null) {
+                    if (!isIsa && n > 0 && (item.yield_general === undefined || item.yield_general === null)) {
+                        return n * (1 - GENERAL_TAX_RATE);
+                    }
+                    return n;
+                }
+            }
+
+            return computeFallbackYieldFromSpac(item, accountType);
+        }
+
+        function formatSpreadPp(yieldVal, baseAfterTaxRate) {
+            const y = toFiniteNumber(yieldVal);
+            const b = toFiniteNumber(baseAfterTaxRate);
+            if (y === null || b === null) return null;
+            const diff = y - b;
+            const sign = diff > 0.05 ? '+' : (diff < -0.05 ? '-' : '');
+            return `(${sign}${Math.abs(diff).toFixed(1)}%p)`;
+        }
+
+        const DART_API_KEY_CLIENT = (window.DART_API_KEY || localStorage.getItem('dart_api_key') || '').trim();
+        const dartClientDocCache = new Map();
+        const dartClientListCache = new Map();
+
+        function extractDateRangeClient(snippet) {
+            if (!snippet) return null;
+            const mRange = snippet.match(/(20[2-9][0-9])[년./-]\s*([01]?[0-9])[월./-]\s*([0-3]?[0-9])\s*일?\s*(?:~|부터|-|까지)\s*(?:(20[2-9][0-9])[년./-]\s*)?([01]?[0-9])[월./-]\s*([0-3]?[0-9])\s*일?/);
+            if (mRange) {
+                const y1 = mRange[1];
+                const m1 = mRange[2].padStart(2, '0');
+                const d1 = mRange[3].padStart(2, '0');
+                const y2 = mRange[4] || y1;
+                const m2 = mRange[5].padStart(2, '0');
+                const d2 = mRange[6].padStart(2, '0');
+                return `${y1}-${m1}-${d1} ~ ${y2}-${m2}-${d2}`;
+            }
+            const mSingle = snippet.match(/(20[2-9][0-9])[년./-]\s*([01]?[0-9])[월./-]\s*([0-3]?[0-9])\s*일?/);
+            if (mSingle) {
+                return `${mSingle[1]}-${mSingle[2].padStart(2, '0')}-${mSingle[3].padStart(2, '0')}`;
+            }
+            return null;
+        }
+
+        function parseDecisionTextClient(text, fallbackTarget) {
+            const out = {
+                merger_target: fallbackTarget || null,
+                opposing_notice_period: null,
+                general_meeting_date: null,
+                appraisal_exercise_period: null
+            };
+            if (!text) return out;
+            if (!out.merger_target) {
+                const mT = text.match(/(?:합병\s*대상\s*회사(?:명)?|피합병회사(?:명)?|합병상대회사(?:명)?|대상회사명)\s*[:：|]?\s*([가-힣A-Za-z0-9()·&\-_\s]{2,40}?)(?:\s*(?:\||주주총회|합병기일|합병비율|주식매수청구권|반대의사|$))/);
+                if (mT && mT[1]) {
+                    const cand = mT[1].replace(/\s+/g, ' ').replace(/^[ :：|-]+|[ :：|-]+$/g, '').trim();
+                    if (cand && !['해당사항없음', '미정', '없음'].includes(cand)) out.merger_target = cand;
+                }
+            }
+            const schedIdx = text.search(/10\.\s*합병일정|합병일정/);
+            const schedScope = schedIdx >= 0 ? text.slice(schedIdx, schedIdx + 8000) : text;
+            const mOpp = schedScope.match(/합병반대의사통지\s*접수기간.{0,260}/) || text.match(/(?:합병반대의사통지\s*접수기간|반대의사\s*표시\s*기간).{0,260}/);
+            if (mOpp) out.opposing_notice_period = extractDateRangeClient(mOpp[0]);
+            const mGm = schedScope.match(/(?:주주총회\s*(?:예정)?일|임시주주총회\s*(?:예정)?일|주주총회일).{0,220}/) || text.match(/(?:주주총회\s*(?:예정)?일|임시주주총회\s*(?:예정)?일|주주총회일).{0,220}/);
+            if (mGm) out.general_meeting_date = extractDateRangeClient(mGm[0]);
+            const mEx = schedScope.match(/(?:주식매수청구권\s*행사\s*기간|매수청구권\s*행사\s*기간|매수청구\s*기간).{0,260}/) || text.match(/(?:주식매수청구권\s*행사\s*기간|매수청구권\s*행사\s*기간|매수청구\s*기간).{0,260}/);
+            if (mEx) out.appraisal_exercise_period = extractDateRangeClient(mEx[0]);
+            return out;
+        }
+
+        function parseRegistrationTextClient(text) {
+            const out = {
+                first_offer_price: null,
+                second_appraisal_price: null,
+                opposing_notice_period: null,
+                general_meeting_date: null,
+                appraisal_exercise_period: null
+            };
+            if (!text) return out;
+
+            let sec = text;
+            const part1Idx = text.search(/제\s*1\s*부\s*합병의\s*개요/);
+            const baseSearch = part1Idx >= 0 ? text.slice(part1Idx) : text;
+            const buyIdx = baseSearch.search(/주식매수청구권에\s*관한\s*사항/);
+            if (buyIdx >= 0) {
+                sec = baseSearch.slice(buyIdx, buyIdx + 18000);
+            } else {
+                const fallbackIdx = text.search(/주식매수청구권에\s*관한\s*사항/);
+                if (fallbackIdx >= 0) sec = text.slice(fallbackIdx, fallbackIdx + 18000);
+            }
+
+            const normSec = sec.replace(/\s*\|\s*/g, ' ').replace(/\s+/g, ' ').trim();
+
+            const p1Patterns = [
+                /(?:1차\s*(?:매수청구(?:가|가격)?|제시\s*가격|협의\s*가격)|협의\s*매수가격|협의를\s*위한\s*회사의\s*제시가격|1차\s*제시\s*매수가격)[^0-9원]{0,120}([1-9][0-9,]{2,5})\s*원/,
+                /1차[^0-9원]{0,40}(?:제시|매수|청구)[^0-9원]{0,60}([1-9][0-9,]{2,5})\s*원/
+            ];
+            for (const pat of p1Patterns) {
+                const m = normSec.match(pat);
+                if (m) {
+                    const v = toFiniteNumber(m[1]);
+                    if (v !== null && v >= 100 && v <= 500000) {
+                        out.first_offer_price = Math.round(v);
+                        break;
+                    }
+                }
+            }
+
+            const p2Patterns = [
+                /(?:2차\s*(?:매수청구(?:가|가격)?|제시\s*가격|매수가격)|협의가\s*성립되지\s*(?:아니할|않는|않은)\s*경우[^0-9원]{0,140}|협의\s*불성립\s*시[^0-9원]{0,120})([1-9][0-9,]{2,5})\s*원/,
+                /2차[^0-9원]{0,40}(?:매수청구|제시|매수)[^0-9원]{0,60}([1-9][0-9,]{2,5})\s*원/
+            ];
+            for (const pat of p2Patterns) {
+                const m = normSec.match(pat);
+                if (m) {
+                    const v = toFiniteNumber(m[1]);
+                    if (v !== null && v >= 100 && v <= 500000) {
+                        out.second_appraisal_price = Math.round(v);
+                        break;
+                    }
+                }
+            }
+
+            if (out.first_offer_price === null || out.second_appraisal_price === null) {
+                const mPair = normSec.match(/1차[^0-9원]{0,50}([1-9][0-9,]{2,5})\s*원.{0,180}?2차[^0-9원]{0,50}([1-9][0-9,]{2,5})\s*원/);
+                if (mPair) {
+                    if (out.first_offer_price === null) out.first_offer_price = toFiniteNumber(mPair[1]);
+                    if (out.second_appraisal_price === null) out.second_appraisal_price = toFiniteNumber(mPair[2]);
+                }
+            }
+
+            const mOpp = sec.match(/(?:합병반대의사통지\s*접수기간|반대의사\s*표시\s*기간).{0,260}/);
+            if (mOpp) out.opposing_notice_period = extractDateRangeClient(mOpp[0]);
+            const mGm = sec.match(/(?:주주총회\s*(?:예정)?일|임시주주총회\s*(?:예정)?일|주주총회일).{0,220}/);
+            if (mGm) out.general_meeting_date = extractDateRangeClient(mGm[0]);
+            const mEx = sec.match(/(?:주식매수청구권\s*행사\s*기간|매수청구권\s*행사\s*기간|매수청구\s*기간).{0,260}/);
+            if (mEx) out.appraisal_exercise_period = extractDateRangeClient(mEx[0]);
+            return out;
+        }
+
+        async function fetchDartListClient(corpCode) {
+            if (!DART_API_KEY_CLIENT || !corpCode) return [];
+            if (dartClientListCache.has(corpCode)) return dartClientListCache.get(corpCode);
+            try {
+                const now = new Date();
+                const endDe = now.toISOString().slice(0, 10).replace(/-/g, '');
+                const bgnDe = `${now.getFullYear() - 4}${endDe.slice(4)}`;
+                const url = `https://opendart.fss.or.kr/api/list.json?crtfc_key=${encodeURIComponent(DART_API_KEY_CLIENT)}&corp_code=${encodeURIComponent(corpCode)}&bgn_de=${bgnDe}&end_de=${endDe}&page_count=100`;
+                const res = await fetch(url);
+                if (!res.ok) return [];
+                const json = await res.json();
+                const rows = json && json.status === '000' && Array.isArray(json.list) ? json.list : [];
+                dartClientListCache.set(corpCode, rows);
+                return rows;
+            } catch (e) {
+                return [];
+            }
+        }
+
+        async function fetchDartDocTextClient(rceptNo) {
+            if (!DART_API_KEY_CLIENT || !rceptNo) return '';
+            if (dartClientDocCache.has(rceptNo)) return dartClientDocCache.get(rceptNo);
+            try {
+                const url = `https://opendart.fss.or.kr/api/document.xml?crtfc_key=${encodeURIComponent(DART_API_KEY_CLIENT)}&rcept_no=${encodeURIComponent(rceptNo)}`;
+                const res = await fetch(url);
+                if (!res.ok) return '';
+                const buf = await res.arrayBuffer();
+                const rawText = new TextDecoder('utf-8', { fatal: false }).decode(buf);
+                const stripped = rawText.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/gi, ' ').replace(/\s+/g, ' ').trim();
+                dartClientDocCache.set(rceptNo, stripped);
+                return stripped;
+            } catch (e) {
+                return '';
+            }
+        }
+
+        async function enrichMergerInfoViaDartClient(spacItem) {
+            const existing = spacItem.merger_appraisal_info || {};
+            const merged = {
+                merger_target: spacItem.merger_target ?? existing.merger_target ?? null,
+                first_offer_price: spacItem.first_offer_price ?? existing.first_offer_price ?? null,
+                second_appraisal_price: spacItem.second_appraisal_price ?? existing.second_appraisal_price ?? null,
+                opposing_notice_period: spacItem.opposing_notice_period ?? existing.opposing_notice_period ?? null,
+                general_meeting_date: spacItem.general_meeting_date ?? existing.general_meeting_date ?? null,
+                appraisal_exercise_period: spacItem.appraisal_exercise_period ?? existing.appraisal_exercise_period ?? null
+            };
+            if (!DART_API_KEY_CLIENT || !spacItem.corp_code) return merged;
+
+            const disclosures = Array.isArray(spacItem.recent_disclosures) && spacItem.recent_disclosures.length > 0
+                ? spacItem.recent_disclosures
+                : await fetchDartListClient(spacItem.corp_code);
+
+            const sorted = [...disclosures].sort((a, b) => String(b.rcept_dt || '').localeCompare(String(a.rcept_dt || '')));
+            const decDocs = sorted.filter(d => d.rcept_no && /회사합병결정|합병결정/.test(String(d.report_nm || '').replace(/\s+/g, '')));
+            for (const dDoc of decDocs.slice(0, 2)) {
+                const txt = await fetchDartDocTextClient(dDoc.rcept_no);
+                const pDec = parseDecisionTextClient(txt, merged.merger_target);
+                if (pDec.merger_target) merged.merger_target = pDec.merger_target;
+                if (!merged.opposing_notice_period && pDec.opposing_notice_period) merged.opposing_notice_period = pDec.opposing_notice_period;
+                if (!merged.general_meeting_date && pDec.general_meeting_date) merged.general_meeting_date = pDec.general_meeting_date;
+                if (!merged.appraisal_exercise_period && pDec.appraisal_exercise_period) merged.appraisal_exercise_period = pDec.appraisal_exercise_period;
+            }
+
+            const regDocs = sorted.filter(d => d.rcept_no && String(d.report_nm || '').replace(/\s+/g, '').includes('증권신고서(합병)'));
+            const tNorm = String(merged.merger_target || '').replace(/\s+/g, '').toLowerCase();
+            if (tNorm) {
+                regDocs.sort((a, b) => {
+                    const aMatch = String(a.report_nm || '').replace(/\s+/g, '').toLowerCase().includes(tNorm) ? 1 : 0;
+                    const bMatch = String(b.report_nm || '').replace(/\s+/g, '').toLowerCase().includes(tNorm) ? 1 : 0;
+                    if (bMatch !== aMatch) return bMatch - aMatch;
+                    return String(b.rcept_dt || '').localeCompare(String(a.rcept_dt || ''));
+                });
+            }
+            for (const rDoc of regDocs.slice(0, 3)) {
+                const txt = await fetchDartDocTextClient(rDoc.rcept_no);
+                const pReg = parseRegistrationTextClient(txt);
+                if (merged.first_offer_price === null && pReg.first_offer_price !== null) merged.first_offer_price = pReg.first_offer_price;
+                if (merged.second_appraisal_price === null && pReg.second_appraisal_price !== null) merged.second_appraisal_price = pReg.second_appraisal_price;
+                if (!merged.opposing_notice_period && pReg.opposing_notice_period) merged.opposing_notice_period = pReg.opposing_notice_period;
+                if (!merged.general_meeting_date && pReg.general_meeting_date) merged.general_meeting_date = pReg.general_meeting_date;
+                if (!merged.appraisal_exercise_period && pReg.appraisal_exercise_period) merged.appraisal_exercise_period = pReg.appraisal_exercise_period;
+            }
+
+            return merged;
+        }
+
+        async function openHoldingMergerDetail(holdingIndex) {
+            const hItem = holdingItems[holdingIndex];
+            if (!hItem) return;
+            const matched = findSpacByName(hItem.name);
+            if (!matched) {
+                alert('해당 종목의 상세 정보를 찾을 수 없습니다.');
+                return;
+            }
+            const enrichedMerger = await enrichMergerInfoViaDartClient(matched);
+            const detailItem = {
+                ...matched,
+                status: '합병',
+                merger_target: enrichedMerger.merger_target,
+                first_offer_price: enrichedMerger.first_offer_price,
+                second_appraisal_price: enrichedMerger.second_appraisal_price,
+                opposing_notice_period: enrichedMerger.opposing_notice_period,
+                general_meeting_date: enrichedMerger.general_meeting_date,
+                appraisal_exercise_period: enrichedMerger.appraisal_exercise_period,
+                merger_appraisal_info: enrichedMerger
+            };
+            openSpacDetailModal(detailItem);
+        }
+
+        function setOptionalText(id, val) {
+            const el = document.getElementById(id);
+            if (el) el.innerText = val;
+        }
+
+        function openSpacDetailModal(indexOrItem) {
+            const item = typeof indexOrItem === 'object' && indexOrItem !== null
+                ? indexOrItem
+                : allItems[indexOrItem];
+            if (!item) return;
+
+            setOptionalText('detail-modal-name', item.name || '-');
+            setOptionalText('detail-modal-code', item.code ? `(${String(item.code).padStart(6, '0')})` : '');
+
+            const mInfo = item.merger_appraisal_info || {};
+            const firstPrice = toFiniteNumber(item.first_offer_price ?? mInfo.first_offer_price);
+            const secondPrice = toFiniteNumber(item.second_appraisal_price ?? mInfo.second_appraisal_price);
+            const oppPeriod = item.opposing_notice_period ?? mInfo.opposing_notice_period ?? null;
+            const gmDate = item.general_meeting_date ?? mInfo.general_meeting_date ?? null;
+            const exPeriod = item.appraisal_exercise_period ?? mInfo.appraisal_exercise_period ?? null;
+
+            setOptionalText('detail-first-offer-price', firstPrice !== null && firstPrice > 0 ? `${firstPrice.toLocaleString()}원` : '미확인');
+            setOptionalText('detail-second-appraisal-price', secondPrice !== null && secondPrice > 0 ? `${secondPrice.toLocaleString()}원` : '미확인');
+            setOptionalText('detail-opposing-period', oppPeriod ? String(oppPeriod) : '미확인');
+            setOptionalText('detail-general-meeting-date', gmDate ? String(gmDate) : '미확인');
+            setOptionalText('detail-exercise-period', exPeriod ? String(exPeriod) : '미확인');
+
+            document.getElementById('spac-detail-modal').classList.remove('hidden');
+            syncBodyScrollLock();
+        }
+
+        function closeSpacDetailModal() {
+            document.getElementById('spac-detail-modal').classList.add('hidden');
+            syncBodyScrollLock();
+        }
+
+        function switchTab(tabName) {
+            const viewDash = document.getElementById('view-dashboard');
+            const viewHold = document.getElementById('view-holdings');
+            const viewPerf = document.getElementById('view-performance');
+
+            const btnDash = document.getElementById('tab-btn-dashboard');
+            const btnHold = document.getElementById('tab-btn-holdings');
+            const btnPerf = document.getElementById('tab-btn-performance');
+
+            [btnDash, btnHold, btnPerf].forEach(btn => {
+                btn.classList.remove('bg-white', 'text-indigo-600', 'shadow-sm');
+                btn.classList.add('text-slate-600', 'hover:text-slate-900');
+            });
+
+            viewDash.classList.add('hidden');
+            viewHold.classList.add('hidden');
+            viewPerf.classList.add('hidden');
+
+            if (tabName === 'dashboard') {
+                viewDash.classList.remove('hidden');
+                btnDash.classList.remove('text-slate-600', 'hover:text-slate-900');
+                btnDash.classList.add('bg-white', 'text-indigo-600', 'shadow-sm');
+                renderDashboard();
+            } else if (tabName === 'holdings') {
+                viewHold.classList.remove('hidden');
+                btnHold.classList.remove('text-slate-600', 'hover:text-slate-900');
+                btnHold.classList.add('bg-white', 'text-indigo-600', 'shadow-sm');
+                updatePrivateTabVisibility();
+                if (isUnlocked) renderHoldings();
+            } else if (tabName === 'performance') {
+                viewPerf.classList.remove('hidden');
+                btnPerf.classList.remove('text-slate-600', 'hover:text-slate-900');
+                btnPerf.classList.add('bg-white', 'text-indigo-600', 'shadow-sm');
+                updatePrivateTabVisibility();
+                if (isUnlocked) renderPerformance();
+            }
+        }
+
+        function updatePrivateTabVisibility() {
+            const holdLock = document.getElementById('holdings-lock-screen');
+            const holdContent = document.getElementById('holdings-content');
+            const perfLock = document.getElementById('perf-lock-screen');
+            const perfContent = document.getElementById('perf-content');
+
+            const btnHold = document.getElementById('tab-btn-holdings');
+            const btnPerf = document.getElementById('tab-btn-performance');
+
+            if (isUnlocked) {
+                holdLock.classList.add('hidden');
+                holdContent.classList.remove('hidden');
+                perfLock.classList.add('hidden');
+                perfContent.classList.remove('hidden');
+                btnHold.innerHTML = '📂 보유 종목';
+                btnPerf.innerHTML = '💰 성과 관리';
+            } else {
+                holdLock.classList.remove('hidden');
+                holdContent.classList.add('hidden');
+                perfLock.classList.remove('hidden');
+                perfContent.classList.add('hidden');
+                btnHold.innerHTML = '📂 보유 종목 🔒';
+                btnPerf.innerHTML = '💰 성과 관리 🔒';
+            }
+        }
+
+        function unlockPrivateTabs(event, targetTab) {
+            event.preventDefault();
+            const holdInput = document.getElementById('holdings-password-input');
+            const perfInput = document.getElementById('perf-password-input');
+            const pw = targetTab === 'holdings' ? holdInput.value : perfInput.value;
+
+            if (pw === '1234') {
+                isUnlocked = true;
+                holdInput.value = '';
+                perfInput.value = '';
+                updatePrivateTabVisibility();
+                if (targetTab === 'holdings') renderHoldings();
+                else renderPerformance();
+            } else {
+                alert('비밀번호가 올바르지 않습니다.');
+                if (targetTab === 'holdings') { holdInput.value = ''; holdInput.focus(); }
+                else { perfInput.value = ''; perfInput.focus(); }
+            }
+        }
+
+        function lockPrivateTabs() {
+            isUnlocked = false;
+            updatePrivateTabVisibility();
+        }
+
+        function renderDashboard() {
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const typeVal = document.getElementById('filter-type').value;
+            const fairVal = document.getElementById('filter-fair').value;
+            const statusVal = document.getElementById('filter-status').value;
+            const acctVal = document.getElementById('filter-account').value;
+            const yearVal = document.getElementById('filter-delisting-year').value;
+            const yieldRangeVal = document.getElementById('filter-yield-range').value;
+            const searchVal = document.getElementById('search-input').value.trim().toLowerCase();
+
+            const baseAfterTaxRate = getCurrentBaseDepositRate() ?? 2.0;
+
+            const filtered = allItems.filter(item => {
+                const invType = item.invest_type || normalizeInvestType(item);
+                const status = item.status || normalizeStatus(item.status);
+                const fairBuy = item.is_fair_buy || null;
+                const y = resolveAccountYield(item, acctVal);
+                const delistDate = getDelistingDateValue(item);
+                const delistYear = delistDate ? delistDate.slice(0, 4) : '';
+
+                if (typeVal !== 'all' && invType !== typeVal) return false;
+                if (fairVal !== 'all' && fairBuy !== fairVal) return false;
+                if (statusVal !== 'all' && status !== statusVal) return false;
+                if (yearVal !== 'all' && delistYear !== yearVal) return false;
+
+                if (yieldRangeVal !== 'all') {
+                    if (y === null) return false;
+                    if (yieldRangeVal === 'above_deposit' && y < baseAfterTaxRate) return false;
+                    if (yieldRangeVal === 'low_positive' && (y < 0 || y >= baseAfterTaxRate)) return false;
+                    if (yieldRangeVal === 'negative' && y >= 0) return false;
+                }
+
+                if (searchVal && !String(item.name || '').toLowerCase().includes(searchVal)) return false;
+                return true;
+            });
+
+            renderTable(filtered, acctVal, baseAfterTaxRate);
+        }
+
+        function renderTable(items, acctVal, baseAfterTaxRate) {
+            const tbody = document.getElementById('spac-table-body');
+            if (!tbody) return;
+            if (!items.length) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-10 text-center text-slate-400 text-sm">조건에 맞는 스팩 종목이 없습니다.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = items.map(item => {
+                const idx = allItems.indexOf(item);
+                const curPrice = toFiniteNumber(item.current_price);
+                const parsed = item._parsedDisclosure || parseSpacDisclosureData(item);
+                const liqPrice = parsed.liquidationPrice;
+                const y = resolveAccountYield(item, acctVal);
+                const spread = y !== null ? formatSpreadPp(y, baseAfterTaxRate) : '';
+                const delistDate = getDelistingDateValue(item) || '-';
+                const status = item.status || normalizeStatus(item.status);
+                const invType = item.invest_type || normalizeInvestType(item);
+                return `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="py-3.5 px-5 font-bold text-slate-900 cursor-pointer hover:text-indigo-600" onclick="openSpacDetailModal(${idx})">${escapeHtml(item.name)} <span class="text-[10px] font-normal text-slate-400">(${escapeHtml(invType)})</span></td>
+                        <td class="py-3.5 px-4 text-right font-semibold">${curPrice !== null ? `${curPrice.toLocaleString()}원` : '-'}</td>
+                        <td class="py-3.5 px-4 text-right font-semibold text-indigo-700">${liqPrice !== null ? `${liqPrice.toLocaleString()}원` : '-'}</td>
+                        <td class="py-3.5 px-4 text-right font-bold">${y !== null ? `${y.toFixed(2)}% <span class="text-[11px] text-slate-400">${escapeHtml(spread || '')}</span>` : '-'}</td>
+                        <td class="py-3.5 px-4 text-center text-xs text-slate-600">${escapeHtml(delistDate)}</td>
+                        <td class="py-3.5 px-4 text-center text-xs"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-bold">${escapeHtml(status)}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function sortData(col) {
+            applyFilters();
+        }
+
+        function getTodayStr() {
+            const d = new Date();
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
+        function calculateHoldingMetrics(item) {
+            const buyAmount = toFiniteNumber(item.buy_amount) || 0;
+            const quantity = toFiniteNumber(item.quantity) || 0;
+            const matchedSpac = findSpacByName(item.name);
+
+            const curPrice = matchedSpac ? (toFiniteNumber(matchedSpac.current_price) ?? 0) : 0;
+            const evalAmount = Math.round(curPrice * quantity);
+            const pnl = evalAmount - buyAmount;
+
+            const simpleYield = buyAmount > 0 ? ((evalAmount - buyAmount) / buyAmount) * 100 : 0;
+            const annualYield = calculateSingleAnnualYield(buyAmount, evalAmount, item.buy_date, getTodayStr());
+
+            const acct = item.acct || '일반';
+            const buyYm = String(item.buy_date || '').slice(0, 7);
+            const grossRate = bokDepositRates[buyYm] ?? getFallbackGrossDepositRate();
+            const benchmarkRate = acct === 'ISA' ? grossRate : toAfterTaxDepositRate(grossRate);
+            const beatBenchmark = annualYield >= benchmarkRate;
+
+            const spacStatus = matchedSpac ? (matchedSpac.status || normalizeStatus(matchedSpac.status)) : '미확인';
+            const delistingDate = matchedSpac ? getDelistingDateValue(matchedSpac) : '';
+
+            return {
+                buyAmount,
+                quantity,
+                curPrice,
+                evalAmount,
+                pnl,
+                simpleYield,
+                annualYield,
+                benchmarkRate,
+                beatBenchmark,
+                spacStatus,
+                delistingDate,
+                matchedSpac
+            };
+        }
+
+        function addHoldingItem(event) {
+            event.preventDefault();
+            const holder = document.getElementById('hold-input-holder').value;
+            const acct = document.getElementById('hold-input-account').value;
+            const name = document.getElementById('hold-input-name').value.trim();
+            const buyAmount = Number(document.getElementById('hold-input-amount').value);
+            const quantity = Number(document.getElementById('hold-input-quantity').value);
+            const buyDate = document.getElementById('hold-input-date').value;
+
+            if (!name || buyAmount <= 0 || quantity <= 0 || !buyDate) return;
+
+            holdingItems.push({
+                account: holder,
+                acct,
+                name,
+                buy_amount: buyAmount,
+                quantity,
+                buy_date: buyDate
+            });
+            saveHoldings();
+            renderHoldings();
+            event.target.reset();
+            document.getElementById('hold-input-date').value = getTodayStr();
+        }
+
+        function deleteHoldingItem(index) {
+            if (!confirm('이 보유 종목 내역을 삭제하시겠습니까?')) return;
+            holdingItems.splice(index, 1);
+            saveHoldings();
+            renderHoldings();
+        }
+
+        function sortHoldingData(col) {
+            if (holdingSortColumn === col) {
+                holdingSortDirection = holdingSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                holdingSortColumn = col;
+                holdingSortDirection = col === 'name' ? 'asc' : 'desc';
+            }
+            renderHoldings();
+        }
+
+        function renderHoldings() {
+            const holderFilter = document.getElementById('hold-filter-holder').value;
+            const acctFilter = document.getElementById('hold-filter-account').value;
+            const yearFilter = document.getElementById('hold-filter-delisting-year').value;
+            const benchFilter = document.getElementById('hold-filter-benchmark').value;
+            const statusFilter = document.getElementById('hold-filter-status').value;
+            const searchFilter = document.getElementById('hold-search-input').value.trim().toLowerCase();
+
+            const enriched = holdingItems.map((item, idx) => ({
+                ...item,
+                _idx: idx,
+                _metrics: calculateHoldingMetrics(item)
+            }));
+
+            const filtered = enriched.filter(row => {
+                const holder = getHoldingHolder(row);
+                if (holderFilter !== 'all' && holder !== holderFilter) return false;
+                if (acctFilter !== 'all' && (row.acct || '일반') !== acctFilter) return false;
+                if (yearFilter !== 'all') {
+                    const yr = row._metrics.delistingDate ? row._metrics.delistingDate.slice(0, 4) : '';
+                    if (yr !== yearFilter) return false;
+                }
+                if (benchFilter === 'beat' && !row._metrics.beatBenchmark) return false;
+                if (benchFilter === 'miss' && row._metrics.beatBenchmark) return false;
+                if (statusFilter !== 'all' && row._metrics.spacStatus !== statusFilter) return false;
+                if (searchFilter && !String(row.name || '').toLowerCase().includes(searchFilter)) return false;
+                return true;
+            });
+
+            filtered.sort((a, b) => {
+                let valA, valB;
+                if (holdingSortColumn === 'holder') {
+                    valA = getHoldingHolder(a);
+                    valB = getHoldingHolder(b);
+                } else if (holdingSortColumn === 'acct') {
+                    valA = a.acct || '';
+                    valB = b.acct || '';
+                } else if (holdingSortColumn === 'name') {
+                    valA = a.name || '';
+                    valB = b.name || '';
+                } else if (holdingSortColumn === 'buy_amount') {
+                    valA = a._metrics.buyAmount;
+                    valB = b._metrics.buyAmount;
+                } else if (holdingSortColumn === 'eval_amount') {
+                    valA = a._metrics.evalAmount;
+                    valB = b._metrics.evalAmount;
+                } else if (holdingSortColumn === 'annualYield') {
+                    valA = a._metrics.annualYield;
+                    valB = b._metrics.annualYield;
+                } else if (holdingSortColumn === 'spacStatus') {
+                    valA = a._metrics.spacStatus;
+                    valB = b._metrics.spacStatus;
+                }
+                if (typeof valA === 'string') {
+                    return holdingSortDirection === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                }
+                return holdingSortDirection === 'asc' ? valA - valB : valB - valA;
+            });
+
+            let totalBuy = 0;
+            let totalEval = 0;
+            let weightedAnnualSum = 0;
+            filtered.forEach(r => {
+                totalBuy += r._metrics.buyAmount;
+                totalEval += r._metrics.evalAmount;
+                weightedAnnualSum += r._metrics.buyAmount * r._metrics.annualYield;
+            });
+
+            const totalSimpleYield = totalBuy > 0 ? ((totalEval - totalBuy) / totalBuy) * 100 : 0;
+            const totalAnnualYield = totalBuy > 0 ? weightedAnnualSum / totalBuy : 0;
+
+            document.getElementById('hold-total-buy').innerText = `${totalBuy.toLocaleString()} 원`;
+            document.getElementById('hold-total-eval').innerText = `${totalEval.toLocaleString()} 원`;
+            document.getElementById('hold-total-simple').innerText = `${totalSimpleYield.toFixed(2)} %`;
+            document.getElementById('hold-total-annual').innerText = `${totalAnnualYield.toFixed(2)} %`;
+
+            const tbody = document.getElementById('holdings-table-body');
+            if (!filtered.length) {
+                tbody.innerHTML = `<tr><td colspan="8" class="py-10 text-center text-slate-400 text-sm">보유 종목 내역이 없습니다.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(row => {
+                const m = row._metrics;
+                const holder = getHoldingHolder(row);
+                const acct = row.acct || '일반';
+                const pnlSign = m.pnl > 0 ? '+' : '';
+                const pnlColor = m.pnl > 0 ? 'text-emerald-600' : (m.pnl < 0 ? 'text-rose-600' : 'text-slate-500');
+                const statusBadge = m.spacStatus === '합병'
+                    ? `<button type="button" onclick="openHoldingMergerDetail(${row._idx})" class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 hover:bg-amber-200 transition-colors cursor-pointer">합병</button>`
+                    : `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700">${escapeHtml(m.spacStatus)}</span>`;
+
+                return `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="py-4 px-4 text-center text-xs font-bold">${escapeHtml(holder)}</td>
+                        <td class="py-4 px-4 text-center text-xs font-bold text-indigo-700">${escapeHtml(acct)}</td>
+                        <td class="py-4 px-5 font-bold text-slate-900">
+                            <div>${escapeHtml(row.name)}</div>
+                            <div class="text-[11px] font-normal text-slate-400">${escapeHtml(row.buy_date)} · ${m.quantity.toLocaleString()}주</div>
+                        </td>
+                        <td class="py-4 px-4 font-semibold">${m.buyAmount.toLocaleString()}원</td>
+                        <td class="py-4 px-4">
+                            <div class="font-bold text-slate-900">${m.evalAmount.toLocaleString()}원</div>
+                            <div class="text-xs font-bold ${pnlColor}">${pnlSign}${m.pnl.toLocaleString()}원</div>
+                        </td>
+                        <td class="py-4 px-4">
+                            <div class="font-extrabold text-blue-700">연 ${m.annualYield.toFixed(2)}%</div>
+                            <div class="text-xs font-semibold text-emerald-700">단순 ${m.simpleYield.toFixed(2)}%</div>
+                        </td>
+                        <td class="py-4 px-4 text-center">${statusBadge}</td>
+                        <td class="py-4 px-4 text-center space-x-1 whitespace-nowrap">
+                            <button type="button" onclick="openSellModal(${row._idx})" class="px-2.5 py-1.5 text-xs font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg transition-colors">매도/청산</button>
+                            <button type="button" onclick="deleteHoldingItem(${row._idx})" class="px-2.5 py-1.5 text-xs font-bold bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors">삭제</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openSellModal(index) {
+            const item = holdingItems[index];
+            if (!item) return;
+            const m = calculateHoldingMetrics(item);
+            document.getElementById('sell-modal-index').value = index;
+            document.getElementById('sell-modal-subtitle').innerText = `${item.name} (${m.quantity.toLocaleString()}주 보유) 매도/청산 내역을 기록합니다.`;
+            document.getElementById('sell-modal-amount').value = m.evalAmount > 0 ? m.evalAmount : m.buyAmount;
+            document.getElementById('sell-modal-date').value = getTodayStr();
+            document.getElementById('sell-modal').classList.remove('hidden');
+            syncBodyScrollLock();
+        }
+
+        function closeSellModal() {
+            document.getElementById('sell-modal').classList.add('hidden');
+            syncBodyScrollLock();
+        }
+
+        function confirmSellHolding(event) {
+            event.preventDefault();
+            const index = Number(document.getElementById('sell-modal-index').value);
+            const type = document.getElementById('sell-modal-type').value;
+            const sellAmount = Number(document.getElementById('sell-modal-amount').value);
+            const sellDate = document.getElementById('sell-modal-date').value;
+            const item = holdingItems[index];
+            if (!item || Number.isNaN(sellAmount) || sellAmount < 0 || !sellDate) return;
+
+            performanceItems.push({
+                name: item.name,
+                type,
+                buy_amount: Number(item.buy_amount),
+                buy_date: item.buy_date,
+                sell_amount: sellAmount,
+                sell_date: sellDate
+            });
+            holdingItems.splice(index, 1);
+            savePerformance();
+            saveHoldings();
+            closeSellModal();
+            renderHoldings();
+            renderPerformance();
+        }
+
+        function addPerformanceItem(event) {
+            event.preventDefault();
+            const name = document.getElementById('input-name').value.trim();
+            const type = document.getElementById('input-type').value;
+            const buyAmount = Number(document.getElementById('input-buy-amount').value);
+            const buyDate = document.getElementById('input-buy-date').value;
+            const sellAmount = Number(document.getElementById('input-sell-amount').value);
+            const sellDate = document.getElementById('input-sell-date').value;
+
+            if (!name || buyAmount <= 0 || sellAmount < 0 || !buyDate || !sellDate) return;
+            performanceItems.push({
+                name,
+                type,
+                buy_amount: buyAmount,
+                buy_date: buyDate,
+                sell_amount: sellAmount,
+                sell_date: sellDate
+            });
+            savePerformance();
+            renderPerformance();
+            event.target.reset();
+            document.getElementById('input-buy-date').value = getTodayStr();
+            document.getElementById('input-sell-date').value = getTodayStr();
+        }
+
+        function deletePerformanceItem(index) {
+            if (!confirm('이 성과 내역을 삭제하시겠습니까?')) return;
+            performanceItems.splice(index, 1);
+            savePerformance();
+            renderPerformance();
+        }
+
+        function sortPerformanceData(col) {
+            if (perfSortColumn === col) {
+                perfSortDirection = perfSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                perfSortColumn = col;
+                perfSortDirection = col === 'name' || col === 'type' ? 'asc' : 'desc';
+            }
+            renderPerformance();
+        }
+
+        function renderPerformance() {
+            const yearFilter = document.getElementById('perf-filter-year').value;
+            const typeFilter = document.getElementById('perf-filter-type').value;
+            const benchFilter = document.getElementById('perf-filter-benchmark').value;
+            const searchFilter = document.getElementById('perf-search-input').value.trim().toLowerCase();
+
+            const enriched = performanceItems.map((item, idx) => {
+                const buyAmt = toFiniteNumber(item.buy_amount) || 0;
+                const sellAmt = toFiniteNumber(item.sell_amount) || 0;
+                const pnl = sellAmt - buyAmt;
+                const simpleYield = buyAmt > 0 ? (pnl / buyAmt) * 100 : 0;
+                const annualYield = calculateSingleAnnualYield(buyAmt, sellAmt, item.buy_date, item.sell_date);
+                const buyYm = String(item.buy_date || '').slice(0, 7);
+                const grossRate = bokDepositRates[buyYm] ?? getFallbackGrossDepositRate();
+                const afterTaxBench = toAfterTaxDepositRate(grossRate) ?? 2.0;
+                const beatBenchmark = annualYield >= afterTaxBench;
+                return {
+                    ...item,
+                    _idx: idx,
+                    buyAmt,
+                    sellAmt,
+                    pnl,
+                    simpleYield,
+                    annualYield,
+                    beatBenchmark
+                };
+            });
+
+            const filtered = enriched.filter(row => {
+                if (yearFilter !== 'all' && !String(row.sell_date || '').startsWith(yearFilter)) return false;
+                if (typeFilter !== 'all' && row.type !== typeFilter) return false;
+                if (benchFilter === 'beat' && !row.beatBenchmark) return false;
+                if (benchFilter === 'miss' && row.beatBenchmark) return false;
+                if (searchFilter && !String(row.name || '').toLowerCase().includes(searchFilter)) return false;
+                return true;
+            });
+
+            filtered.sort((a, b) => {
+                const vA = a[perfSortColumn];
+                const vB = b[perfSortColumn];
+                if (typeof vA === 'string') {
+                    return perfSortDirection === 'asc' ? String(vA).localeCompare(String(vB)) : String(vB).localeCompare(String(vA));
+                }
+                return perfSortDirection === 'asc' ? (vA - vB) : (vB - vA);
+            });
+
+            let totalPnl = 0;
+            let totalBuy = 0;
+            let weightedAnnual = 0;
+            filtered.forEach(r => {
+                totalPnl += r.pnl;
+                totalBuy += r.buyAmt;
+                weightedAnnual += r.buyAmt * r.annualYield;
+            });
+            const avgSimple = totalBuy > 0 ? (totalPnl / totalBuy) * 100 : 0;
+            const avgAnnual = totalBuy > 0 ? weightedAnnual / totalBuy : 0;
+
+            document.getElementById('perf-total-pnl').innerText = `${totalPnl >= 0 ? '+' : ''}${totalPnl.toLocaleString()} 원`;
+            document.getElementById('perf-avg-simple').innerText = `${avgSimple.toFixed(2)} %`;
+            document.getElementById('perf-avg-annual').innerText = `${avgAnnual.toFixed(2)} %`;
+
+            const tbody = document.getElementById('perf-table-body');
+            if (!filtered.length) {
+                tbody.innerHTML = `<tr><td colspan="8" class="py-10 text-center text-slate-400 text-sm">성과 내역이 없습니다.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(row => {
+                const pnlSign = row.pnl > 0 ? '+' : '';
+                const pnlColor = row.pnl > 0 ? 'text-emerald-600' : (row.pnl < 0 ? 'text-rose-600' : 'text-slate-500');
+                return `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="py-4 px-5 font-bold text-slate-900">${escapeHtml(row.name)}</td>
+                        <td class="py-4 px-4 text-xs font-bold">${escapeHtml(row.type)}</td>
+                        <td class="py-4 px-5 font-semibold">${row.buyAmt.toLocaleString()}원</td>
+                        <td class="py-4 px-4 text-xs">${escapeHtml(row.buy_date)}</td>
+                        <td class="py-4 px-5">
+                            <div class="font-bold">${row.sellAmt.toLocaleString()}원</div>
+                            <div class="text-xs font-bold ${pnlColor}">${pnlSign}${row.pnl.toLocaleString()}원</div>
+                        </td>
+                        <td class="py-4 px-4 text-xs">${escapeHtml(row.sell_date)}</td>
+                        <td class="py-4 px-4">
+                            <div class="font-extrabold text-blue-700">연 ${row.annualYield.toFixed(2)}%</div>
+                            <div class="text-xs font-semibold text-emerald-700">단순 ${row.simpleYield.toFixed(2)}%</div>
+                        </td>
+                        <td class="py-4 px-4 text-center">
+                            <button type="button" onclick="deletePerformanceItem(${row._idx})" class="px-2.5 py-1.5 text-xs font-bold bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors">삭제</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function populateSpacNameDatalist() {
+            const dl = document.getElementById('spac-name-list');
+            if (!dl) return;
+            dl.innerHTML = allItems.map(s => `<option value="${escapeHtml(s.name)}"></option>`).join('');
+        }
+
+        async function loadData() {
+            try {
+                const res = await fetch('spac_data.json?_=' + Date.now());
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const payload = await res.json();
+                const rawList = Array.isArray(payload) ? payload : (payload.items || payload.spacs || []);
+
+                if (payload && payload.bok_deposit_rates && typeof payload.bok_deposit_rates === 'object') {
+                    bokDepositRates = { ...bokDepositRates, ...payload.bok_deposit_rates };
+                }
+
+                allItems = rawList
+                    .filter(item => !EXCLUDED_SPAC_CODES.has(String(item.code || '').trim()))
+                    .filter(item => !isExpiredOrDelistedSpac(item))
+                    .map(item => {
+                        const parsed = parseSpacDisclosureData(item);
+                        const fairEval = evaluateFairBuy(item, parsed);
+                        return {
+                            ...item,
+                            invest_type: normalizeInvestType(item),
+                            status: normalizeStatus(item.status),
+                            liquidation_price: parsed.liquidationPrice,
+                            fair_buy_price: fairEval.fairPrice,
+                            is_fair_buy: fairEval.isFairBuy,
+                            _parsedDisclosure: parsed
+                        };
+                    });
+
+                const rateBadge = document.getElementById('deposit-rate-badge');
+                const baseAfterTaxRate = getCurrentBaseDepositRate();
+                if (rateBadge && baseAfterTaxRate !== null) {
+                    rateBadge.innerText = `기준 예금금리(세후): 연 ${baseAfterTaxRate.toFixed(2)}%`;
+                }
+
+                const updEl = document.getElementById('update-time');
+                if (updEl) {
+                    updEl.innerText = `업데이트: ${payload.updated_at || new Date().toLocaleString('ko-KR')}`;
+                }
+
+                populateSpacNameDatalist();
+                applyFilters();
+                if (isUnlocked) {
+                    renderHoldings();
+                    renderPerformance();
+                }
+            } catch (err) {
+                const updEl = document.getElementById('update-time');
+                if (updEl) updEl.innerText = '데이터 로딩 실패';
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeSpacDetailModal();
+                closeSellModal();
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                const savedHold = localStorage.getItem('spac_holding_items_v5');
+                if (savedHold) holdingItems = JSON.parse(savedHold) || [];
+            } catch (e) { holdingItems = []; }
+
+            try {
+                const savedPerf = localStorage.getItem('spac_performance_items_v3');
+                if (savedPerf) performanceItems = JSON.parse(savedPerf) || [];
+            } catch (e) { performanceItems = []; }
+
+            applySeedHoldings();
+
+            const today = getTodayStr();
+            const holdDateEl = document.getElementById('hold-input-date');
+            const buyDateEl = document.getElementById('input-buy-date');
+            const sellDateEl = document.getElementById('input-sell-date');
+            if (holdDateEl && !holdDateEl.value) holdDateEl.value = today;
+            if (buyDateEl && !buyDateEl.value) buyDateEl.value = today;
+            if (sellDateEl && !sellDateEl.value) sellDateEl.value = today;
+
+            updatePrivateTabVisibility();
+            loadData();
+        });
+    </script>
+</body>
+</html>
